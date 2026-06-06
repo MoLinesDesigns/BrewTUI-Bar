@@ -1,0 +1,28 @@
+{
+  "name": "brew-tui-bar",
+  "version": "4.0.3",
+  "description": "Native macOS menu bar companion for Brew-TUI.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MoLinesDesigns/Brew-TUI-Bar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MoLinesDesigns/Brew-TUI-Bar/issues"
+  },
+  "homepage": "https://github.com/MoLinesDesigns/Brew-TUI-Bar#readme",
+  "author": "MoLines Designs",
+  "license": "MIT",
+  "scripts": {
+    "generate": "tuist generate --no-open",
+    "build": "xcodebuild -workspace Brew-TUI-Bar.xcworkspace -scheme Brew-TUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build",
+    "test": "xcodebuild -workspace Brew-TUI-Bar.xcworkspace -scheme Brew-TUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO test"
+  },
+  "keywords": [
+    "homebrew",
+    "brew",
+    "macos",
+    "menubar",
+    "swiftui"
+  ]
+}

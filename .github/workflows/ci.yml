@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install Tuist
+        env:
+          TUIST_VERSION: "4.39.0"
+        run: |
+          curl -Ls "https://install.tuist.io" | TUIST_VERSION="$TUIST_VERSION" bash
+          tuist version
+
+      - name: Generate workspace
+        run: tuist generate --no-open
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test

@@ -1,0 +1,26 @@
+.DS_Store
+
+# Tuist / Xcode generated output
+Derived/
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Signing certificates and private release material
+*.p12
+*.cer
+*.mobileprovision
+AuthKey_*.p8
+*.app.zip
+*.app.zip.sha256
+*.dSYM.zip
+*.app.dSYM/
+
+# SwiftPM / tooling scratch
+.build/
+.swiftpm/
+
+# Node is only used for package metadata/scripts in this repo.
+node_modules/
+package-lock.json
