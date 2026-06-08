@@ -147,36 +147,80 @@ struct PopoverView: View {
     /// opened; cached for 24h after that. Hidden when an install is in flight
     /// to avoid distracting the user mid-action.
     private var newPackagesBanner: some View {
-        Button {
+        let discoveryCount = appState.newPackagesFormulae.count + appState.newPackagesCasks.count
+
+        return Button {
             appState.loadNewPackagesIfNeeded()
             showNewPackages = true
         } label: {
             HStack(spacing: CrystalGlass.Spacing.sm) {
                 Image(systemName: "sparkles")
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(CrystalGlass.glassCyan)
+                    .symbolEffect(.pulse, options: .repeating, isActive: discoveryCount > 0)
                     .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 1) {
+
+                VStack(alignment: .leading, spacing: 2) {
                     Text(String(localized: "What's new in Homebrew"))
-                        .font(.caption)
-                        .fontWeight(.medium)
-                    Text(String(localized: "Recently added formulae and casks"))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text(newPackagesBannerSubtitle(count: discoveryCount))
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(
+                            colorSchemeContrast == .increased
+                                ? Color.primary.opacity(0.82)
+                                : Color.secondary
+                        )
+                        .lineLimit(2)
                 }
+
                 Spacer(minLength: 4)
+
+                if discoveryCount > 0 {
+                    Text("\(discoveryCount)")
+                        .font(.caption2.weight(.bold))
+                        .monospacedDigit()
+                        .foregroundStyle(CrystalGlass.glassCyan)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(CrystalGlass.glassCyan.opacity(0.16))
+                        )
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .strokeBorder(CrystalGlass.glassCyan.opacity(0.35), lineWidth: 0.5)
+                        )
+                        .accessibilityHidden(true)
+                }
+
                 Image(systemName: "chevron.right")
-                    .font(.caption2)
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.tertiary)
                     .accessibilityHidden(true)
             }
             .padding(.horizontal, CrystalGlass.Spacing.md)
-            .padding(.vertical, CrystalGlass.Spacing.sm)
+            .padding(.vertical, CrystalGlass.Spacing.sm + 2)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .glassPanel(cornerRadius: CrystalGlass.Radius.panel - 6, strokeOpacity: 0.4, ambientGlow: 0.05)
+        .glassPanel(
+            cornerRadius: CrystalGlass.Radius.panel - 6,
+            strokeOpacity: colorSchemeContrast == .increased ? 0.62 : 0.48,
+            ambientGlow: discoveryCount > 0 ? 0.12 : 0.06
+        )
         .accessibilityLabel(String(localized: "Open what's new in Homebrew"))
         .accessibilityHint(String(localized: "Shows recently added formulae and casks"))
+    }
+
+    private func newPackagesBannerSubtitle(count: Int) -> String {
+        if appState.newPackagesLoading && count == 0 {
+            return String(localized: "Loading from Homebrew…")
+        }
+        if count > 0 {
+            return String(format: String(localized: "%lld recent packages to explore"), Int64(count))
+        }
+        return String(localized: "Recently added formulae and casks")
     }
 
     // Cross-platform version contract: the bundle's CFBundleShortVersionString

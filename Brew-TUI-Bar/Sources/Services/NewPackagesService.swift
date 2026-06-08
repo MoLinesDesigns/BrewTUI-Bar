@@ -194,9 +194,21 @@ actor NewPackagesService {
         let lines = message.split(separator: "\n", omittingEmptySubsequences: false)
         guard let line = lines.first(where: { $0.contains(suffix) }) else { return nil }
         let trimmed = line.trimmingCharacters(in: .whitespaces)
-        let first = trimmed.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true).first.map(String.init)
-        guard let name = first, isValidPackageName(name) else { return nil }
-        return name
+
+        // homebrew-cask PRs sometimes land as "Add <token> (new cask)" instead of
+        // "<token> <version> (new cask)" — the bare first token would be "Add".
+        let candidate: String
+        if kind == .cask, trimmed.hasPrefix("Add ") {
+            let afterAdd = trimmed.dropFirst(4).trimmingCharacters(in: .whitespaces)
+            candidate = afterAdd.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true)
+                .first.map(String.init) ?? ""
+        } else {
+            candidate = trimmed.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true)
+                .first.map(String.init) ?? ""
+        }
+
+        guard isValidPackageName(candidate) else { return nil }
+        return candidate
     }
 
     /// ISO 8601 parser that accepts both fractional-seconds and base formats
@@ -216,10 +228,14 @@ actor NewPackagesService {
     static func isValidPackageName(_ name: String) -> Bool {
         guard let first = name.unicodeScalars.first,
               CharacterSet.letters.contains(first) else { return false }
+        // Merge titles and cask "Add …" prefixes parse to these tokens.
+        guard !reservedPackageNameTokens.contains(name) else { return false }
         let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "@+-_."))
         return name.unicodeScalars.allSatisfy(allowed.contains)
             && name.count < 80
     }
+
+    private static let reservedPackageNameTokens: Set<String> = ["Add", "Merge", "from"]
 
     // MARK: - Cache I/O
 
@@ -278,7 +294,17 @@ actor NewPackagesService {
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let token = try container.decodeIfPresent(String.self, forKey: .token)
-            let nameValue = try container.decodeIfPresent(String.self, forKey: .name) ?? token ?? ""
+            // formulae.brew.sh: formula `name` is a String; cask `name` is a
+            // display-name array and the installable id lives in `token`.
+            let resolvedName: String?
+            if let stringName = try? container.decode(String.self, forKey: .name) {
+                resolvedName = stringName
+            } else if let displayNames = try? container.decode([String].self, forKey: .name) {
+                resolvedName = displayNames.first
+            } else {
+                resolvedName = nil
+            }
+            let nameValue = token ?? resolvedName ?? ""
             self.name = nameValue
             self.token = token
             self.desc = try container.decodeIfPresent(String.self, forKey: .desc)

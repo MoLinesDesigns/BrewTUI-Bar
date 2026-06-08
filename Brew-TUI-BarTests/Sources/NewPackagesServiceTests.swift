@@ -30,6 +30,12 @@ struct NewPackagesServiceParserTests {
         #expect(NewPackagesService.extractPackageName(from: caskMsg, kind: .cask) == "ghostty")
     }
 
+    @Test("Cask commits with an Add prefix extract the token, not Add")
+    func addPrefixCask() {
+        let msg = "Merge pull request #268160 from AdamBaali/add-microsoft-remote-help\n\nAdd microsoft-remote-help (new cask)"
+        #expect(NewPackagesService.extractPackageName(from: msg, kind: .cask) == "microsoft-remote-help")
+    }
+
     @Test("Message without the (new <kind>) suffix returns nil")
     func noSuffix() {
         let msg = "Merge pull request #999\n\nfoo 1.0 (rebuild)"

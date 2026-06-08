@@ -94,6 +94,40 @@
         }
       }
     },
+    "%lld packages · tap a row to copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld packages · tap a row to copy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paquetes · pulsa una fila para copiar"
+          }
+        }
+      }
+    },
+    "%lld recent packages to explore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld recent packages to explore"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld paquetes recientes por explorar"
+          }
+        }
+      }
+    },
     "%lld packages can be updated.": {
       "extractionState": "manual",
       "localizations": {
@@ -774,6 +808,23 @@
         }
       }
     },
+    "Cask": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cask"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cask"
+          }
+        }
+      }
+    },
     "Casks": {
       "extractionState": "manual",
       "localizations": {
@@ -1307,6 +1358,23 @@
         }
       }
     },
+    "Formula": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formula"
+          }
+        }
+      }
+    },
     "Formulae": {
       "extractionState": "manual",
       "localizations": {
@@ -1623,6 +1691,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sin paquetes nuevos"
+          }
+        }
+      }
+    },
+    "No recent casks in homebrew-cask. Try refreshing or check back later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recent casks in homebrew-cask. Try refreshing or check back later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay casks recientes en homebrew-cask. Prueba a actualizar o vuelve más tarde."
+          }
+        }
+      }
+    },
+    "No recent formulae in homebrew-core. Try refreshing or check back later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recent formulae in homebrew-core. Try refreshing or check back later."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay formulae recientes en homebrew-core. Prueba a actualizar o vuelve más tarde."
           }
         }
       }
