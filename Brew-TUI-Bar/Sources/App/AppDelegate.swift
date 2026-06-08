@@ -218,7 +218,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private func showVersionMismatch(brewTui: String, brewBar: String) {
         let alert = NSAlert()
         alert.messageText = String(localized: "Brew-TUI-Bar version mismatch")
-        let template = String(localized: "Brew-TUI-Bar %@ is out of sync with Brew-TUI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brew-tui install-brew-tui-bar --force")
+        let template = String(
+            localized: "Brew-TUI-Bar %@ is out of sync with Brew-TUI %@."
+                + " They must match for license decryption and updates."
+                + "\n\nRun this in the terminal:\n\n  brew-tui install-brew-tui-bar --force"
+        )
         alert.informativeText = String(format: template, brewBar, brewTui)
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Copy Update Command"))
@@ -234,7 +238,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private func showLicenseExpired() {
         let alert = NSAlert()
         alert.messageText = String(localized: "Pro license expired")
-        alert.informativeText = String(localized: "Your Pro license has expired or needs revalidation.\n\nRun `brew-tui revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode.")
+        alert.informativeText = String(
+            localized: "Your Pro license has expired or needs revalidation."
+                + "\n\nRun `brew-tui revalidate` in the terminal, or renew your subscription."
+                + "\n\nThe app will continue in basic mode."
+        )
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Continue"))
         alert.runModal()

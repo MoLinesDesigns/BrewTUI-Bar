@@ -163,13 +163,13 @@ actor NewPackagesService {
             guard let (name, date) = parseCommit(commit, kind: kind) else { continue }
             if seen.contains(name) { continue }
             seen.insert(name)
-            let m = meta[name]
+            let pkgMeta = meta[name]
             out.append(NewPackage(
                 name: name,
                 kind: kind,
                 addedAt: date,
-                desc: m?.desc,
-                homepage: m?.homepage.flatMap(URL.init(string:))
+                desc: pkgMeta?.desc,
+                homepage: pkgMeta?.homepage.flatMap(URL.init(string:))
             ))
             if out.count >= Self.maxResults { break }
         }
@@ -205,7 +205,7 @@ actor NewPackagesService {
     static func parseDate(_ raw: String) -> Date {
         let withFraction = ISO8601DateFormatter()
         withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = withFraction.date(from: raw) { return d }
+        if let date = withFraction.date(from: raw) { return date }
         let base = ISO8601DateFormatter()
         base.formatOptions = [.withInternetDateTime]
         return base.date(from: raw) ?? Date()
@@ -276,14 +276,14 @@ actor NewPackagesService {
         }
 
         init(from decoder: Decoder) throws {
-            let c = try decoder.container(keyedBy: CodingKeys.self)
-            let token = try c.decodeIfPresent(String.self, forKey: .token)
-            let n = try c.decodeIfPresent(String.self, forKey: .name) ?? token ?? ""
-            self.name = n
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            let token = try container.decodeIfPresent(String.self, forKey: .token)
+            let nameValue = try container.decodeIfPresent(String.self, forKey: .name) ?? token ?? ""
+            self.name = nameValue
             self.token = token
-            self.desc = try c.decodeIfPresent(String.self, forKey: .desc)
+            self.desc = try container.decodeIfPresent(String.self, forKey: .desc)
             // Casks use `homepage` as String too — `decodeIfPresent` covers both.
-            self.homepage = try c.decodeIfPresent(String.self, forKey: .homepage)
+            self.homepage = try container.decodeIfPresent(String.self, forKey: .homepage)
         }
     }
 }

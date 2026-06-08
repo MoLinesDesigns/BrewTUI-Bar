@@ -104,7 +104,7 @@ enum BrewProcess {
         return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             let pipe = Pipe()
-            let guard_ = OnceGuard(continuation)
+            let onceGuard = OnceGuard(continuation)
 
             process.executableURL = URL(fileURLWithPath: executable)
             process.arguments = arguments
@@ -138,7 +138,7 @@ enum BrewProcess {
                 let result: Result<Data, Error> = proc.terminationStatus == 0
                     ? .success(data)
                     : .failure(BrewProcessError.processExited(proc.terminationStatus))
-                if guard_.resume(with: result) {
+                if onceGuard.resume(with: result) {
                     // Process finished first — cancel the pending timeout so it
                     // does not stay alive sleeping until the deadline.
                     timeoutBox.task?.cancel()
@@ -149,11 +149,11 @@ enum BrewProcess {
                 try process.run()
             } catch let error as CocoaError where error.code == .fileNoSuchFile || error.code == .fileReadNoSuchFile {
                 brewProcessLogger.error("Homebrew not found at \(executable, privacy: .public)")
-                _ = guard_.resume(with: .failure(BrewProcessError.brewNotInstalled))
+                _ = onceGuard.resume(with: .failure(BrewProcessError.brewNotInstalled))
                 return
             } catch {
                 brewProcessLogger.error("Failed to launch brew: \(error.localizedDescription, privacy: .public)")
-                _ = guard_.resume(with: .failure(error))
+                _ = onceGuard.resume(with: .failure(error))
                 return
             }
 

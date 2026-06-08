@@ -43,14 +43,14 @@ struct OutdatedPackage: Identifiable, Codable, Sendable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        name = try c.decode(String.self, forKey: .name)
-        installedVersions = try c.decode([String].self, forKey: .installedVersions)
-        currentVersion = try c.decode(String.self, forKey: .currentVersion)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        installedVersions = try container.decode([String].self, forKey: .installedVersions)
+        currentVersion = try container.decode(String.self, forKey: .currentVersion)
         // Casks from `brew outdated --json=v2 --greedy` omit `pinned` / `pinned_version`.
         // Treat absence as not pinned so the decoder doesn't fail and silently abort the whole refresh.
-        pinned = try c.decodeIfPresent(Bool.self, forKey: .pinned) ?? false
-        pinnedVersion = try c.decodeIfPresent(String.self, forKey: .pinnedVersion)
+        pinned = try container.decodeIfPresent(Bool.self, forKey: .pinned) ?? false
+        pinnedVersion = try container.decodeIfPresent(String.self, forKey: .pinnedVersion)
         kind = .formula
     }
 

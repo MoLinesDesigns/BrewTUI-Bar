@@ -398,7 +398,7 @@ final class AppState {
                 succeeded = false
                 let reason: String = {
                     for pkg in progress.packages {
-                        if case .failed(let r) = pkg.stage { return r }
+                        if case .failed(let failedReason) = pkg.stage { return failedReason }
                     }
                     return String(localized: "Homebrew did not perform any upgrade")
                 }()

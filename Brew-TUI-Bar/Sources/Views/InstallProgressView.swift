@@ -307,35 +307,35 @@ struct CrystalProgressBar: View {
 // MARK: - Previews
 
 #Preview("In progress") {
-    let p: InstallProgress = {
-        var prog = InstallProgress(mode: .all, seeds: ["git", "node", "wget", "ffmpeg"])
-        prog.mark("git", stage: .done)
-        prog.mark("node", stage: .fetching)
-        return prog
+    let prog: InstallProgress = {
+        var progress = InstallProgress(mode: .all, seeds: ["git", "node", "wget", "ffmpeg"])
+        progress.mark("git", stage: .done)
+        progress.mark("node", stage: .fetching)
+        return progress
     }()
-    return InstallProgressView(progress: p) {}
+    return InstallProgressView(progress: prog) {}
         .padding()
         .background(Color(red: 0.05, green: 0.07, blue: 0.10))
 }
 
 #Preview("Single package — finished") {
-    let p: InstallProgress = {
-        var prog = InstallProgress(mode: .singlePackage("git"), seeds: ["git"])
-        prog.finishSuccess()
-        return prog
+    let prog: InstallProgress = {
+        var progress = InstallProgress(mode: .singlePackage("git"), seeds: ["git"])
+        progress.finishSuccess()
+        return progress
     }()
-    return InstallProgressView(progress: p) {}
+    return InstallProgressView(progress: prog) {}
         .padding()
         .background(Color(red: 0.05, green: 0.07, blue: 0.10))
 }
 
 #Preview("Failed") {
-    let p: InstallProgress = {
-        var prog = InstallProgress(mode: .singlePackage("ffmpeg"), seeds: ["ffmpeg"])
-        prog.finishFailure("brew exited with code 1")
-        return prog
+    let prog: InstallProgress = {
+        var progress = InstallProgress(mode: .singlePackage("ffmpeg"), seeds: ["ffmpeg"])
+        progress.finishFailure("brew exited with code 1")
+        return progress
     }()
-    return InstallProgressView(progress: p) {}
+    return InstallProgressView(progress: prog) {}
         .padding()
         .background(Color(red: 0.05, green: 0.07, blue: 0.10))
 }

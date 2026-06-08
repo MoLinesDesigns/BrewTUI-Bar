@@ -141,7 +141,7 @@ private enum DiagnosticProcess {
             let process = Process()
             let pipe = Pipe()
             let buffer = DataBuffer()
-            let guard_ = OnceGuard(continuation)
+            let onceGuard = OnceGuard(continuation)
             let timeoutBox = TimeoutBox()
 
             process.executableURL = URL(fileURLWithPath: executable)
@@ -169,7 +169,7 @@ private enum DiagnosticProcess {
                     buffer.append(remaining)
                 }
                 let output = String(data: buffer.snapshot(), encoding: .utf8) ?? ""
-                if guard_.resume(with: DiagnosticResult(exitCode: proc.terminationStatus, output: output)) {
+                if onceGuard.resume(with: DiagnosticResult(exitCode: proc.terminationStatus, output: output)) {
                     timeoutBox.task?.cancel()
                 }
             }
@@ -178,7 +178,7 @@ private enum DiagnosticProcess {
                 try process.run()
             } catch {
                 let message = String(format: String(localized: "Could not launch command: %@"), error.localizedDescription)
-                _ = guard_.resume(with: DiagnosticResult(exitCode: 127, output: message))
+                _ = onceGuard.resume(with: DiagnosticResult(exitCode: 127, output: message))
                 return
             }
 

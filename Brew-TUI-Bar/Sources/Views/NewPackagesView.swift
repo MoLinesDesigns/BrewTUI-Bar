@@ -18,6 +18,8 @@ struct NewPackagesView: View {
     /// Brief "Copied" pill on the row the user just clicked. Cleared by a
     /// throwaway Task after 1.6s so several clicks don't pile up timers.
     @State private var copiedID: String?
+    /// Feedback visual cuando el usuario copia TODOS los paquetes de una vez.
+    @State private var allCopied: Bool = false
 
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
@@ -258,8 +260,31 @@ struct NewPackagesView: View {
     // MARK: - Footer
 
     private var footer: some View {
-        HStack {
+        HStack(spacing: CrystalGlass.Spacing.sm) {
+            // Botón "Copiar todos" — solo visible cuando hay paquetes
+            if !visiblePackages.isEmpty {
+                Button {
+                    copyAll()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: allCopied ? "checkmark.circle.fill" : "doc.on.clipboard")
+                            .font(.caption)
+                        Text(allCopied
+                             ? String(localized: "Copied!")
+                             : String(localized: "Copy all (\(visiblePackages.count))"))
+                            .fontWeight(.medium)
+                    }
+                }
+                .buttonStyle(.glassPill)
+                .foregroundStyle(allCopied ? .green : .primary)
+                .accessibilityLabel(String(localized: "Copy all install commands"))
+                .accessibilityHint(
+                    String(localized: "Copies all \(visiblePackages.count) install commands to the clipboard")
+                )
+            }
+
             Spacer()
+
             Button {
                 onClose()
             } label: {
@@ -290,6 +315,26 @@ struct NewPackagesView: View {
             }
         }
     }
+
+    /// Copia al portapapeles todos los comandos install de los paquetes
+    /// actualmente visibles (según el tab seleccionado), uno por línea.
+    private func copyAll() {
+        guard !visiblePackages.isEmpty else { return }
+        let combined = visiblePackages
+            .map(\.installCommand)
+            .joined(separator: "\n")
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(combined, forType: .string)
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+            allCopied = true
+        }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_800_000_000)
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
+                allCopied = false
+            }
+        }
+    }
 }
 
 // MARK: - Previews
@@ -297,12 +342,36 @@ struct NewPackagesView: View {
 #Preview("With data") {
     NewPackagesView(
         formulae: [
-            NewPackage(name: "ripgrep-all", kind: .formula, addedAt: Date().addingTimeInterval(-3600), desc: "ripgrep, but also for PDFs, E-Books, Office documents, zip, tar.gz, etc.", homepage: URL(string: "https://example.com")),
-            NewPackage(name: "zellij", kind: .formula, addedAt: Date().addingTimeInterval(-86_400), desc: "Pluggable terminal workspace, with terminal multiplexer as the base feature", homepage: nil),
-            NewPackage(name: "uv", kind: .formula, addedAt: Date().addingTimeInterval(-172_800), desc: "Extremely fast Python package installer and resolver", homepage: nil),
+            NewPackage(
+                name: "ripgrep-all",
+                kind: .formula,
+                addedAt: Date().addingTimeInterval(-3600),
+                desc: "ripgrep, but also for PDFs, E-Books, Office documents, zip, tar.gz, etc.",
+                homepage: URL(string: "https://example.com")
+            ),
+            NewPackage(
+                name: "zellij",
+                kind: .formula,
+                addedAt: Date().addingTimeInterval(-86_400),
+                desc: "Pluggable terminal workspace, with terminal multiplexer as the base feature",
+                homepage: nil
+            ),
+            NewPackage(
+                name: "uv",
+                kind: .formula,
+                addedAt: Date().addingTimeInterval(-172_800),
+                desc: "Extremely fast Python package installer and resolver",
+                homepage: nil
+            )
         ],
         casks: [
-            NewPackage(name: "ghostty", kind: .cask, addedAt: Date().addingTimeInterval(-7200), desc: "Fast, native, feature-rich terminal emulator", homepage: nil),
+            NewPackage(
+                name: "ghostty",
+                kind: .cask,
+                addedAt: Date().addingTimeInterval(-7200),
+                desc: "Fast, native, feature-rich terminal emulator",
+                homepage: nil
+            )
         ],
         isLoading: false,
         error: nil,

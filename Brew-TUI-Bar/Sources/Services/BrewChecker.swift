@@ -39,8 +39,8 @@ struct BrewChecker: Sendable {
         // Stamp kind on every row so upgrade(package:) can build the right
         // `brew upgrade --cask|--formula <name>` command. The JSON itself
         // omits this — it's implicit in which array the row came from.
-        let formulae = raw.formulae.map { var p = $0; p.kind = .formula; return p }
-        let allCasks = raw.casks.map { var p = $0; p.kind = .cask; return p }
+        let formulae = raw.formulae.map { var pkg = $0; pkg.kind = .formula; return pkg }
+        let allCasks = raw.casks.map { var pkg = $0; pkg.kind = .cask; return pkg }
         let filteredCasks = allCasks.filter { !Self.selfCaskNames.contains($0.name) }
         // Surface the self-update version to AppState so the popover can show
         // a discrete "↑ self-update" indicator without polluting the outdated

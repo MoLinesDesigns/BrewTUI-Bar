@@ -275,9 +275,9 @@ struct LicenseChecker {
     /// JSON-encode a string with escapes matching JavaScript's JSON.stringify:
     /// double quotes, backslash escapes, control character \uXXXX, slashes
     /// not escaped. Matches the canonical encoding the signer uses.
-    private static func jsonString(_ s: String) -> String {
+    private static func jsonString(_ input: String) -> String {
         var out = "\""
-        for scalar in s.unicodeScalars {
+        for scalar in input.unicodeScalars {
             switch scalar {
             case "\"":   out += "\\\""
             case "\\":   out += "\\\\"
@@ -372,4 +372,3 @@ struct LicenseChecker {
         return plainFormatter.date(from: value)
     }
 }
-

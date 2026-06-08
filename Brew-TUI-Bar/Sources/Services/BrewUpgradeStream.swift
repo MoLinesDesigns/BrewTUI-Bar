@@ -278,28 +278,28 @@ enum BrewUpgradeStream {
         // strip them so the row keys cleanly. Versioned formulae like
         // `python@3.12` keep the `@3.12` because it sits BEFORE any extension.
         for ext in [".bottle.tar.gz", ".tar.gz", ".tar.xz", ".zip", ".dmg", ".pkg"] {
-            if let r = trimmed.range(of: ext, options: [.backwards, .caseInsensitive]) {
-                return String(trimmed[..<r.lowerBound])
+            if let range = trimmed.range(of: ext, options: [.backwards, .caseInsensitive]) {
+                return String(trimmed[..<range.lowerBound])
             }
         }
         return trimmed
     }
 
     /// Cheap ANSI strip — brew uses ESC[…m sequences.
-    static func stripANSI(_ s: String) -> String {
-        guard s.contains("\u{1B}") else { return s }
+    static func stripANSI(_ str: String) -> String {
+        guard str.contains("\u{1B}") else { return str }
         var out = ""
         var inEscape = false
-        for ch in s {
-            if ch == "\u{1B}" {
+        for char in str {
+            if char == "\u{1B}" {
                 inEscape = true
                 continue
             }
             if inEscape {
-                if ch == "m" { inEscape = false }
+                if char == "m" { inEscape = false }
                 continue
             }
-            out.append(ch)
+            out.append(char)
         }
         return out
     }
