@@ -31,6 +31,7 @@
 		87F943ED0E8F73CEEB88100F /* LicenseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813E5666D16A203A409FDE7E /* LicenseChecker.swift */; };
 		8E3C12B9C4C8A47B5FCABB25 /* ServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E886004FD8268509823CE847 /* ServiceDiagnostics.swift */; };
 		A1721ADB928D705482B34F00 /* LegacyMigratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEFFCE79214FF76868D0B09 /* LegacyMigratorTests.swift */; };
+		A3F3431907466DDAFEABDED7 /* MenuBarIconComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */; };
 		A4F3D84650016C35784A0DCE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2C9102B94AF9E2BF500E1DD /* Localizable.xcstrings */; };
 		AF2569D8D195C89ED62E3BB6 /* BrewServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E807F5E2A3B3306A7543ACE /* BrewServiceDiagnostics.swift */; };
 		AF92D45204E407973D2A0B5D /* InstallProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41392E0984972D0094FB5B0D /* InstallProgress.swift */; };
@@ -100,6 +101,7 @@
 		2BDDB6F017DD07533F3C7561 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		41392E0984972D0094FB5B0D /* InstallProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgress.swift; sourceTree = "<group>"; };
 		423A7F25D5838ACF21ADE4A0 /* TuistAssets+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+BrewTUIBar.swift"; sourceTree = "<group>"; };
+		4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconComposer.swift; sourceTree = "<group>"; };
 		512E0DB8E9E9A63F934E205D /* ScreenshotGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotGenerator.swift; sourceTree = "<group>"; };
 		54146A14A0AFBFFA5E89DD14 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		5597277151467483E271F654 /* SyncMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMonitor.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 			children = (
 				2BDDB6F017DD07533F3C7561 /* AppDelegate.swift */,
 				B042D77338E8CBBCD4F40DB2 /* BrewTUIBarApp.swift */,
+				4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -443,6 +446,7 @@
 			files = (
 				5ADFB922904B579A16D7577F /* AppDelegate.swift in Sources */,
 				186F1CBB2A2181A8736D437C /* BrewTUIBarApp.swift in Sources */,
+				A3F3431907466DDAFEABDED7 /* MenuBarIconComposer.swift in Sources */,
 				CBBEA33602824043A49C4588 /* AppState.swift in Sources */,
 				65A3240F983FA372AE305434 /* BadgePreferences.swift in Sources */,
 				E282C483D8BA4B88BF10E69D /* BrewService.swift in Sources */,
@@ -550,7 +554,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.0.4)";
+				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.1.1)";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -711,7 +715,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.0.4)";
+				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.1.1)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;

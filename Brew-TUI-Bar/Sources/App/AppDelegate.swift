@@ -22,6 +22,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         return BadgePreferences()
     }()
     private var badgeTimer: Timer?
+    private var blinkTimer: Timer?
+    private var tLayerVisible = true
     private var launchTask: Task<Void, Never>?
     private var hostingController: NSHostingController<PopoverView>?
     // Red de seguridad sobre `.transient`: en algunos escenarios (popover con
@@ -132,6 +134,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         appState.onRefreshComplete = nil
         badgeTimer?.invalidate()
         badgeTimer = nil
+        stopOutdatedBlink()
         scheduler.stop()
         LastActionMonitor.shared.stop()
         removeClickOutsideMonitor()
@@ -246,18 +249,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     // MARK: - Status item
 
-    // Apple HIG: menu bar icons render at 22x22 max; ours uses 18x18 for visual balance.
-    // Without this explicit size the NSImage would expose its native pixel dimensions and
-    // the variable-length status item would reserve extra horizontal space around the icon.
-    private static let menuBarIconSize = NSSize(width: 18, height: 18)
-
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            let icon = NSImage(named: "MenuBarIcon")
-            icon?.isTemplate = true
-            icon?.size = Self.menuBarIconSize
+            let icon = MenuBarIconComposer.fullIcon()
             button.image = icon
             button.image?.accessibilityDescription = String(localized: "Brew-TUI-Bar")
             button.imagePosition = .imageLeft
@@ -283,49 +279,86 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // reach them. See togglePopover for the rationale.
     }
 
-    private func updateBadge() {
+    private func shouldAnimateOutdatedIndicator() -> Bool {
+        appState.outdatedCount > 0 && badgePreferences.showOutdated
+    }
+
+    private func syncOutdatedBlink() {
+        if shouldAnimateOutdatedIndicator() {
+            guard blinkTimer == nil else { return }
+            tLayerVisible = true
+            blinkTimer = Timer.scheduledTimer(withTimeInterval: 0.55, repeats: true) { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    self.tLayerVisible.toggle()
+                    self.updateStatusItemIcon()
+                }
+            }
+        } else {
+            stopOutdatedBlink()
+        }
+    }
+
+    private func stopOutdatedBlink() {
+        blinkTimer?.invalidate()
+        blinkTimer = nil
+        tLayerVisible = true
+    }
+
+    private func updateStatusItemIcon() {
         guard let button = statusItem.button else { return }
 
+        let icon = shouldAnimateOutdatedIndicator()
+            ? MenuBarIconComposer.layeredIcon(showT: tLayerVisible)
+            : MenuBarIconComposer.fullIcon()
+        icon?.accessibilityDescription = statusItemAccessibilityDescription()
+        button.image = icon
+    }
+
+    private func statusItemAccessibilityDescription() -> String {
         let outdated = appState.outdatedCount
         let cve = appState.criticalCveCount
         let sync = appState.syncActivity
 
-        // Each part remembers if it represents outdated packages so we can
-        // selectively tint only that segment in red. CVE warnings and sync
-        // status keep the system color — they're informational, not alerting,
-        // and overloading red across all three would dilute the cue.
-        var parts: [(text: String, isOutdated: Bool)] = []
-        if outdated > 0, badgePreferences.showOutdated { parts.append(("\(outdated)↑", true)) }
-        if cve > 0, badgePreferences.showCVE          { parts.append(("\(cve)⚠", false)) }
-        if sync, badgePreferences.showSync            { parts.append(("⟳", false)) }
+        var parts: [String] = []
+        if outdated > 0, badgePreferences.showOutdated {
+            parts.append(String(format: String(localized: "%lld outdated packages"), outdated))
+        }
+        if cve > 0, badgePreferences.showCVE { parts.append("\(cve) CVE") }
+        if sync, badgePreferences.showSync { parts.append(String(localized: "Sync active")) }
 
-        // Build the attributed title with per-segment colors. We always write
-        // attributedTitle — even when empty — so a residual red from a previous
-        // state can't linger after the outdated count drops to zero. CVE and
-        // sync stay in the system color: red is reserved for "you have pending
-        // updates" so it stays semantically distinct.
+        if parts.isEmpty {
+            return String(localized: "Brew-TUI-Bar")
+        }
+        return String(format: String(localized: "Brew-TUI-Bar — %@"), parts.joined(separator: ", "))
+    }
+
+    private func updateBadge() {
+        guard let button = statusItem.button else { return }
+
+        let cve = appState.criticalCveCount
+        let sync = appState.syncActivity
+
+        // Outdated packages are surfaced by blinking the T layer in the icon.
+        // CVE and sync keep compact text badges beside the glyph.
+        var parts: [String] = []
+        if cve > 0, badgePreferences.showCVE { parts.append("\(cve)⚠") }
+        if sync, badgePreferences.showSync { parts.append("⟳") }
+
         let menuFont = NSFont.menuBarFont(ofSize: NSFont.systemFontSize(for: .small))
         let attributed = NSMutableAttributedString()
         for (idx, part) in parts.enumerated() {
             if idx > 0 {
                 attributed.append(NSAttributedString(string: " ", attributes: [.font: menuFont]))
             }
-            var attrs: [NSAttributedString.Key: Any] = [.font: menuFont]
-            if part.isOutdated { attrs[.foregroundColor] = NSColor.systemRed }
-            attributed.append(NSAttributedString(string: part.text, attributes: attrs))
+            attributed.append(NSAttributedString(string: part, attributes: [.font: menuFont]))
         }
         if attributed != button.attributedTitle {
             button.attributedTitle = attributed
         }
 
-        let icon = NSImage(named: "MenuBarIcon")
-        icon?.isTemplate = true
-        icon?.size = Self.menuBarIconSize
-        let desc = parts.isEmpty
-            ? String(localized: "Brew-TUI-Bar")
-            : String(format: String(localized: "Brew-TUI-Bar — %@"), parts.map(\.text).joined(separator: ", "))
-        icon?.accessibilityDescription = desc
-        button.image = icon
+        syncOutdatedBlink()
+        updateStatusItemIcon()
     }
 
     @objc private func togglePopover() {

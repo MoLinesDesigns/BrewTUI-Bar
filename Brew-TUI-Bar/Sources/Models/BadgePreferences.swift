@@ -1,8 +1,8 @@
 import Foundation
 import Observation
 
-/// User-controlled visibility for the three badges that can decorate the
-/// status-bar item title (outdated count, CVE count, sync indicator).
+/// User-controlled visibility for the three menu-bar indicators: blinking T on
+/// outdated packages, CVE count text, and sync text.
 /// Defaults to all-on, matching the pre-1.0 behaviour. Each setter mirrors
 /// the change into UserDefaults so the choice survives relaunches.
 @MainActor

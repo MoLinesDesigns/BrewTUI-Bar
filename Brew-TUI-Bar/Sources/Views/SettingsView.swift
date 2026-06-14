@@ -84,6 +84,42 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Login Item
+
+    /// Registra/desregistra el login item y resincroniza el toggle con el
+    /// estado real de `SMAppService`. macOS puede dejar el registro en
+    /// `.requiresApproval` (sin lanzar): en ese caso abrimos Ajustes del
+    /// sistema en vez de dejar el toggle mintiendo.
+    private func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+        } catch {
+            loginError = String(
+                format: String(localized: "Could not change the login item: %@"),
+                error.localizedDescription
+            )
+            launchAtLogin = (SMAppService.mainApp.status == .enabled)
+            return
+        }
+
+        switch SMAppService.mainApp.status {
+        case .enabled:
+            launchAtLogin = true
+        case .requiresApproval:
+            // Registrado pero pendiente de que el usuario lo habilite en
+            // Ajustes > General > Ítems de inicio.
+            launchAtLogin = true
+            loginError = String(localized: "Brew-TUI-Bar was added to Login Items but needs your approval. Enable it in System Settings › General › Login Items.")
+            SMAppService.openSystemSettingsLoginItems()
+        default:
+            launchAtLogin = false
+        }
+    }
+
     // MARK: - Sections
 
     private var generalSection: some View {
@@ -101,16 +137,7 @@ struct SettingsView: View {
                 .accessibilityLabel(String(localized: "Launch at login"))
                 .onChange(of: launchAtLogin) { _, newValue in
                     guard !Self.isRunningForPreviews else { return }
-                    do {
-                        if newValue {
-                            try SMAppService.mainApp.register()
-                        } else {
-                            try SMAppService.mainApp.unregister()
-                        }
-                    } catch {
-                        loginError = error.localizedDescription
-                        launchAtLogin = !newValue
-                    }
+                    setLaunchAtLogin(newValue)
                 }
         }
     }
@@ -139,11 +166,11 @@ struct SettingsView: View {
 
     private var menuBarSection: some View {
         Section(String(localized: "Menu Bar Badges")) {
-            Toggle("Show outdated count", isOn: Binding(
+            Toggle("Blink icon on updates", isOn: Binding(
                 get: { badgePreferences.showOutdated },
                 set: { badgePreferences.showOutdated = $0 }
             ))
-            .accessibilityLabel(String(localized: "Show outdated count"))
+            .accessibilityLabel(String(localized: "Blink icon on updates"))
 
             Toggle("Show CVE alerts", isOn: Binding(
                 get: { badgePreferences.showCVE },

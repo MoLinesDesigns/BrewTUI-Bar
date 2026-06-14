@@ -5,12 +5,12 @@
         "color-space" : "display-p3",
         "components" : {
           "alpha" : "0.834",
-          "blue" : "0.600",
-          "green" : "0.400",
-          "red" : "0.000"
+          "blue" : "0.149",
+          "green" : "0.724",
+          "red" : "0.500"
         }
       },
-      "idiom" : "universal"
+      "idiom" : "mac"
     }
   ],
   "info" : {
