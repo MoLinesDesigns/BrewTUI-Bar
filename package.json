@@ -3,10 +3,6 @@
   "version": "4.2.0",
   "description": "Native macOS menu bar companion for Brew-TUI.",
   "type": "module",
-  "files": [
-    "README.md",
-    "LICENSE"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MoLinesDesigns/Brew-TUI-Bar.git"
