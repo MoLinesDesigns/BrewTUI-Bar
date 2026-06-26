@@ -29,9 +29,26 @@ Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest. C
 
 ## Versioning & release
 
-- **Single source of truth for the version is `package.json` (`version`)**. `Project.swift`'s `readMarketingVersion()` reads it at generate time and feeds `MARKETING_VERSION`. Bump the version there, never in the Xcode project. Override per-build with `MARKETING_VERSION=x.y.z tuist generate`.
-- Release: `NOTARY_PROFILE=brewbar-notary ./scripts/release.sh` (sign → archive → export → notarize → staple → SHA256). The script runs `tuist clean` first because Tuist caches the *compiled* manifest and would otherwise ship a stale version. `scripts/notarize.sh` notarizes an already-exported archive.
-- Releases publish to a GitHub Release + a Homebrew cask (`MoLinesDesigns/homebrew-tap`).
+- **Single source of truth for the app version is `package.json` (`version`)**. `Project.swift`'s `readMarketingVersion()` reads it at generate time and feeds `MARKETING_VERSION`. Bump the version there, never in the Xcode project. Override per-build with `MARKETING_VERSION=x.y.z tuist generate`. `package.json` here is **not** an npm package — it only carries the version; do not add `bin`/`files` or `npm publish` this repo.
+- App release: `NOTARY_PROFILE=brewbar-notary ./scripts/release.sh` (sign → archive → export → notarize → staple → SHA256). The script runs `tuist clean` first because Tuist caches the *compiled* manifest and would otherwise ship a stale version. It prints the `SHA256:` and writes `build/Brew-TUI-Bar.app.zip` + `.app.zip.sha256`. `scripts/notarize.sh` notarizes an already-exported archive.
+
+### Coordinated two-repo release (read before any version bump)
+
+This app ships in lockstep with the **`brew-tui` CLI**, a *separate* repo and the real npm package. `AppDelegate`'s `VersionChecker` warns when the two versions drift, so **both must be bumped to the same version together**.
+
+- **`brew-tui` CLI** — `/Volumes/SSD/Projects/Brew-TUI`, repo `MoLinesDesigns/Brew-TUI`, npm package `brew-tui` (the one users `npm install -g`). This is the npm publish target — `brew-tui-bar` is not.
+- **This app** — `/Volumes/SSD/xCode_Projects/Brew-TUI-Bar`, repo `MoLinesDesigns/Brew-TUI-Bar`.
+- **The app's binary GitHub Release lives in the CLI repo `MoLinesDesigns/Brew-TUI`, not in `Brew-TUI-Bar`** — the cask's `url`/`homepage` point there. (`Brew-TUI-Bar` holds only source + the `vX.Y.Z` source tag.)
+- **Cask**: `MoLinesDesigns/homebrew-tap`, cloned locally at `/opt/homebrew/Library/Taps/molinesdesigns/homebrew-tap/Casks/brew-tui-bar.rb`. Bump `version` + `sha256` (the SHA from `release.sh`), `brew style` it, commit, push `main` directly.
+- **Ordering is enforced**: the CLI's `prepublishOnly` runs `scripts/check-brewtuibar-release.mjs`, which hits the GitHub API and fails unless the `vX.Y.Z` release in `MoLinesDesigns/Brew-TUI` already has both `Brew-TUI-Bar.app.zip` and `Brew-TUI-Bar.app.zip.sha256` assets. So the binary release must exist **before** publishing the CLI. Emergency bypass: `SKIP_BREWTUIBAR_CHECK=1`.
+- `npm publish` requires a one-time password (the account enforces 2FA) unless you use an **Automation** token (the only token type that bypasses 2FA).
+
+Full release sequence for version `X.Y.Z`:
+1. App: bump `package.json` → X.Y.Z, commit, `git tag vX.Y.Z`, push `main` + tag (this repo).
+2. App: `NOTARY_PROFILE=brewbar-notary ./scripts/release.sh` → notarized zip + SHA256.
+3. App: `gh release create vX.Y.Z -R MoLinesDesigns/Brew-TUI --target main` uploading `build/Brew-TUI-Bar.app.zip` and `build/Brew-TUI-Bar.app.zip.sha256`.
+4. Cask: bump `version` + `sha256` in the tap, commit, push.
+5. CLI: bump `package.json` → X.Y.Z (`npm version X.Y.Z --no-git-tag-version`), commit, push `main`, then `npm publish --access public --otp=<code>` (its prepublish guard now passes because step 3 exists).
 
 ## Signing config (in `Project.swift`)
 
