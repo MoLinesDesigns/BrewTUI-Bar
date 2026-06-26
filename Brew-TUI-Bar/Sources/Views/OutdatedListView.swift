@@ -3,14 +3,16 @@ import SwiftUI
 struct OutdatedListView: View {
     let appState: AppState
     @State private var showUpgradeAllConfirm = false
-    @State private var countdownPackage: OutdatedPackage?
-    @State private var countdownRemaining = 0
-    @State private var countdownTask: Task<Void, Never>?
+    /// Segundos restantes por paquete (clave = `OutdatedPackage.id`). Cada
+    /// paquete lleva su propia cuenta atrás independiente: arrancar una nueva
+    /// no detiene las demás en curso.
+    @State private var countdownRemaining: [OutdatedPackage.ID: Int] = [:]
+    @State private var countdownTasks: [OutdatedPackage.ID: Task<Void, Never>] = [:]
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     /// Segundos de margen antes de que un upgrade de un paquete arranque solo.
-    private static let countdownSeconds = 8
+    private static let countdownSeconds = 3
 
     var body: some View {
         VStack(spacing: 0) {
@@ -100,13 +102,13 @@ struct OutdatedListView: View {
 
             // Note: Task in button action — .task modifier not applicable here
             if appState.canUpgrade {
-                if countdownPackage?.id == pkg.id {
+                if let remaining = countdownRemaining[pkg.id] {
                     // Cuenta atrás en curso: pulsar cancela y aborta el upgrade.
                     Button {
-                        cancelCountdown()
+                        cancelCountdown(pkg.id)
                     } label: {
                         HStack(spacing: 4) {
-                            Text("\(countdownRemaining)")
+                            Text("\(remaining)")
                                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                                 .monospacedDigit()
                             Image(systemName: "xmark")
@@ -115,7 +117,7 @@ struct OutdatedListView: View {
                     }
                     .buttonStyle(.glassPill)
                     .accessibilityLabel(
-                        String(format: String(localized: "Cancel upgrade of %@ (%lld seconds left)", comment: "Accessibility label for cancelling the auto-upgrade countdown of a package"), pkg.name, Int64(countdownRemaining))
+                        String(format: String(localized: "Cancel upgrade of %@ (%lld seconds left)", comment: "Accessibility label for cancelling the auto-upgrade countdown of a package"), pkg.name, Int64(remaining))
                     )
                 } else {
                     Button {
@@ -145,36 +147,39 @@ struct OutdatedListView: View {
             ambientGlow: 0.04
         )
         .contentShape(Rectangle())
-        .animation(.easeInOut(duration: 0.2), value: countdownPackage?.id)
+        .animation(.easeInOut(duration: 0.2), value: countdownRemaining[pkg.id])
     }
 
     // MARK: - Countdown
 
-    /// Arranca la cuenta atrás de `countdownSeconds`; al agotarse, lanza el
-    /// upgrade salvo que el usuario haya cancelado antes.
+    /// Arranca la cuenta atrás de `countdownSeconds` para `pkg`; al agotarse,
+    /// lanza el upgrade salvo que el usuario haya cancelado antes. Cada paquete
+    /// tiene su propia cuenta atrás: pulsar otro paquete arranca una cuenta
+    /// independiente sin detener las que ya están en marcha. Reclicar el mismo
+    /// paquete reinicia solo su propia cuenta.
     private func startCountdown(for pkg: OutdatedPackage) {
-        countdownTask?.cancel()
+        let id = pkg.id
         let name = pkg.name
-        countdownPackage = pkg
-        countdownRemaining = Self.countdownSeconds
-        countdownTask = Task {
+        countdownTasks[id]?.cancel()
+        countdownRemaining[id] = Self.countdownSeconds
+        countdownTasks[id] = Task {
             for second in stride(from: Self.countdownSeconds, through: 1, by: -1) {
-                countdownRemaining = second
+                countdownRemaining[id] = second
                 try? await Task.sleep(for: .seconds(1))
                 if Task.isCancelled { return }
             }
-            countdownPackage = nil
-            countdownTask = nil
+            countdownRemaining[id] = nil
+            countdownTasks[id] = nil
             // Sin handle retenido: el upgrade debe sobrevivir al cierre del
             // popover (click fuera, foco a otra app).
             await appState.upgrade(package: name)
         }
     }
 
-    private func cancelCountdown() {
-        countdownTask?.cancel()
-        countdownTask = nil
-        countdownPackage = nil
+    private func cancelCountdown(_ id: OutdatedPackage.ID) {
+        countdownTasks[id]?.cancel()
+        countdownTasks[id] = nil
+        countdownRemaining[id] = nil
     }
 }
 

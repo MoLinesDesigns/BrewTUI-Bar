@@ -7,6 +7,9 @@ struct InstallProgressView: View {
     let progress: InstallProgress
     let onClose: () -> Void
     var onCancel: (() -> Void)? = nil
+    /// Upgrades esperando turno detrás del que se muestra ahora. Se pinta como
+    /// un badge "+N en cola" en la cabecera.
+    var queuedCount: Int = 0
 
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
@@ -76,6 +79,24 @@ struct InstallProgressView: View {
                     .accessibilityAddTraits(.isHeader)
 
                 Spacer()
+
+                if queuedCount > 0 {
+                    Text(String(format: String(localized: "+%lld queued"), Int64(queuedCount)))
+                        .font(.caption2.weight(.bold))
+                        .monospacedDigit()
+                        .foregroundStyle(CrystalGlass.glassCyan)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(CrystalGlass.glassCyan.opacity(0.16))
+                        )
+                        .overlay(
+                            Capsule(style: .continuous)
+                                .strokeBorder(CrystalGlass.glassCyan.opacity(0.35), lineWidth: 0.5)
+                        )
+                        .accessibilityLabel(String(format: String(localized: "%lld upgrades queued"), Int64(queuedCount)))
+                }
             }
 
             Text(headerSubtitle)

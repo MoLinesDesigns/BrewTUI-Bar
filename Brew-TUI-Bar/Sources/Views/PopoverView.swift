@@ -7,6 +7,11 @@ struct PopoverView: View {
 
     @State private var showSettings = false
     @State private var showNewPackages = false
+    /// Dispara la animación del check "al día" cada vez que se despliega el
+    /// popover. El hostingController se recrea en cada apertura (ver
+    /// AppDelegate.togglePopover), así que `@State` arranca en false y el
+    /// `.onAppear` de upToDateView lo anima a true en cada show.
+    @State private var upToDateAppeared = false
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
@@ -60,11 +65,11 @@ struct PopoverView: View {
                             .padding(.vertical, 6)
                     }
 
-                    newPackagesBanner
-                        .padding(.horizontal, CrystalGlass.Spacing.md)
-                        .padding(.top, 4)
-                        .padding(.bottom, 2)
-
+                    // Estado de paquetes al centro, justo bajo el header. Las
+                    // vistas vacías (upToDate/loading/error) expanden con
+                    // maxHeight: .infinity y empujan el banner de novedades
+                    // hasta el pie. La lista de outdated trae su propio
+                    // ScrollView que también ocupa el espacio disponible.
                     if appState.isLoading && appState.outdatedPackages.isEmpty {
                         loadingView
                     } else if let error = appState.error {
@@ -86,6 +91,14 @@ struct PopoverView: View {
                             .padding(.horizontal, CrystalGlass.Spacing.md)
                             .padding(.vertical, 6)
                     }
+
+                    // Zona de descubrimiento: el banner de novedades baja al
+                    // pie (sobre el footer) en lugar de competir con el estado
+                    // por el espacio superior.
+                    GlassDivider().padding(.horizontal, CrystalGlass.Spacing.md)
+                    newPackagesBanner
+                        .padding(.horizontal, CrystalGlass.Spacing.md)
+                        .padding(.vertical, 6)
                 }
 
                 GlassDivider().padding(.horizontal, CrystalGlass.Spacing.md)
@@ -118,7 +131,8 @@ struct PopoverView: View {
                 InstallProgressView(
                     progress: progress,
                     onClose: { appState.dismissInstallProgress() },
-                    onCancel: { appState.cancelInstallProgress() }
+                    onCancel: { appState.cancelInstallProgress() },
+                    queuedCount: appState.queuedUpgradeCount
                 )
             }
         }
@@ -331,10 +345,10 @@ struct PopoverView: View {
     private var headerView: some View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
             appIconView
-                .frame(width: 20, height: 20)
+                .frame(width: 30, height: 30)
                 .accessibilityHidden(true)
-            Text("Homebrew Updates")
-                .font(.headline)
+            Text(verbatim: "Brew-TUI-Bar")
+                .font(.title3)
                 .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
                 .accessibilityAddTraits(.isHeader)
 
@@ -400,20 +414,34 @@ struct PopoverView: View {
         VStack(spacing: 8) {
             Spacer()
             Image(systemName: "checkmark.circle.fill")
-                .font(.largeTitle)
+                .font(.system(size: 44))
                 .foregroundStyle(colorSchemeContrast == .increased ? Color(red: 0, green: 0.6, blue: 0) : .green)
+                // Entrada con escala elástica + rebote del símbolo. Se reinicia
+                // en cada apertura del popover porque `upToDateAppeared` vuelve
+                // a false con el hostingController recreado.
+                .scaleEffect(upToDateAppeared ? 1 : 0.4)
+                .opacity(upToDateAppeared ? 1 : 0)
+                .symbolEffect(.bounce, value: upToDateAppeared)
                 .accessibilityHidden(true)
             Text("All packages up to date")
                 .font(.headline)
                 .foregroundStyle(.secondary)
+                .opacity(upToDateAppeared ? 1 : 0)
             if let last = appState.lastChecked {
                 Text(String(format: String(localized: "Last checked %@"), last.formatted(.relative(presentation: .named))))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                    .opacity(upToDateAppeared ? 1 : 0)
             }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear {
+            upToDateAppeared = false
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.05)) {
+                upToDateAppeared = true
+            }
+        }
     }
 
     private var servicesErrorView: some View {

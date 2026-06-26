@@ -53,11 +53,25 @@ final class AppState {
     /// this when the user clicks a service error row.
     var serviceDiagnostics: ServiceDiagnostics?
 
-    /// Handle to the in-flight install task so the user can cancel it. We
-    /// store it weakly via reference — cancelling propagates to the AsyncStream
-    /// consumer loop, which trips `onTermination` and `process.terminate()`s
-    /// brew.
-    private var installTask: Task<Void, Never>?
+    /// Cola serial de upgrades. Cada petición (paquete suelto o upgrade-all) se
+    /// encola y la procesa un único worker en orden, de modo que las cuentas
+    /// atrás que vencen mientras otro upgrade está corriendo se ejecutan
+    /// después en vez de descartarse. `installProgress` muestra siempre la
+    /// petición en curso; al terminar una, el worker arranca la siguiente
+    /// reemplazando el contenido del modal.
+    private struct UpgradeRequest {
+        let id = UUID()
+        let mode: InstallProgress.Mode
+        let seeds: [String]
+        let arguments: [String]
+    }
+    private var upgradeQueue: [UpgradeRequest] = []
+    private var upgradeWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
+    private var upgradeWorker: Task<Void, Never>?
+
+    /// Número de upgrades esperando turno detrás del que se muestra ahora.
+    /// Lo consume el modal para indicar "N en cola".
+    var queuedUpgradeCount: Int { upgradeQueue.count }
 
     /// Dedupes concurrent calls to `loadNewPackagesIfNeeded`. Non-nil means
     /// a fetch is in flight; new callers piggyback on it.
@@ -243,7 +257,6 @@ final class AppState {
     }
 
     func upgrade(package name: String) async {
-        guard !isLoading else { return }
         guard canUpgrade else {
             error = String(localized: "Pro license expired")
             return
@@ -255,17 +268,12 @@ final class AppState {
         // the modal showing "Done" over a package that's still outdated.
         let kind = outdatedPackages.first(where: { $0.name == name })?.kind ?? .formula
         let typeFlag = kind == .cask ? "--cask" : "--formula"
-        await spawnInstallTask {
-            await self.runUpgradeStream(
-                mode: .singlePackage(name),
-                seeds: [name],
-                arguments: [typeFlag, name]
-            )
-        }
+        await enqueueUpgrade(
+            UpgradeRequest(mode: .singlePackage(name), seeds: [name], arguments: [typeFlag, name])
+        )
     }
 
     func upgradeAll() async {
-        guard !isLoading else { return }
         guard canUpgrade else {
             error = String(localized: "Pro license expired")
             return
@@ -277,25 +285,43 @@ final class AppState {
         let seeds = outdatedPackages
             .filter { !$0.pinned }
             .map(\.name)
-        await spawnInstallTask {
-            await self.runUpgradeStream(
-                mode: .all,
-                seeds: seeds,
-                arguments: []
-            )
+        await enqueueUpgrade(UpgradeRequest(mode: .all, seeds: seeds, arguments: []))
+    }
+
+    /// Encola una petición de upgrade y suspende hasta que ESA petición concreta
+    /// termina, preservando el contrato `await state.upgrade(...)` que usan la
+    /// UI y los tests. Si el worker ya está procesando otra petición, esta
+    /// espera su turno en la cola en vez de descartarse (antes, un segundo
+    /// upgrade simultáneo se perdía por el `guard !isLoading`).
+    private func enqueueUpgrade(_ request: UpgradeRequest) async {
+        upgradeQueue.append(request)
+        startUpgradeWorkerIfNeeded()
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            // Sin carrera: estamos en el @MainActor y no cedemos entre el
+            // append y este registro, así que el worker (que sólo avanza al
+            // suspendernos aquí) nunca resume antes de que el waiter exista.
+            upgradeWaiters[request.id] = continuation
         }
     }
 
-    /// Wraps an upgrade flow in a tracked Task so `cancelInstallProgress()` has
-    /// something to cancel. The caller still awaits completion, preserving the
-    /// existing `await state.upgrade(...)` contract used by tests.
-    private func spawnInstallTask(_ body: @escaping @Sendable () async -> Void) async {
-        let task = Task { @MainActor in
-            await body()
+    /// Arranca el worker serial si no hay uno vivo. Drena la cola en orden:
+    /// cada petición corre su `runUpgradeStream` completo (incluido el refresh
+    /// final) antes de sacar la siguiente, así que los modales se encadenan sin
+    /// solaparse.
+    private func startUpgradeWorkerIfNeeded() {
+        guard upgradeWorker == nil else { return }
+        upgradeWorker = Task { @MainActor in
+            defer { upgradeWorker = nil }
+            while !upgradeQueue.isEmpty {
+                let request = upgradeQueue.removeFirst()
+                await runUpgradeStream(
+                    mode: request.mode,
+                    seeds: request.seeds,
+                    arguments: request.arguments
+                )
+                upgradeWaiters.removeValue(forKey: request.id)?.resume()
+            }
         }
-        installTask = task
-        await task.value
-        installTask = nil
     }
 
     /// Dismisses the install-progress sheet. Allowed only once the run has
@@ -305,16 +331,23 @@ final class AppState {
         installProgress = nil
     }
 
-    /// Aborts an in-flight install. Cancels the wrapping Task; cancellation
-    /// propagates to the `for await` loop in `runUpgradeStream`, the stream's
-    /// `onTermination` callback fires, and brew receives SIGTERM. The modal
-    /// stays open with a `.failed` final state so the user can read the
-    /// outcome before dismissing.
+    /// Aborts the in-flight install and discards everything still queued.
+    /// Cancelling the worker propagates to the `for await` loop in
+    /// `runUpgradeStream`, the stream's `onTermination` fires and brew receives
+    /// SIGTERM. Queued requests are dropped and their waiters resumed so no
+    /// `await enqueueUpgrade` stays suspended. The modal keeps a `.failed`
+    /// final state so the user can read the outcome before dismissing.
     func cancelInstallProgress() {
         guard installProgress?.isFinished == false else { return }
-        installTask?.cancel()
+        let pending = upgradeQueue
+        upgradeQueue.removeAll()
+        for request in pending {
+            upgradeWaiters.removeValue(forKey: request.id)?.resume()
+        }
+        upgradeWorker?.cancel()
         installProgress?.finishFailure(String(localized: "Cancelled"))
-        // The wrapping task will still re-enter and emit isLoading = false.
+        // The worker re-enters after the cancelled stream returns, resumes the
+        // current request's waiter and exits (queue is now empty).
     }
 
     // MARK: - What's new in Homebrew
