@@ -49,6 +49,17 @@ final class AppState {
     var newPackagesLoading = false
     var newPackagesError: String?
     var newPackagesFetchedAt: Date?
+    /// Catalog search state. The modal's search field queries ALL of Homebrew
+    /// (core taps + any third-party taps, via `CatalogSearchService`), not just
+    /// the recently-added feed above. An empty/short query clears these so the
+    /// modal falls back to showing the novelties feed.
+    var catalogSearchResultsFormulae: [NewPackage] = []
+    var catalogSearchResultsCasks: [NewPackage] = []
+    var catalogSearching = false
+    var catalogSearchError: String?
+    /// Trimmed query the current results correspond to, so the view can tell
+    /// whether `catalogSearchResults*` are for what's typed now.
+    var catalogSearchQuery = ""
     /// Diagnostic modal for a failed `brew services` entry. The popover opens
     /// this when the user clicks a service error row.
     var serviceDiagnostics: ServiceDiagnostics?
@@ -76,6 +87,10 @@ final class AppState {
     /// Dedupes concurrent calls to `loadNewPackagesIfNeeded`. Non-nil means
     /// a fetch is in flight; new callers piggyback on it.
     private var newPackagesTask: Task<Void, Never>?
+
+    /// Debounce/cancel handle for `searchCatalog`. Each keystroke cancels the
+    /// previous in-flight search before scheduling a new one.
+    private var catalogSearchTask: Task<Void, Never>?
 
     /// Serializes `refresh()` so only one `brew update`/outdated/services chain
     /// runs at a time. `pendingCoalescedForce` merges overlapping `force: true`
@@ -375,6 +390,72 @@ final class AppState {
                 appStateLogger.warning("New packages fetch failed: \(error.localizedDescription, privacy: .public)")
                 self.newPackagesError = error.localizedDescription
             }
+        }
+    }
+
+    /// Searches the entire Homebrew catalog for `rawQuery`, debounced ~250 ms so
+    /// fast typing spawns `brew` once, not per keystroke. A query shorter than
+    /// `CatalogSearchService.minQueryLength` clears the results, dropping the
+    /// modal back to the novelties feed. Hits that are also current novelties
+    /// get their `addedAt` backfilled so the row keeps its "added X ago" pill.
+    func searchCatalog(_ rawQuery: String) {
+        let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        catalogSearchTask?.cancel()
+
+        guard query.count >= CatalogSearchService.minQueryLength else {
+            catalogSearchTask = nil
+            catalogSearching = false
+            catalogSearchError = nil
+            catalogSearchQuery = ""
+            catalogSearchResultsFormulae = []
+            catalogSearchResultsCasks = []
+            return
+        }
+
+        catalogSearching = true
+        catalogSearchError = nil
+        catalogSearchTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await Task.sleep(for: .milliseconds(250))   // debounce
+            } catch {
+                return // cancelled by a newer keystroke before the network hit
+            }
+            do {
+                let results = try await CatalogSearchService.shared.search(query)
+                if Task.isCancelled { return }
+                self.catalogSearchResultsFormulae = self.backfillNovelty(results.formulae, kind: .formula)
+                self.catalogSearchResultsCasks = self.backfillNovelty(results.casks, kind: .cask)
+                self.catalogSearchQuery = query
+                self.catalogSearchError = nil
+            } catch is CancellationError {
+                return
+            } catch {
+                if Task.isCancelled { return }
+                appStateLogger.warning("Catalog search failed: \(error.localizedDescription, privacy: .public)")
+                self.catalogSearchError = error.localizedDescription
+                self.catalogSearchResultsFormulae = []
+                self.catalogSearchResultsCasks = []
+                self.catalogSearchQuery = query
+            }
+            self.catalogSearching = false
+            self.catalogSearchTask = nil
+        }
+    }
+
+    /// Copies the `addedAt` date from the recently-added feed onto matching
+    /// search hits, so a result that is also a current novelty keeps its date
+    /// pill while plain catalog hits stay dateless.
+    private func backfillNovelty(_ hits: [NewPackage], kind: NewPackage.Kind) -> [NewPackage] {
+        let feed = kind == .formula ? newPackagesFormulae : newPackagesCasks
+        guard !feed.isEmpty else { return hits }
+        let dateByName: [String: Date] = Dictionary(
+            feed.compactMap { pkg in pkg.addedAt.map { (pkg.name, $0) } },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return hits.map { hit in
+            guard let date = dateByName[hit.name] else { return hit }
+            return NewPackage(name: hit.name, kind: hit.kind, addedAt: date, desc: hit.desc, homepage: hit.homepage)
         }
     }
 

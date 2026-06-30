@@ -13,9 +13,12 @@ struct NewPackage: Identifiable, Sendable, Equatable, Codable {
     var id: String { "\(kind.rawValue):\(name)" }
     let name: String
     let kind: Kind
-    /// Commit date of the PR that added the formula/cask. Used to sort the
-    /// list and to render a relative timestamp in the row.
-    let addedAt: Date
+    /// Commit date of the PR that added the formula/cask, used to render a
+    /// relative timestamp in the row. Nil for catalog *search* results (which
+    /// come from `brew search`/`brew info`, not the "recently added" feed) —
+    /// the row then omits the "added X ago" pill unless the hit also happens to
+    /// be a current novelty, in which case AppState backfills this date.
+    let addedAt: Date?
     /// One-line description from formulae.brew.sh metadata. Nil when the
     /// metadata fetch failed or the formula was removed before we cached it.
     let desc: String?

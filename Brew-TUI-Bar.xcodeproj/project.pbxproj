@@ -16,6 +16,7 @@
 		2B90352D735FC549902CE020 /* CVEAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566A60980B7441F437DEB972 /* CVEAlert.swift */; };
 		2FD5479DD4C81D969AB38639 /* OutdatedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DD88D7F0196E7A166E2A1F /* OutdatedListView.swift */; };
 		36E15F6B07497C154E8372AB /* ServiceDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599B1375570B9D952468A7BB /* ServiceDiagnosticsView.swift */; };
+		3725F60746FBDB6BFAF68668 /* CatalogSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */; };
 		3E0AD11E5095E15C5C55C7A8 /* CrystalGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B609E800610B3D260461F19 /* CrystalGlass.swift */; };
 		3E1708FF6CC152FF41CEB544 /* TuistAssets+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423A7F25D5838ACF21ADE4A0 /* TuistAssets+BrewTUIBar.swift */; };
 		3E6D3A27461842B37D2F6B74 /* SecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F85C515B60209AA8A23C75 /* SecurityMonitor.swift */; };
@@ -132,6 +133,7 @@
 		C46FD62F3B01E2C3D4F8F8BE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C6B02B13112A5F11D9350564 /* Brew-TUI-BarTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Brew-TUI-BarTests-Info.plist"; sourceTree = "<group>"; };
 		D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewUpgradeStream.swift; sourceTree = "<group>"; };
+		DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSearchService.swift; sourceTree = "<group>"; };
 		E668FB288FAF0CE8E76361DC /* BrewProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewProcess.swift; sourceTree = "<group>"; };
 		E7FBB2994AE982723D8FDEC3 /* InstallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgressView.swift; sourceTree = "<group>"; };
 		E886004FD8268509823CE847 /* ServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnostics.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 				E668FB288FAF0CE8E76361DC /* BrewProcess.swift */,
 				1E807F5E2A3B3306A7543ACE /* BrewServiceDiagnostics.swift */,
 				D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */,
+				DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */,
 				5F65D74D48519B0A43A079EE /* CrashReporter.swift */,
 				A00C784B0AF4873D58CDC9B9 /* LastActionMonitor.swift */,
 				18FF089615AD254B855B86D5 /* LegacyMigrator.swift */,
@@ -461,6 +464,7 @@
 				B33F7511CC5500056B468262 /* BrewProcess.swift in Sources */,
 				AF2569D8D195C89ED62E3BB6 /* BrewServiceDiagnostics.swift in Sources */,
 				F09F7EDA460F847403922C5E /* BrewUpgradeStream.swift in Sources */,
+				3725F60746FBDB6BFAF68668 /* CatalogSearchService.swift in Sources */,
 				2030E93A77D189C8C9F5C291 /* CrashReporter.swift in Sources */,
 				4BDB290E21EAE5611D2A0BC5 /* LastActionMonitor.swift in Sources */,
 				E70D92D6CA2F010643C71541 /* LegacyMigrator.swift in Sources */,

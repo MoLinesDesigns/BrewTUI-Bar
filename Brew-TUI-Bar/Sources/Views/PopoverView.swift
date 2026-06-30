@@ -143,6 +143,12 @@ struct PopoverView: View {
                 isLoading: appState.newPackagesLoading,
                 error: appState.newPackagesError,
                 fetchedAt: appState.newPackagesFetchedAt,
+                searchResultsFormulae: appState.catalogSearchResultsFormulae,
+                searchResultsCasks: appState.catalogSearchResultsCasks,
+                isSearchingCatalog: appState.catalogSearching,
+                searchError: appState.catalogSearchError,
+                searchResultsQuery: appState.catalogSearchQuery,
+                onSearch: { appState.searchCatalog($0) },
                 onClose: { showNewPackages = false },
                 onRefresh: { appState.loadNewPackagesIfNeeded(force: true) }
             )
