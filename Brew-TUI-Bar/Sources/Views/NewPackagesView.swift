@@ -4,8 +4,8 @@ import SwiftUI
 /// plus a search field that queries the *entire* Homebrew catalog (core + any
 /// third-party taps). Discoverability surface for "what's new" — clicking a row
 /// copies the `brew install <name>` command to the pasteboard so the user can
-/// paste it straight into their shell (Brew-TUI-Bar deliberately stays out of
-/// the install path; that's Brew-TUI's job).
+/// paste it straight into their shell (BrewTUI-Bar deliberately stays out of
+/// the install path; that's BrewTUI's job).
 ///
 /// Two modes driven by the search field:
 ///  - **Novelties** (query empty or 1 char): the recently-added feed, optionally

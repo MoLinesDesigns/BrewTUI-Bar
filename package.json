@@ -5,18 +5,18 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MoLinesDesigns/Brew-TUI-Bar.git"
+    "url": "git+https://github.com/MoLinesDesigns/BrewTUI-Bar.git"
   },
   "bugs": {
-    "url": "https://github.com/MoLinesDesigns/Brew-TUI-Bar/issues"
+    "url": "https://github.com/MoLinesDesigns/BrewTUI-Bar/issues"
   },
-  "homepage": "https://github.com/MoLinesDesigns/Brew-TUI-Bar#readme",
+  "homepage": "https://github.com/MoLinesDesigns/BrewTUI-Bar#readme",
   "author": "MoLines Designs",
   "license": "MIT",
   "scripts": {
     "generate": "tuist generate --no-open",
-    "build": "xcodebuild -workspace Brew-TUI-Bar.xcworkspace -scheme Brew-TUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build",
-    "test": "xcodebuild -workspace Brew-TUI-Bar.xcworkspace -scheme Brew-TUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO test"
+    "build": "xcodebuild -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build",
+    "test": "xcodebuild -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO test"
   },
   "keywords": [
     "homebrew",

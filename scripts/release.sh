@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Brew-TUI-Bar release pipeline — sign, archive, export and notarize.
+# BrewTUI-Bar release pipeline — sign, archive, export and notarize.
 #
 # Status: SCAFFOLD. Fill in the credentials section before first use; the
 # notarytool calls below intentionally fail loudly if NOTARY_PROFILE is
@@ -19,10 +19,10 @@
 set -euo pipefail
 
 # ── Config ────────────────────────────────────────────────────────────────
-SCHEME="Brew-TUI-Bar"
-WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)/Brew-TUI-Bar.xcworkspace"
+SCHEME="BrewTUI-Bar"
+WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)/BrewTUI-Bar.xcworkspace"
 BUILD_DIR="$(cd "$(dirname "$0")/.." && pwd)/build"
-ARCHIVE_PATH="${BUILD_DIR}/Brew-TUI-Bar.xcarchive"
+ARCHIVE_PATH="${BUILD_DIR}/BrewTUI-Bar.xcarchive"
 EXPORT_DIR="${BUILD_DIR}/export"
 EXPORT_OPTIONS="$(cd "$(dirname "$0")/.." && pwd)/exportOptions.plist"
 TEAM_ID="GD6M44DYPQ"
@@ -54,7 +54,7 @@ echo "✓ notary profile listo."
 # explicit clean, `readMarketingVersion()` is NOT re-run when package.json
 # changes — so the .app keeps shipping the previous release's version.
 # This breaks the version contract silently (the user sees a stale
-# Brew-TUI-Bar even after `brew upgrade`).
+# BrewTUI-Bar even after `brew upgrade`).
 # Always `tuist clean` before `tuist generate` during release.
 ( cd "$(dirname "$0")/.." && tuist clean && tuist generate --no-open )
 
@@ -113,11 +113,11 @@ dereg_paths=(
 )
 
 # The DerivedData hash is opaque to us, so glob it. There may be more than
-# one Brew-TUI-Bar-* directory if Tuist regenerated with a different cache
+# one BrewTUI-Bar-* directory if Tuist regenerated with a different cache
 # key at any point; deregister all of them. `nullglob` makes the loop skip
 # cleanly when no DerivedData dir exists yet (fresh checkout).
 shopt -s nullglob
-for d in "$HOME"/Library/Developer/Xcode/DerivedData/Brew-TUI-Bar-*/Build/Intermediates.noindex/ArchiveIntermediates/Brew-TUI-Bar/InstallationBuildProductsLocation/Applications/"${SCHEME}.app"; do
+for d in "$HOME"/Library/Developer/Xcode/DerivedData/BrewTUI-Bar-*/Build/Intermediates.noindex/ArchiveIntermediates/BrewTUI-Bar/InstallationBuildProductsLocation/Applications/"${SCHEME}.app"; do
   dereg_paths+=("$d")
 done
 shopt -u nullglob
@@ -142,5 +142,5 @@ echo "  SHA256: $(awk '{print $1}' "${ZIP_PATH}.sha256")"
 echo ""
 echo "Next steps (manual):"
 echo "  1. Upload \$ZIP_PATH to GitHub Release v\$(plutil -extract CFBundleShortVersionString raw \"\$APP_PATH/Contents/Info.plist\")"
-echo "  2. Update homebrew/Casks/brew-tui-bar.rb with the new version + SHA256"
+echo "  2. Update homebrew/Casks/brewtui-bar.rb with the new version + SHA256"
 echo "  3. Open PR against MoLinesDesigns/homebrew-tap"

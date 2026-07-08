@@ -258,7 +258,7 @@ struct PopoverView: View {
     private var versionFooter: some View {
         HStack(spacing: 4) {
             Spacer()
-            Text(verbatim: "Brew-TUI-Bar v\(bundleVersion)")
+            Text(verbatim: "BrewTUI-Bar v\(bundleVersion)")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
             if let newVersion = appState.selfUpdateVersion {
@@ -270,7 +270,7 @@ struct PopoverView: View {
                         .foregroundStyle(BrewTUIBarTheme.accent(highContrast: colorSchemeContrast == .increased))
                 }
                 .buttonStyle(.borderless)
-                .help(String(format: String(localized: "Brew-TUI-Bar %@ is available — click to upgrade"), newVersion))
+                .help(String(format: String(localized: "BrewTUI-Bar %@ is available — click to upgrade"), newVersion))
                 .accessibilityLabel(String(format: String(localized: "Self-update available, version %@"), newVersion))
             }
             Text(verbatim: "·")
@@ -353,7 +353,7 @@ struct PopoverView: View {
             appIconView
                 .frame(width: 30, height: 30)
                 .accessibilityHidden(true)
-            Text(verbatim: "Brew-TUI-Bar")
+            Text(verbatim: "BrewTUI-Bar")
                 .font(.title3)
                 .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
                 .accessibilityAddTraits(.isHeader)
@@ -495,11 +495,11 @@ struct PopoverView: View {
             Button {
                 openBrewTUI()
             } label: {
-                Label("Open Brew-TUI", systemImage: "terminal")
+                Label("Open BrewTUI", systemImage: "terminal")
                     .font(.caption)
             }
             .buttonStyle(.glassPill)
-            .accessibilityLabel(String(localized: "Open Brew-TUI"))
+            .accessibilityLabel(String(localized: "Open BrewTUI"))
 
             Spacer()
 
@@ -553,10 +553,10 @@ struct PopoverView: View {
                         .font(.title2)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(String(localized: "Unlock Brew-TUI-Bar"))
+                        Text(String(localized: "Unlock BrewTUI-Bar"))
                             .font(.headline)
                             .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
-                        Text(String(localized: "Brew-TUI-Bar is part of Brew-TUI Pro"))
+                        Text(String(localized: "BrewTUI-Bar is part of BrewTUI Pro"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -568,10 +568,10 @@ struct PopoverView: View {
                 // Features list — tight spacing so all five rows + label
                 // fit inside the fixed-height popover without scrolling.
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(String(localized: "Brew-TUI Pro unlocks:"))
+                    Text(String(localized: "BrewTUI Pro unlocks:"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    proFeatureRow(systemImage: "menubar.rectangle", text: String(localized: "Brew-TUI-Bar (this menu bar app)"))
+                    proFeatureRow(systemImage: "menubar.rectangle", text: String(localized: "BrewTUI-Bar (this menu bar app)"))
                     proFeatureRow(systemImage: "doc.on.doc", text: String(localized: "Package Profiles"))
                     proFeatureRow(systemImage: "trash.slash", text: String(localized: "Smart Cleanup"))
                     proFeatureRow(systemImage: "clock.arrow.circlepath", text: String(localized: "Action History"))
@@ -715,14 +715,14 @@ struct PopoverView: View {
             let scriptURL = try makeLaunchScript()
             guard NSWorkspace.shared.open(scriptURL) else {
                 throw NSError(
-                    domain: "Brew-TUI-Bar",
+                    domain: "BrewTUI-Bar",
                     code: 1,
-                    userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not open Brew-TUI in your terminal app.")]
+                    userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not open BrewTUI in your terminal app.")]
                 )
             }
         } catch {
             let alert = NSAlert()
-            alert.messageText = String(localized: "Could not open Brew-TUI")
+            alert.messageText = String(localized: "Could not open BrewTUI")
             alert.informativeText = error.localizedDescription
             alert.alertStyle = .warning
             alert.addButton(withTitle: String(localized: "Continue"))
@@ -761,7 +761,7 @@ struct PopoverView: View {
             let scriptURL = tempURL.appendingPathComponent("brew-tui-bar-upgrade.command")
             let script = """
             #!/bin/zsh
-            echo "Upgrading Brew-TUI-Bar via Homebrew..."
+            echo "Upgrading BrewTUI-Bar via Homebrew..."
             brew upgrade --cask brew-tui-bar
             """
             try script.write(to: scriptURL, atomically: true, encoding: .utf8)
@@ -771,14 +771,14 @@ struct PopoverView: View {
             )
             guard NSWorkspace.shared.open(scriptURL) else {
                 throw NSError(
-                    domain: "Brew-TUI-Bar",
+                    domain: "BrewTUI-Bar",
                     code: 2,
                     userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not launch the upgrade in your terminal app.")]
                 )
             }
         } catch {
             let alert = NSAlert()
-            alert.messageText = String(localized: "Could not upgrade Brew-TUI-Bar")
+            alert.messageText = String(localized: "Could not upgrade BrewTUI-Bar")
             alert.informativeText = error.localizedDescription
             alert.alertStyle = .warning
             alert.addButton(withTitle: String(localized: "Continue"))

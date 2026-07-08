@@ -116,7 +116,7 @@ actor NewPackagesService {
 
         var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
         req.setValue("application/vnd.github.cloak-preview+json", forHTTPHeaderField: "Accept")
-        req.setValue("Brew-TUI-Bar", forHTTPHeaderField: "User-Agent")
+        req.setValue("BrewTUI-Bar", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
@@ -134,7 +134,7 @@ actor NewPackagesService {
     /// the parent TTL hits, which is acceptable for a 24h window.
     private func fetchMetadata(url: URL) async throws -> [String: PackageMeta] {
         var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
-        req.setValue("Brew-TUI-Bar", forHTTPHeaderField: "User-Agent")
+        req.setValue("BrewTUI-Bar", forHTTPHeaderField: "User-Agent")
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             let code = (response as? HTTPURLResponse)?.statusCode ?? -1

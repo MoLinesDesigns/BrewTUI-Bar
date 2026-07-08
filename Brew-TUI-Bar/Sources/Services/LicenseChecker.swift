@@ -36,7 +36,7 @@ struct LicenseFile: Codable {
 /// Mirrors the four-level degradation in `src/lib/license/license-manager.ts`
 /// (`getDegradationLevel`). The cutoff thresholds must stay in sync — both
 /// codebases read the same license.json and compute against the same field.
-/// Currently the Brew-TUI-Bar UI only distinguishes pro vs expired, but the level
+/// Currently the BrewTUI-Bar UI only distinguishes pro vs expired, but the level
 /// is exposed so future affordances (warning banner, partial degradation)
 /// can rely on it without divergence.
 enum DegradationLevel: Sendable {

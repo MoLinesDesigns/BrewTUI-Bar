@@ -34,7 +34,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("Brew-TUI-Bar Settings")
+            Text("BrewTUI-Bar Settings")
                 .font(.headline)
                 .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
                 .accessibilityAddTraits(.isHeader)
@@ -113,7 +113,7 @@ struct SettingsView: View {
             // Registrado pero pendiente de que el usuario lo habilite en
             // Ajustes > General > Ítems de inicio.
             launchAtLogin = true
-            loginError = String(localized: "Brew-TUI-Bar was added to Login Items but needs your approval. Enable it in System Settings › General › Login Items.")
+            loginError = String(localized: "BrewTUI-Bar was added to Login Items but needs your approval. Enable it in System Settings › General › Login Items.")
             SMAppService.openSystemSettingsLoginItems()
         default:
             launchAtLogin = false
@@ -157,7 +157,7 @@ struct SettingsView: View {
             .accessibilityLabel(String(localized: "Notifications"))
 
             if scheduler.notificationsDenied {
-                Text("Notifications are disabled in System Settings. Enable them in System Settings > Notifications > Brew-TUI-Bar.")
+                Text("Notifications are disabled in System Settings. Enable them in System Settings > Notifications > BrewTUI-Bar.")
                     .font(.caption)
                     .foregroundStyle(BrewTUIBarTheme.accent(highContrast: colorSchemeContrast == .increased))
             }
@@ -184,7 +184,7 @@ struct SettingsView: View {
             ))
             .accessibilityLabel(String(localized: "Show sync indicator"))
 
-            Text("Toggle the icons that appear next to Brew-TUI-Bar's menu bar icon.")
+            Text("Toggle the icons that appear next to BrewTUI-Bar's menu bar icon.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -235,9 +235,9 @@ struct SettingsView: View {
 
     private var advancedSection: some View {
         Section(String(localized: "Advanced")) {
-            LabeledContent(String(localized: "Brew-TUI-Bar version"), value: bundleVersion)
+            LabeledContent(String(localized: "BrewTUI-Bar version"), value: bundleVersion)
             if let cli = appState.brewTuiCliVersion {
-                LabeledContent(String(localized: "Brew-TUI CLI"), value: cli)
+                LabeledContent(String(localized: "BrewTUI CLI"), value: cli)
             }
             HStack {
                 Button {
@@ -261,10 +261,10 @@ struct SettingsView: View {
     }
 
     private func runRevalidate() {
-        // Same pattern PopoverView uses for `Open Brew-TUI`: drop a one-shot
+        // Same pattern PopoverView uses for `Open BrewTUI`: drop a one-shot
         // .command script and hand it to NSWorkspace so the user's default
         // terminal launches `brew-tui revalidate`. We don't shell out
-        // in-process — Brew-TUI-Bar is sandbox-adjacent and we'd lose the user's
+        // in-process — BrewTUI-Bar is sandbox-adjacent and we'd lose the user's
         // shell config + interactive prompts.
         do {
             let tempDir = FileManager.default.temporaryDirectory
@@ -299,9 +299,9 @@ struct SettingsView: View {
     }
 
     private func openLogs() {
-        // Console.app filtered for Brew-TUI-Bar's subsystem. NSWorkspace cannot pass
+        // Console.app filtered for BrewTUI-Bar's subsystem. NSWorkspace cannot pass
         // a predicate to Console, so we open the app and rely on the user to
-        // search for "Brew-TUI-Bar". The bundle id is stable.
+        // search for "BrewTUI-Bar". The bundle id is stable.
         let consoleURL = URL(fileURLWithPath: "/System/Applications/Utilities/Console.app")
         NSWorkspace.shared.open(consoleURL)
     }

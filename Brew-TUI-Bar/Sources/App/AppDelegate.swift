@@ -52,7 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
 
             // Cross-platform version contract: warn (non-blocking) when the
-            // installed Brew-TUI-Bar drifts from the brew-tui CLI. License decryption
+            // installed BrewTUI-Bar drifts from the brew-tui CLI. License decryption
             // may still work today, but skew has bitten us before (HKDF schema
             // bump). Continue to license check either way.
             let versionStatus = await VersionChecker.check()
@@ -98,7 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             // Built from the same value `checkLicense()` returned so we never
             // re-decode the file.
             appState.licenseSummary = LicenseSummary(from: licenseStatus)
-            // Surface the brew-tui CLI version alongside Brew-TUI-Bar's in the
+            // Surface the brew-tui CLI version alongside BrewTUI-Bar's in the
             // About section. Reused from VersionChecker so we do not spawn
             // a second `brew-tui --version` process at launch.
             if case let .match(version) = versionStatus {
@@ -128,7 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             let machineCount = await SyncMonitor.shared.getKnownMachineCount()
             appState.updateSyncStatus(hasActivity: hasSyncActivity, machineCount: machineCount)
 
-            // Listen for actions performed in the Brew-TUI CLI so the popover
+            // Listen for actions performed in the BrewTUI CLI so the popover
             // reflects them immediately and shows a friendly status banner.
             LastActionMonitor.shared.start { [weak self] action in
                 guard let self else { return }
@@ -157,7 +157,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     // MARK: - Login item
 
-    /// Registers Brew-TUI-Bar as a login item the first time it runs as Pro.
+    /// Registers BrewTUI-Bar as a login item the first time it runs as Pro.
     /// Honors the user's choice afterwards: if they later disable it in Settings,
     /// we won't re-register on subsequent launches.
     private func autoRegisterLoginItemIfNeeded() {
@@ -217,8 +217,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func showBrewTuiRequired() {
         let alert = NSAlert()
-        alert.messageText = String(localized: "Brew-TUI is required")
-        alert.informativeText = String(localized: "Brew-TUI-Bar requires Brew-TUI to be installed.\n\nInstall it with:\n  npm install -g brew-tui\n\nThen relaunch Brew-TUI-Bar.")
+        alert.messageText = String(localized: "BrewTUI is required")
+        alert.informativeText = String(localized: "BrewTUI-Bar requires BrewTUI to be installed.\n\nInstall it with:\n  npm install -g brew-tui\n\nThen relaunch BrewTUI-Bar.")
         alert.alertStyle = .critical
         alert.addButton(withTitle: String(localized: "Copy Install Command"))
         alert.addButton(withTitle: String(localized: "Quit"))
@@ -235,9 +235,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func showVersionMismatch(brewTui: String, brewBar: String) {
         let alert = NSAlert()
-        alert.messageText = String(localized: "Brew-TUI-Bar version mismatch")
+        alert.messageText = String(localized: "BrewTUI-Bar version mismatch")
         let template = String(
-            localized: "Brew-TUI-Bar %@ is out of sync with Brew-TUI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brew-tui install-brew-tui-bar --force"
+            localized: "BrewTUI-Bar %@ is out of sync with BrewTUI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brew-tui install-brew-tui-bar --force"
         )
         alert.informativeText = String(format: template, brewBar, brewTui)
         alert.alertStyle = .warning
@@ -270,7 +270,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if let button = statusItem.button {
             let icon = MenuBarIconComposer.fullIcon()
             button.image = icon
-            button.image?.accessibilityDescription = String(localized: "Brew-TUI-Bar")
+            button.image?.accessibilityDescription = String(localized: "BrewTUI-Bar")
             button.imagePosition = .imageLeft
             button.title = ""
             button.action = #selector(togglePopover)
@@ -343,9 +343,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if sync, badgePreferences.showSync { parts.append(String(localized: "Sync active")) }
 
         if parts.isEmpty {
-            return String(localized: "Brew-TUI-Bar")
+            return String(localized: "BrewTUI-Bar")
         }
-        return String(format: String(localized: "Brew-TUI-Bar — %@"), parts.joined(separator: ", "))
+        return String(format: String(localized: "BrewTUI-Bar — %@"), parts.joined(separator: ", "))
     }
 
     private func updateBadge() {

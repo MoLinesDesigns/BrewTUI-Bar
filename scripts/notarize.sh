@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Notarize the already-built build/Brew-TUI-Bar.app.zip and publish it
+# Notarize the already-built build/BrewTUI-Bar.app.zip and publish it
 # to the GitHub Release for the current package version. Re-run idempotently — if the .zip is
 # already stapled this only updates the SHA on the cask.
 #
@@ -30,8 +30,8 @@ EOF
   exit 1
 fi
 
-APP_PATH="${REPO_ROOT}/build/export/Brew-TUI-Bar.app"
-ZIP_PATH="${REPO_ROOT}/build/Brew-TUI-Bar.app.zip"
+APP_PATH="${REPO_ROOT}/build/export/BrewTUI-Bar.app"
+ZIP_PATH="${REPO_ROOT}/build/BrewTUI-Bar.app.zip"
 EXPORT_DIR="${REPO_ROOT}/build/export"
 
 if [[ ! -d "$APP_PATH" ]]; then
@@ -55,7 +55,7 @@ xcrun stapler validate "$APP_PATH"
 # ── Step 3: re-zip the stapled app ────────────────────────────────────────
 echo "→ Re-zipping the stapled .app..."
 rm -f "$ZIP_PATH"
-( cd "$EXPORT_DIR" && ditto -c -k --keepParent Brew-TUI-Bar.app "$ZIP_PATH" )
+( cd "$EXPORT_DIR" && ditto -c -k --keepParent BrewTUI-Bar.app "$ZIP_PATH" )
 
 # ── Step 4: SHA256 + upload ───────────────────────────────────────────────
 SHA="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
@@ -77,25 +77,25 @@ update_cask() {
   perl -i -pe "s/^  sha256 \"[^\"]+\"/  sha256 \"${SHA}\"/" "$cask_file"
 }
 
-LOCAL_CASK_FILE="${REPO_ROOT}/homebrew/Casks/brew-tui-bar.rb"
+LOCAL_CASK_FILE="${REPO_ROOT}/homebrew/Casks/brewtui-bar.rb"
 if [[ -f "$LOCAL_CASK_FILE" ]]; then
   update_cask "$LOCAL_CASK_FILE"
 fi
 
 TAP_DIR="$(mktemp -d)/homebrew-tap"
 git clone https://github.com/MoLinesDesigns/homebrew-tap "$TAP_DIR"
-CASK_FILE="${TAP_DIR}/Casks/brew-tui-bar.rb"
+CASK_FILE="${TAP_DIR}/Casks/brewtui-bar.rb"
 
 update_cask "$CASK_FILE"
 
 cd "$TAP_DIR"
-git add Casks/brew-tui-bar.rb
-git commit -m "chore: bump brew-tui-bar to ${VERSION} (notarized)
+git add Casks/brewtui-bar.rb
+git commit -m "chore: bump brewtui-bar to ${VERSION} (notarized)
 
-Stapled .app published to MoLinesDesigns/Brew-TUI-Bar release v${VERSION}.
+Stapled .app published to MoLinesDesigns/BrewTUI-Bar release v${VERSION}.
 SHA256: ${SHA}"
 git push origin HEAD
 
 echo ""
 echo "✓ Done. Cask bumped on MoLinesDesigns/homebrew-tap. Users running"
-echo "  'brew upgrade --cask brew-tui-bar' will pick up the notarized ${VERSION}."
+echo "  'brew upgrade --cask brewtui-bar' will pick up the notarized ${VERSION}."

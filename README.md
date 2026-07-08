@@ -1,6 +1,6 @@
-# Brew-TUI-Bar
+# BrewTUI-Bar
 
-Native macOS menu bar companion for Brew-TUI. It watches Homebrew updates, surfaces service status, shows security notifications, and provides quick actions from the menu bar.
+Native macOS menu bar companion for BrewTUI. It watches Homebrew updates, surfaces service status, shows security notifications, and provides quick actions from the menu bar.
 
 ## Requirements
 

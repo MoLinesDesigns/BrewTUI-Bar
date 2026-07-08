@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Tokens
 
-/// Crystal Glass design tokens for Brew-TUI-Bar. Mirrors the Apple Liquid
+/// Crystal Glass design tokens for BrewTUI-Bar. Mirrors the Apple Liquid
 /// Glass language used across MoLines Designs products: `.ultraThinMaterial`
 /// fills, cyan + soft-white gradient borders, deep cyan ambient glow.
 enum CrystalGlass {

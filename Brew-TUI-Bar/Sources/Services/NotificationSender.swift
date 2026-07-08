@@ -52,7 +52,7 @@ struct NotificationSender: Notifying {
         let content = UNMutableNotificationContent()
         content.sound = .default
         if hasCriticalOrHigh, let worst = sorted.first {
-            content.title = String(localized: "Security Alert — Brew-TUI")
+            content.title = String(localized: "Security Alert — BrewTUI")
             content.body = String(
                 format: String(localized: "%lld vulnerable packages found, including %@"),
                 Int64(count),
@@ -60,7 +60,7 @@ struct NotificationSender: Notifying {
             )
             content.userInfo = ["cveId": worst.id]
         } else {
-            content.title = String(localized: "Security Notice — Brew-TUI")
+            content.title = String(localized: "Security Notice — BrewTUI")
             content.body = String(format: String(localized: "%lld vulnerable packages found"), Int64(count))
             if let worst = sorted.first {
                 content.userInfo = ["cveId": worst.id]

@@ -1,7 +1,7 @@
-//  Brew-TUI-BarDesignVariants.swift
-//  Brew-TUI-Bar · Design Exploration — Xcode Preview only, not production code.
+//  BrewTUI-BarDesignVariants.swift
+//  BrewTUI-Bar · Design Exploration — Xcode Preview only, not production code.
 //
-//  Five conceptual directions for the Brew-TUI-Bar popover (340 × 420 pt).
+//  Five conceptual directions for the BrewTUI-Bar popover (340 × 420 pt).
 //  Each variant is fully self-contained; no changes to existing source.
 
 #if DEBUG
@@ -258,7 +258,7 @@ struct VariantOrganicBloom: View {
                 Image(systemName: "leaf.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.brewTeal)
-                Text("Brew-TUI-Bar")
+                Text("BrewTUI-Bar")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(Color(red: 0.22, green: 0.20, blue: 0.16))
             }
@@ -382,7 +382,7 @@ struct VariantOrganicBloom: View {
             HStack(spacing: 5) {
                 Image(systemName: "terminal")
                     .font(.system(size: 10))
-                Text("Open Brew-TUI")
+                Text("Open BrewTUI")
                     .font(.system(size: 10, design: .rounded))
             }
             .foregroundStyle(Color.brewTeal)
@@ -803,7 +803,7 @@ struct VariantAuraGlass: View {
                 Image(systemName: "mug.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(.white.opacity(0.62))
-                Text("Brew-TUI-Bar")
+                Text("BrewTUI-Bar")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.80))
             }
@@ -945,7 +945,7 @@ struct VariantAuraGlass: View {
         HStack {
             HStack(spacing: 5) {
                 Image(systemName: "terminal").font(.system(size: 10))
-                Text("Brew-TUI").font(.system(size: 10, weight: .medium))
+                Text("BrewTUI").font(.system(size: 10, weight: .medium))
             }
             .foregroundStyle(.white.opacity(0.52))
 

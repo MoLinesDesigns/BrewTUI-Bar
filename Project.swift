@@ -59,7 +59,7 @@ let project = Project(
                 "LSUIElement": true,
                 "LSApplicationCategoryType": "public.app-category.developer-tools",
                 "NSMainStoryboardFile": "",
-                "CFBundleDisplayName": "Brew-TUI-Bar",
+                "CFBundleDisplayName": "BrewTUI-Bar",
                 "CFBundleDevelopmentRegion": "en",
                 "CFBundleShortVersionString": "$(MARKETING_VERSION)",
                 "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
