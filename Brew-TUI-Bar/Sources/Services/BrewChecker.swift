@@ -13,6 +13,12 @@ struct BrewChecker: Sendable {
     /// so dropping these from the visible list is safe.
     private static let selfCaskNames: Set<String> = ["brew-tui-bar", "brewbar"]
 
+    /// `brew services` plists that ship without the args needed to actually run.
+    /// cloudflared's default plist invokes the binary with no `tunnel run` →
+    /// permanent exit 1. Operators run named tunnels via a custom LaunchAgent
+    /// or Docker on the NAS; surfacing this as a Homebrew service error is noise.
+    private static let suppressedServiceErrorNames: Set<String> = ["cloudflared"]
+
     /// Refreshes the local formula/cask index. Errors are non-fatal — the
     /// outdated check proceeds with whatever index is already cached.
     func updateIndex() async {
@@ -67,8 +73,25 @@ struct BrewChecker: Sendable {
         brewCheckerLogger.info("Checking services")
         let data = try await BrewProcess.run(["services", "list", "--json"])
         let result = try JSONDecoder().decode([BrewService].self, from: data)
-        brewCheckerLogger.info("Found \(result.count) services")
-        return result
+        let sanitized = Self.sanitizeServiceErrors(result)
+        brewCheckerLogger.info("Found \(sanitized.count) services")
+        return sanitized
+    }
+
+    /// Downgrades known false-positive `error` rows so the popover doesn't alarm.
+    static func sanitizeServiceErrors(_ services: [BrewService]) -> [BrewService] {
+        services.map { service in
+            guard suppressedServiceErrorNames.contains(service.name), service.hasError else {
+                return service
+            }
+            return BrewService(
+                name: service.name,
+                status: "none",
+                user: service.user,
+                file: service.file,
+                exitCode: nil
+            )
+        }
     }
 
     func upgradePackage(_ name: String) async throws {

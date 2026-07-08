@@ -146,6 +146,21 @@ struct BrewServiceTests {
     }
 }
 
+@Suite("BrewChecker service sanitization")
+struct BrewCheckerServiceTests {
+    @Test("cloudflared brew-services error is suppressed as false positive")
+    func suppressCloudflaredError() {
+        let input = [
+            BrewService(name: "mysql", status: "error", user: nil, file: nil, exitCode: 1),
+            BrewService(name: "cloudflared", status: "error", user: "me", file: "/tmp/p.plist", exitCode: 1),
+        ]
+        let output = BrewChecker.sanitizeServiceErrors(input)
+        #expect(output[0].hasError == true)
+        #expect(output[1].hasError == false)
+        #expect(output[1].status == "none")
+    }
+}
+
 // MARK: - LicenseChecker Tests
 
 @Suite("LicenseChecker")
