@@ -26,7 +26,7 @@ private func readMarketingVersion() -> String {
 private let marketingVersion = readMarketingVersion()
 
 let project = Project(
-    name: "Brew-TUI-Bar",
+    name: "BrewTUI-Bar",
     options: .options(
         defaultKnownRegions: ["en", "es"],
         developmentRegion: "en"
@@ -50,7 +50,7 @@ let project = Project(
     ),
     targets: [
         .target(
-            name: "Brew-TUI-Bar",
+            name: "BrewTUI-Bar",
             destinations: .macOS,
             product: .app,
             bundleId: "com.molinesdesigns.brewtuibar",
@@ -69,18 +69,18 @@ let project = Project(
             // BrewTUIBarDesignVariants.swift es codigo de exploracion
             // de diseno que no debe entrar al producto firmado.
             sources: SourceFilesList(globs: [
-                .glob("Brew-TUI-Bar/Sources/**", excluding: ["Brew-TUI-Bar/Sources/DesignExploration/**"]),
+                .glob("BrewTUI-Bar/Sources/**", excluding: ["BrewTUI-Bar/Sources/DesignExploration/**"]),
             ]),
-            resources: ["Brew-TUI-Bar/Resources/**"],
+            resources: ["BrewTUI-Bar/Resources/**"],
             settings: .settings(
                 base: [
                     // Xcode sanitises hyphens out of PRODUCT_NAME when derived from the
-                    // target name, which would emit Brew_TUI_Bar.app. The cask + installer
+                    // target name, which would emit BrewTUI-Bar.app. The cask + installer
                     // scripts look for the hyphenated bundle, so force the brand name
                     // explicitly while keeping PRODUCT_MODULE_NAME identifier-safe.
-                    "PRODUCT_NAME": "Brew-TUI-Bar",
-                    "EXECUTABLE_NAME": "Brew-TUI-Bar",
-                    "PRODUCT_MODULE_NAME": "Brew_TUI_Bar",
+                    "PRODUCT_NAME": "BrewTUI-Bar",
+                    "EXECUTABLE_NAME": "BrewTUI-Bar",
+                    "PRODUCT_MODULE_NAME": "BrewTUI-Bar",
                     "DEVELOPMENT_TEAM": "GD6M44DYPQ",
                     "CODE_SIGN_STYLE": "Manual",
                     "CODE_SIGN_IDENTITY": "Developer ID Application",
@@ -102,19 +102,19 @@ let project = Project(
             )
         ),
         .target(
-            name: "Brew-TUI-BarTests",
+            name: "BrewTUI-BarTests",
             destinations: .macOS,
             product: .unitTests,
-            bundleId: "com.molinesdesigns.brewtuibar.tests",
+            bundleId: "com.molinesdesigns.brewtui-bar.tests",
             deploymentTargets: .macOS("14.0"),
-            sources: ["Brew-TUI-BarTests/Sources/**"],
-            dependencies: [.target(name: "Brew-TUI-Bar")],
+            sources: ["BrewTUI-BarTests/Sources/**"],
+            dependencies: [.target(name: "BrewTUI-Bar")],
             // Tuist derives TEST_HOST from the sanitised host name (Brew_TUI_Bar),
             // but the host target overrides EXECUTABLE_NAME to keep the hyphens.
             // Override here to point at the actual binary path.
             settings: .settings(
                 base: [
-                    "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/Brew-TUI-Bar.app/Contents/MacOS/Brew-TUI-Bar",
+                    "TEST_HOST": "$(BUILT_PRODUCTS_DIR)/BrewTUI-Bar.app/Contents/MacOS/BrewTUI-Bar",
                     "BUNDLE_LOADER": "$(TEST_HOST)",
                 ]
             )
