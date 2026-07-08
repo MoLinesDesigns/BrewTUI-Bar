@@ -6,12 +6,12 @@ private let brewCheckerLogger = Logger(subsystem: "com.molinesdesigns.brewtuibar
 struct BrewChecker: Sendable {
     private static let updateTimeout: TimeInterval = 120
 
-    /// Cask names that refer to Brew-TUI-Bar itself. `brew outdated` includes
+    /// Cask names that refer to BrewTUI-Bar itself. `brew outdated` includes
     /// these whenever a new release is published, which would otherwise show
     /// up in the badge as "1 update" and confuse the user (the update IS this
     /// app). The CLI's postinstall + cold-start path keeps the bundle current,
     /// so dropping these from the visible list is safe.
-    private static let selfCaskNames: Set<String> = ["brew-tui-bar", "brewbar"]
+    private static let selfCaskNames: Set<String> = ["brewtui-bar", "brewbar"]
 
     /// `brew services` plists that ship without the args needed to actually run.
     /// cloudflared's default plist invokes the binary with no `tunnel run` →
@@ -51,7 +51,7 @@ struct BrewChecker: Sendable {
         // Surface the self-update version to AppState so the popover can show
         // a discrete "↑ self-update" indicator without polluting the outdated
         // badge. Picks the highest-versioned self-cask in case both
-        // brew-tui-bar and the transitional brewbar coexist briefly.
+        // brewtui-bar and the transitional brewbar coexist briefly.
         let selfUpdateVersion = allCasks
             .filter { Self.selfCaskNames.contains($0.name) }
             .map { $0.currentVersion }

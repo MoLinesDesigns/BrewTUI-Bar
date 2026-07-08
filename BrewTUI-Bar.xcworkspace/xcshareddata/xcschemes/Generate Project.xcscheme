@@ -19,7 +19,7 @@
       disablePerformanceAntipatternChecker = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "YES"
-      customWorkingDirectory = "/Volumes/SSD/xCode_Projects/Brew-TUI-Bar"
+      customWorkingDirectory = "/Volumes/SSD/xCode_Projects/BrewTUI-Bar"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"

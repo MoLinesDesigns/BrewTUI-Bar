@@ -80,7 +80,7 @@ let project = Project(
                     // explicitly while keeping PRODUCT_MODULE_NAME identifier-safe.
                     "PRODUCT_NAME": "BrewTUI-Bar",
                     "EXECUTABLE_NAME": "BrewTUI-Bar",
-                    "PRODUCT_MODULE_NAME": "BrewTUI-Bar",
+                    "PRODUCT_MODULE_NAME": "BrewTUI_Bar",
                     "DEVELOPMENT_TEAM": "GD6M44DYPQ",
                     "CODE_SIGN_STYLE": "Manual",
                     "CODE_SIGN_IDENTITY": "Developer ID Application",
@@ -109,7 +109,7 @@ let project = Project(
             deploymentTargets: .macOS("14.0"),
             sources: ["BrewTUI-BarTests/Sources/**"],
             dependencies: [.target(name: "BrewTUI-Bar")],
-            // Tuist derives TEST_HOST from the sanitised host name (Brew_TUI_Bar),
+            // Tuist derives TEST_HOST from the sanitised host name (BrewTUI_Bar),
             // but the host target overrides EXECUTABLE_NAME to keep the hyphens.
             // Override here to point at the actual binary path.
             settings: .settings(

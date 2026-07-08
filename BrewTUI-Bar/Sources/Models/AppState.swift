@@ -19,7 +19,7 @@ final class AppState {
     var cveCheckError: String?
     var syncActivity = false
     var syncMachineCount = 0
-    // Friendly toast shown after BrewTUI publishes a `last-action.json`.
+    // Friendly toast shown after BrewTUI-Bar publishes a `last-action.json`.
     // Auto-clears after 30s via lastActionFadeTask.
     var lastActionMessage: String?
     private var lastActionFadeTask: Task<Void, Never>?
@@ -27,12 +27,12 @@ final class AppState {
     /// (tier badge) and SettingsView's License section. nil until the launch
     /// task in AppDelegate populates it.
     var licenseSummary: LicenseSummary?
-    /// Version of the brew-tui CLI on PATH. Populated alongside the license at
+    /// Version of the brewtui-bar CLI on PATH. Populated alongside the license at
     /// launch; shown in SettingsView's About section.
-    var brewTuiCliVersion: String?
+    var brewTUIBarCliVersion: String?
     /// New BrewTUI-Bar version detected by `brew outdated`. Surfaced as a
     /// discrete `↑` indicator in the popover footer when non-nil; clicking
-    /// opens Terminal with `brew upgrade --cask brew-tui-bar`. Kept separate
+    /// opens Terminal with `brew upgrade --cask brewtui-bar`. Kept separate
     /// from `outdatedPackages` so the self-cask never inflates the user-facing
     /// outdated count.
     var selfUpdateVersion: String?
@@ -249,12 +249,12 @@ final class AppState {
 
         let actionLine: String
         if isUpgrade {
-            let template = String(localized: "Just upgraded %@ from BrewTUI.")
+            let template = String(localized: "Just upgraded %@ from BrewTUI-Bar.")
             actionLine = String(format: template, pkgLabel)
         } else {
             // install / uninstall — keep the wording neutral so future actions
             // surface here without code changes per verb.
-            let template = String(localized: "BrewTUI just ran %@ on %@.")
+            let template = String(localized: "BrewTUI-Bar just ran %@ on %@.")
             actionLine = String(format: template, action, pkgLabel)
         }
 

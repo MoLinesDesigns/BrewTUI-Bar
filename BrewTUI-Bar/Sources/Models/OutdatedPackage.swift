@@ -62,7 +62,7 @@ struct OutdatedPackage: Identifiable, Codable, Sendable {
 struct OutdatedResponse: Codable, Sendable {
     let formulae: [OutdatedPackage]
     let casks: [OutdatedPackage]
-    /// New Brew-TUI-Bar version detected in the tap (when present), populated
+    /// New BrewTUI-Bar version detected in the tap (when present), populated
     /// in-process by `BrewChecker.checkOutdated()` after filtering the
     /// self-cask out of the visible badge. Not part of the JSON schema —
     /// excluded from CodingKeys so the decoder never expects it.

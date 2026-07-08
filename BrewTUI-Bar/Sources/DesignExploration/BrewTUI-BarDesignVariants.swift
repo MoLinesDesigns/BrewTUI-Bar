@@ -382,7 +382,7 @@ struct VariantOrganicBloom: View {
             HStack(spacing: 5) {
                 Image(systemName: "terminal")
                     .font(.system(size: 10))
-                Text("Open BrewTUI")
+                Text("Open BrewTUI-Bar")
                     .font(.system(size: 10, design: .rounded))
             }
             .foregroundStyle(Color.brewTeal)
@@ -945,7 +945,7 @@ struct VariantAuraGlass: View {
         HStack {
             HStack(spacing: 5) {
                 Image(systemName: "terminal").font(.system(size: 10))
-                Text("BrewTUI").font(.system(size: 10, weight: .medium))
+                Text("BrewTUI-Bar").font(.system(size: 10, weight: .medium))
             }
             .foregroundStyle(.white.opacity(0.52))
 

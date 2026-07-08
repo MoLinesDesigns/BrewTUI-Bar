@@ -2,16 +2,16 @@ import Testing
 import SwiftUI
 import AppKit
 import Foundation
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 // MARK: - Screenshot generation suite (on-demand)
 //
 // Renders the redesigned PopoverView / InstallProgressView / Free funnel via
 // NSHostingController into a real NSWindow so .ultraThinMaterial composes
-// correctly, then writes PNGs to /tmp/brew-tui-bar-screenshots/.
+// correctly, then writes PNGs to /tmp/brewtui-bar-screenshots/.
 //
 // Tagged `.screenshots` so the regular test runs do NOT execute it — opt in
-// with `-only-testing:Brew-TUI-BarTests/Screenshot\\ generation` or set the
+// with `-only-testing:BrewTUI-BarTests/Screenshot\\ generation` or set the
 // `RUN_SCREENSHOTS=1` environment variable.
 
 extension Tag {
@@ -25,7 +25,7 @@ extension Tag {
 )
 @MainActor
 struct ScreenshotTests {
-    private static let outputDir = "/tmp/brew-tui-bar-screenshots"
+    private static let outputDir = "/tmp/brewtui-bar-screenshots"
 
     static func makeDir() {
         try? FileManager.default.createDirectory(

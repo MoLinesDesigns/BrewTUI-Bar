@@ -7,69 +7,69 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0A02500CDE62CF27EE1C5B66 /* TuistBundle+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD15B0FDE88E0F49870D90 /* TuistBundle+BrewTUIBar.swift */; };
-		103F53943812C710D9F69DC2 /* BrewChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F08BBC0D22AD4E28C2626DB /* BrewChecker.swift */; };
-		12D8F19C361FEF414B035795 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46FD62F3B01E2C3D4F8F8BE /* SettingsView.swift */; };
-		186F1CBB2A2181A8736D437C /* BrewTUIBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B042D77338E8CBBCD4F40DB2 /* BrewTUIBarApp.swift */; };
-		2030E93A77D189C8C9F5C291 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F65D74D48519B0A43A079EE /* CrashReporter.swift */; };
-		28CFEDEB9D3945B7ECF52F79 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54146A14A0AFBFFA5E89DD14 /* PopoverView.swift */; };
-		2B90352D735FC549902CE020 /* CVEAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566A60980B7441F437DEB972 /* CVEAlert.swift */; };
-		2FD5479DD4C81D969AB38639 /* OutdatedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93DD88D7F0196E7A166E2A1F /* OutdatedListView.swift */; };
-		36E15F6B07497C154E8372AB /* ServiceDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599B1375570B9D952468A7BB /* ServiceDiagnosticsView.swift */; };
-		3725F60746FBDB6BFAF68668 /* CatalogSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */; };
-		3E0AD11E5095E15C5C55C7A8 /* CrystalGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B609E800610B3D260461F19 /* CrystalGlass.swift */; };
-		3E1708FF6CC152FF41CEB544 /* TuistAssets+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423A7F25D5838ACF21ADE4A0 /* TuistAssets+BrewTUIBar.swift */; };
-		3E6D3A27461842B37D2F6B74 /* SecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F85C515B60209AA8A23C75 /* SecurityMonitor.swift */; };
-		4BDB290E21EAE5611D2A0BC5 /* LastActionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00C784B0AF4873D58CDC9B9 /* LastActionMonitor.swift */; };
-		4C25EAFA366855F4D694E19F /* SyncMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5597277151467483E271F654 /* SyncMonitor.swift */; };
-		4F37B692C452A2F8871DC51A /* BrewTUIBarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C0AEAA4687F5A310824BA3 /* BrewTUIBarTests.swift */; };
-		56443B0C9644226CFEF12023 /* OutdatedPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0446776C656D23841D165CC8 /* OutdatedPackage.swift */; };
-		5ADFB922904B579A16D7577F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BDDB6F017DD07533F3C7561 /* AppDelegate.swift */; };
-		5FFB38F57D477DA4FAB3F1D3 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D3AA3D3209602DA288FE9F /* Theme.swift */; };
-		64CDF7BA0094719AF276C636 /* SecurityChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2659ED20D5675998D6DD6A /* SecurityChecking.swift */; };
-		65A3240F983FA372AE305434 /* BadgePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC73CF892A1A5630E40A5421 /* BadgePreferences.swift */; };
-		8531E6E7A0F84796795E6D33 /* ScreenshotGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 512E0DB8E9E9A63F934E205D /* ScreenshotGenerator.swift */; };
-		87F943ED0E8F73CEEB88100F /* LicenseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 813E5666D16A203A409FDE7E /* LicenseChecker.swift */; };
-		8E3C12B9C4C8A47B5FCABB25 /* ServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = E886004FD8268509823CE847 /* ServiceDiagnostics.swift */; };
-		A1721ADB928D705482B34F00 /* LegacyMigratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CEFFCE79214FF76868D0B09 /* LegacyMigratorTests.swift */; };
-		A3F3431907466DDAFEABDED7 /* MenuBarIconComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */; };
-		A4F3D84650016C35784A0DCE /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A2C9102B94AF9E2BF500E1DD /* Localizable.xcstrings */; };
-		AF2569D8D195C89ED62E3BB6 /* BrewServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E807F5E2A3B3306A7543ACE /* BrewServiceDiagnostics.swift */; };
-		AF92D45204E407973D2A0B5D /* InstallProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41392E0984972D0094FB5B0D /* InstallProgress.swift */; };
-		B33F7511CC5500056B468262 /* BrewProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = E668FB288FAF0CE8E76361DC /* BrewProcess.swift */; };
-		B5382F5B751EEABB4B902FFC /* NewPackagesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C7525ADAF8F87BAB63B850B /* NewPackagesService.swift */; };
-		B7719B7B9929DABC6BC3F21A /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB2FFD07568522FBE0B49D12 /* SchedulerService.swift */; };
-		B8AF7CE840C66A0BBF0225BA /* NewPackagesServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD611D71E242F149C9510432 /* NewPackagesServiceTests.swift */; };
-		C5A2863B5D3F0BCFE625008B /* BrewChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2828BE659073D7364095166C /* BrewChecking.swift */; };
-		CBBEA33602824043A49C4588 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBA80BFD9D4DB4C2E58229BB /* AppState.swift */; };
-		CD7B74455BAD25D5438144FF /* VersionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830599C41778990354A82DFC /* VersionChecker.swift */; };
-		D326D7E7B69DC82794CBDD5A /* NotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6545BE6DB192C022A30B7E14 /* NotificationSender.swift */; };
-		D483FF1CF2343414924A5ADB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 98B8C4DBC7C02AAA0F8F9906 /* PrivacyInfo.xcprivacy */; };
-		D777C64795C11E9F76E1057D /* LicenseCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E03AFF0E3CA154CDEB7459 /* LicenseCheckerTests.swift */; };
-		E0D7F59FBF1CFD2BA0C1F595 /* NewPackagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD95CAC0367F03316FE91FE /* NewPackagesView.swift */; };
-		E1E2143FCE65ADA91E2392CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0001FB0491B9B88BB918DB42 /* Assets.xcassets */; };
-		E282C483D8BA4B88BF10E69D /* BrewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C180F0997601FDABF09FC56 /* BrewService.swift */; };
-		E458EAF391D52968D41463E1 /* ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9473CD8BAABEE1889CB47D /* ServiceTests.swift */; };
-		E70D92D6CA2F010643C71541 /* LegacyMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FF089615AD254B855B86D5 /* LegacyMigrator.swift */; };
-		EA27609A34023EFD3D56B329 /* LicenseRevalidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */; };
-		EBDAACC2F5E1C7530EAFAC94 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A779B950A79E2551ADEB81 /* PreviewData.swift */; };
-		F09F7EDA460F847403922C5E /* BrewUpgradeStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */; };
-		F68E6BB8880EB0432DBE1B13 /* NewPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4045BBDCB68DFB452875CF7 /* NewPackage.swift */; };
-		F816E1EE5DC27787AD73CE5C /* InstallProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FBB2994AE982723D8FDEC3 /* InstallProgressView.swift */; };
+		08FEFB317002C3EF40AB6AEA /* LastActionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E207003C040BBC6F8E97BDFF /* LastActionMonitor.swift */; };
+		0B0FE81EE0F031EE6B5DF217 /* LicenseCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */; };
+		0C14525CAB56FB0806E18A99 /* CatalogSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42599B91B519382FA9672776 /* CatalogSearchService.swift */; };
+		12814FC35BCAAFBC3726D91B /* VersionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BA6E7F07281787514CC3A4 /* VersionChecker.swift */; };
+		1FC4EBFE430B4221870447F7 /* SyncMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E1A71C48ACBE24ECAF4746 /* SyncMonitor.swift */; };
+		2101C8E0EF7FA5182FDA5A32 /* LegacyMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24577C5CF85668715B4567CB /* LegacyMigrator.swift */; };
+		2147084C94F28A1919D7242C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD14E475F9B3B2197DBF21B /* AppDelegate.swift */; };
+		292BF5231D1F526AEC78A8EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0CF27494D81FFC7468D5EF4 /* Assets.xcassets */; };
+		2F86BF686284096A0D9C5BB2 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6994AFDF7EAE316D557C82F /* Theme.swift */; };
+		3C6BB02EF2B388C2E8CCB08C /* BrewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4813C643345D121908AD875 /* BrewService.swift */; };
+		3EFC14FB58F69A4066634532 /* ServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E0B2DB9186AB41C971059A /* ServiceDiagnostics.swift */; };
+		45E8E4CB8420F708CF43903A /* BrewChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B6B4B7EADB14573A465F49 /* BrewChecking.swift */; };
+		47083A41E4AB595976277B64 /* ServiceDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */; };
+		4CF49E26130611E7FF55D8F5 /* CrystalGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B3F6ABD3AFDB31A54BB651 /* CrystalGlass.swift */; };
+		4FB44039A253560986CF14C4 /* TuistAssets+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8F46ECA397FB54D79A17CC /* TuistAssets+BrewTUIBar.swift */; };
+		5E99EE588662855D7C207894 /* SecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD29AE41DC1866A8A0A60627 /* SecurityMonitor.swift */; };
+		60C78BCD3FBB824483644F67 /* LicenseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B688B1ECC74B64F18E083BD /* LicenseChecker.swift */; };
+		63A0FCD8C81043394B2727F9 /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3805B7BBA7147A321817673A /* SchedulerService.swift */; };
+		64FA4D2DC4AEED32804D0F47 /* LegacyMigratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A03DFF6A2096C386C36FAD9 /* LegacyMigratorTests.swift */; };
+		659C0999E6959CAAB322FC48 /* BrewUpgradeStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 146183BF7C52E8B49E466773 /* BrewUpgradeStream.swift */; };
+		6A9D38255C5470BFB79CC9DF /* InstallProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5DC06394E21BF72F80CA49 /* InstallProgressView.swift */; };
+		75C4A19A32FD9983D16ADFC8 /* OutdatedPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E59741045F87EBF1FA2C3371 /* OutdatedPackage.swift */; };
+		78C6EA4873F10C45C23668C3 /* BadgePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF8F0B709D4ED6FFBC3EF3D /* BadgePreferences.swift */; };
+		818EF64291A268BAB5BF9EF4 /* BrewChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF891F8BC19F44BDE9FC8799 /* BrewChecker.swift */; };
+		83C49904E8134A34B700A38D /* InstallProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFA2D6A6DCD8B5D2E2D1130C /* InstallProgress.swift */; };
+		89830BE3312D0E47CDCF083B /* MenuBarIconComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A6FA32D3AD9C22170F8104 /* MenuBarIconComposer.swift */; };
+		8A0042C9F4CACC2E29D85E6F /* LicenseRevalidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C72B3CE62B297331F41AD6B /* LicenseRevalidator.swift */; };
+		8A00C28527298892DA00BF13 /* BrewTUIBarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652607E1C1FA09F767EDF27 /* BrewTUIBarTests.swift */; };
+		8E87AA13EE7356729D1FDB58 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F431946D7E578442AD9C958 /* SettingsView.swift */; };
+		A5C9A57ADF2A973B5DC63325 /* NewPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90884D675A9ED4B566BAD94 /* NewPackage.swift */; };
+		A634569C03613A045FB8CF30 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */; };
+		AAC329365B2871F0B9DB69DF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F187999A0402910D940F3A74 /* Localizable.xcstrings */; };
+		B43EFD3B5D5822F918CF753F /* SecurityChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */; };
+		B99DC34A3CEB0B46B2E6BF31 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A5A605C511696A24DB01B /* CrashReporter.swift */; };
+		BC60D48A6E5CC3BE2E1FF29B /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B86AC93D8E3C1C741320E4F1 /* AppState.swift */; };
+		BD184BE92D579DAB2904559B /* NewPackagesServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8E8B12B1EF29C5410ECF23A /* NewPackagesServiceTests.swift */; };
+		CE83F8A05166EAD700CC214D /* NewPackagesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E2E25A232F7E2251DF9DD0E /* NewPackagesService.swift */; };
+		D0AE1A561287031A3062AE62 /* TuistBundle+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CCAC4E3AE04180BA9348FA /* TuistBundle+BrewTUIBar.swift */; };
+		D57854316651EC2199918743 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263A1925A77B19FC962069D1 /* PopoverView.swift */; };
+		D84A510FC20FCBFFF86F1F8A /* ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 157C6C56628E53AC98E15068 /* ServiceTests.swift */; };
+		D8CF13065CC2A87D25B46E7F /* NotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B23D45056E079218AFF363B /* NotificationSender.swift */; };
+		E58BA0B8D0B5F1F0B4E107CD /* NewPackagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7B2E9E871E908775C442B5 /* NewPackagesView.swift */; };
+		E95B57CB309600892EE3F60D /* BrewTUI-BarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F4EB01940C6D8792F8821A /* BrewTUI-BarApp.swift */; };
+		EEB268552533BE695556BE9A /* BrewServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04024121F5AB8B2C9D6D297A /* BrewServiceDiagnostics.swift */; };
+		F09227024F751FA24183E10E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3DF27DA7DCFEEE8630D3D10E /* PrivacyInfo.xcprivacy */; };
+		F3B56887D592EBE9A2E51D28 /* ScreenshotGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0144155EBC0335064B5569C9 /* ScreenshotGenerator.swift */; };
+		F530066AD5EB4EC0ED261FCB /* OutdatedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F305B2E7FFA7C218B265E599 /* OutdatedListView.swift */; };
+		F72D64E1CD37242384E4D27A /* CVEAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F5CF9BDA8E0850BD3F4768 /* CVEAlert.swift */; };
+		FF57FBD91A91C9CDFEE3D661 /* BrewProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54C73A66ABB82447DB836E6 /* BrewProcess.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		EAD332BE3576B4CB0840D67A /* PBXContainerItemProxy */ = {
+		4C4BBC198DD05716183528EB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 458EB0029190DAAF21C8B8DD /* Project object */;
+			containerPortal = BB256F911AF42CC7F3DEB616 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = D4E72B77321FB2E6913EBE52;
-			remoteInfo = "Brew-TUI-Bar";
+			remoteGlobalIDString = 436A66178598403529899092;
+			remoteInfo = "BrewTUI-Bar";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		151F523FDEBC019F9E730A88 /* Embed Frameworks */ = {
+		9E81297BC4B0F255866C30AA /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -79,7 +79,7 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6EF68A66D9679E57AACE9861 /* Embed Frameworks */ = {
+		EFD6678234850FF59F0115C4 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -92,70 +92,70 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0001FB0491B9B88BB918DB42 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		0446776C656D23841D165CC8 /* OutdatedPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdatedPackage.swift; sourceTree = "<group>"; };
-		0B609E800610B3D260461F19 /* CrystalGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrystalGlass.swift; sourceTree = "<group>"; };
-		0FBD15B0FDE88E0F49870D90 /* TuistBundle+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+BrewTUIBar.swift"; sourceTree = "<group>"; };
-		18FF089615AD254B855B86D5 /* LegacyMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigrator.swift; sourceTree = "<group>"; };
-		1E807F5E2A3B3306A7543ACE /* BrewServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewServiceDiagnostics.swift; sourceTree = "<group>"; };
-		2828BE659073D7364095166C /* BrewChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewChecking.swift; sourceTree = "<group>"; };
-		28C0AEAA4687F5A310824BA3 /* BrewTUIBarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewTUIBarTests.swift; sourceTree = "<group>"; };
-		2BDDB6F017DD07533F3C7561 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		41392E0984972D0094FB5B0D /* InstallProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgress.swift; sourceTree = "<group>"; };
-		423A7F25D5838ACF21ADE4A0 /* TuistAssets+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+BrewTUIBar.swift"; sourceTree = "<group>"; };
-		4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconComposer.swift; sourceTree = "<group>"; };
-		512E0DB8E9E9A63F934E205D /* ScreenshotGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotGenerator.swift; sourceTree = "<group>"; };
-		54146A14A0AFBFFA5E89DD14 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
-		5597277151467483E271F654 /* SyncMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMonitor.swift; sourceTree = "<group>"; };
-		566A60980B7441F437DEB972 /* CVEAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVEAlert.swift; sourceTree = "<group>"; };
-		58F85C515B60209AA8A23C75 /* SecurityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityMonitor.swift; sourceTree = "<group>"; };
-		599B1375570B9D952468A7BB /* ServiceDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnosticsView.swift; sourceTree = "<group>"; };
-		5C180F0997601FDABF09FC56 /* BrewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewService.swift; sourceTree = "<group>"; };
-		5F65D74D48519B0A43A079EE /* CrashReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReporter.swift; sourceTree = "<group>"; };
-		6545BE6DB192C022A30B7E14 /* NotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSender.swift; sourceTree = "<group>"; };
-		6F08BBC0D22AD4E28C2626DB /* BrewChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewChecker.swift; sourceTree = "<group>"; };
-		74C6666845EFD9CAD3478A05 /* Brew_TUI_BarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Brew_TUI_BarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7CEFFCE79214FF76868D0B09 /* LegacyMigratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigratorTests.swift; sourceTree = "<group>"; };
-		8015E79BEE69F75E719C7A79 /* Brew-TUI-Bar-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Brew-TUI-Bar-Info.plist"; sourceTree = "<group>"; };
-		80E03AFF0E3CA154CDEB7459 /* LicenseCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseCheckerTests.swift; sourceTree = "<group>"; };
-		813E5666D16A203A409FDE7E /* LicenseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseChecker.swift; sourceTree = "<group>"; };
-		830599C41778990354A82DFC /* VersionChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionChecker.swift; sourceTree = "<group>"; };
-		8BD95CAC0367F03316FE91FE /* NewPackagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesView.swift; sourceTree = "<group>"; };
-		8F9473CD8BAABEE1889CB47D /* ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
-		93DD88D7F0196E7A166E2A1F /* OutdatedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdatedListView.swift; sourceTree = "<group>"; };
-		98B8C4DBC7C02AAA0F8F9906 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		9C7525ADAF8F87BAB63B850B /* NewPackagesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesService.swift; sourceTree = "<group>"; };
-		A00C784B0AF4873D58CDC9B9 /* LastActionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastActionMonitor.swift; sourceTree = "<group>"; };
-		A2C9102B94AF9E2BF500E1DD /* Localizable.xcstrings */ = {isa = PBXFileReference; path = Localizable.xcstrings; sourceTree = "<group>"; };
-		A739E6DE59C27D5322B955D1 /* Brew-TUI-Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Brew-TUI-Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B042D77338E8CBBCD4F40DB2 /* BrewTUIBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewTUIBarApp.swift; sourceTree = "<group>"; };
-		BC73CF892A1A5630E40A5421 /* BadgePreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgePreferences.swift; sourceTree = "<group>"; };
-		BD611D71E242F149C9510432 /* NewPackagesServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesServiceTests.swift; sourceTree = "<group>"; };
-		C46FD62F3B01E2C3D4F8F8BE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		C6B02B13112A5F11D9350564 /* Brew-TUI-BarTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Brew-TUI-BarTests-Info.plist"; sourceTree = "<group>"; };
-		D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewUpgradeStream.swift; sourceTree = "<group>"; };
-		DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSearchService.swift; sourceTree = "<group>"; };
-		DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseRevalidator.swift; sourceTree = "<group>"; };
-		E668FB288FAF0CE8E76361DC /* BrewProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewProcess.swift; sourceTree = "<group>"; };
-		E7FBB2994AE982723D8FDEC3 /* InstallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgressView.swift; sourceTree = "<group>"; };
-		E886004FD8268509823CE847 /* ServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnostics.swift; sourceTree = "<group>"; };
-		E9A779B950A79E2551ADEB81 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
-		EB2FFD07568522FBE0B49D12 /* SchedulerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulerService.swift; sourceTree = "<group>"; };
-		F4045BBDCB68DFB452875CF7 /* NewPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackage.swift; sourceTree = "<group>"; };
-		F4D3AA3D3209602DA288FE9F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		FBA80BFD9D4DB4C2E58229BB /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
-		FD2659ED20D5675998D6DD6A /* SecurityChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityChecking.swift; sourceTree = "<group>"; };
+		00CCAC4E3AE04180BA9348FA /* TuistBundle+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+BrewTUIBar.swift"; sourceTree = "<group>"; };
+		0144155EBC0335064B5569C9 /* ScreenshotGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotGenerator.swift; sourceTree = "<group>"; };
+		04024121F5AB8B2C9D6D297A /* BrewServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewServiceDiagnostics.swift; sourceTree = "<group>"; };
+		0A03DFF6A2096C386C36FAD9 /* LegacyMigratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigratorTests.swift; sourceTree = "<group>"; };
+		0E5DC06394E21BF72F80CA49 /* InstallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgressView.swift; sourceTree = "<group>"; };
+		146183BF7C52E8B49E466773 /* BrewUpgradeStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewUpgradeStream.swift; sourceTree = "<group>"; };
+		157C6C56628E53AC98E15068 /* ServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTests.swift; sourceTree = "<group>"; };
+		1A7B2E9E871E908775C442B5 /* NewPackagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesView.swift; sourceTree = "<group>"; };
+		24577C5CF85668715B4567CB /* LegacyMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyMigrator.swift; sourceTree = "<group>"; };
+		263A1925A77B19FC962069D1 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+		2652607E1C1FA09F767EDF27 /* BrewTUIBarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewTUIBarTests.swift; sourceTree = "<group>"; };
+		2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		3805B7BBA7147A321817673A /* SchedulerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulerService.swift; sourceTree = "<group>"; };
+		3C72B3CE62B297331F41AD6B /* LicenseRevalidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseRevalidator.swift; sourceTree = "<group>"; };
+		3DF27DA7DCFEEE8630D3D10E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		42599B91B519382FA9672776 /* CatalogSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSearchService.swift; sourceTree = "<group>"; };
+		4B688B1ECC74B64F18E083BD /* LicenseChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseChecker.swift; sourceTree = "<group>"; };
+		61E1A71C48ACBE24ECAF4746 /* SyncMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMonitor.swift; sourceTree = "<group>"; };
+		63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseCheckerTests.swift; sourceTree = "<group>"; };
+		6F8F46ECA397FB54D79A17CC /* TuistAssets+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+BrewTUIBar.swift"; sourceTree = "<group>"; };
+		7181974B139A78171F894360 /* BrewTUI-Bar-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "BrewTUI-Bar-Info.plist"; sourceTree = "<group>"; };
+		7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnosticsView.swift; sourceTree = "<group>"; };
+		7F431946D7E578442AD9C958 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		93F4EB01940C6D8792F8821A /* BrewTUI-BarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewTUI-BarApp.swift"; sourceTree = "<group>"; };
+		9B23D45056E079218AFF363B /* NotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSender.swift; sourceTree = "<group>"; };
+		9B4A5A605C511696A24DB01B /* CrashReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReporter.swift; sourceTree = "<group>"; };
+		9E2E25A232F7E2251DF9DD0E /* NewPackagesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesService.swift; sourceTree = "<group>"; };
+		A1B3F6ABD3AFDB31A54BB651 /* CrystalGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrystalGlass.swift; sourceTree = "<group>"; };
+		A9BA6E7F07281787514CC3A4 /* VersionChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionChecker.swift; sourceTree = "<group>"; };
+		AD29AE41DC1866A8A0A60627 /* SecurityMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityMonitor.swift; sourceTree = "<group>"; };
+		AF891F8BC19F44BDE9FC8799 /* BrewChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewChecker.swift; sourceTree = "<group>"; };
+		AFA2D6A6DCD8B5D2E2D1130C /* InstallProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgress.swift; sourceTree = "<group>"; };
+		B0CF27494D81FFC7468D5EF4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B0E0B2DB9186AB41C971059A /* ServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnostics.swift; sourceTree = "<group>"; };
+		B1A6FA32D3AD9C22170F8104 /* MenuBarIconComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconComposer.swift; sourceTree = "<group>"; };
+		B54C73A66ABB82447DB836E6 /* BrewProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewProcess.swift; sourceTree = "<group>"; };
+		B86AC93D8E3C1C741320E4F1 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		BFFE805F45DC47A79BE7360E /* BrewTUI-BarTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "BrewTUI-BarTests-Info.plist"; sourceTree = "<group>"; };
+		C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityChecking.swift; sourceTree = "<group>"; };
+		C3F5CF9BDA8E0850BD3F4768 /* CVEAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVEAlert.swift; sourceTree = "<group>"; };
+		C6994AFDF7EAE316D557C82F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		DBD14E475F9B3B2197DBF21B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E160005EFEC134AAD22E8A89 /* BrewTUI_BarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTUI_BarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E207003C040BBC6F8E97BDFF /* LastActionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastActionMonitor.swift; sourceTree = "<group>"; };
+		E4813C643345D121908AD875 /* BrewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewService.swift; sourceTree = "<group>"; };
+		E59741045F87EBF1FA2C3371 /* OutdatedPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdatedPackage.swift; sourceTree = "<group>"; };
+		E8E8B12B1EF29C5410ECF23A /* NewPackagesServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackagesServiceTests.swift; sourceTree = "<group>"; };
+		E90884D675A9ED4B566BAD94 /* NewPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPackage.swift; sourceTree = "<group>"; };
+		E915CCA2B5B927CE2720FA97 /* BrewTUI-Bar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BrewTUI-Bar.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F187999A0402910D940F3A74 /* Localizable.xcstrings */ = {isa = PBXFileReference; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		F305B2E7FFA7C218B265E599 /* OutdatedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdatedListView.swift; sourceTree = "<group>"; };
+		F7B6B4B7EADB14573A465F49 /* BrewChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewChecking.swift; sourceTree = "<group>"; };
+		FFF8F0B709D4ED6FFBC3EF3D /* BadgePreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgePreferences.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		306A4D3793225CA7E485825F /* Frameworks */ = {
+		678AD75D2FCC69EAFCBA2AC5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8680BA7D465174FD1F86595E /* Frameworks */ = {
+		6C4C5AE7D6BB73CC3F539526 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -165,235 +165,235 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2E7F16CDEB3B7042F337A978 /* Products */ = {
+		09EE1FC31630F683A5B4A99B /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				74C6666845EFD9CAD3478A05 /* Brew_TUI_BarTests.xctest */,
-				A739E6DE59C27D5322B955D1 /* Brew-TUI-Bar.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		2F9EC1F5A848A185DF16F629 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				0001FB0491B9B88BB918DB42 /* Assets.xcassets */,
-				A2C9102B94AF9E2BF500E1DD /* Localizable.xcstrings */,
-				98B8C4DBC7C02AAA0F8F9906 /* PrivacyInfo.xcprivacy */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
-		313717B20F91BFBDA8519790 /* InfoPlists */ = {
-			isa = PBXGroup;
-			children = (
-				8015E79BEE69F75E719C7A79 /* Brew-TUI-Bar-Info.plist */,
-				C6B02B13112A5F11D9350564 /* Brew-TUI-BarTests-Info.plist */,
-			);
-			path = InfoPlists;
-			sourceTree = "<group>";
-		};
-		85D69C4D30D67EE0A80746D9 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				6F08BBC0D22AD4E28C2626DB /* BrewChecker.swift */,
-				2828BE659073D7364095166C /* BrewChecking.swift */,
-				E668FB288FAF0CE8E76361DC /* BrewProcess.swift */,
-				1E807F5E2A3B3306A7543ACE /* BrewServiceDiagnostics.swift */,
-				D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */,
-				DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */,
-				5F65D74D48519B0A43A079EE /* CrashReporter.swift */,
-				A00C784B0AF4873D58CDC9B9 /* LastActionMonitor.swift */,
-				18FF089615AD254B855B86D5 /* LegacyMigrator.swift */,
-				813E5666D16A203A409FDE7E /* LicenseChecker.swift */,
-				DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */,
-				9C7525ADAF8F87BAB63B850B /* NewPackagesService.swift */,
-				6545BE6DB192C022A30B7E14 /* NotificationSender.swift */,
-				EB2FFD07568522FBE0B49D12 /* SchedulerService.swift */,
-				FD2659ED20D5675998D6DD6A /* SecurityChecking.swift */,
-				58F85C515B60209AA8A23C75 /* SecurityMonitor.swift */,
-				5597277151467483E271F654 /* SyncMonitor.swift */,
-				830599C41778990354A82DFC /* VersionChecker.swift */,
+				AF891F8BC19F44BDE9FC8799 /* BrewChecker.swift */,
+				F7B6B4B7EADB14573A465F49 /* BrewChecking.swift */,
+				B54C73A66ABB82447DB836E6 /* BrewProcess.swift */,
+				04024121F5AB8B2C9D6D297A /* BrewServiceDiagnostics.swift */,
+				146183BF7C52E8B49E466773 /* BrewUpgradeStream.swift */,
+				42599B91B519382FA9672776 /* CatalogSearchService.swift */,
+				9B4A5A605C511696A24DB01B /* CrashReporter.swift */,
+				E207003C040BBC6F8E97BDFF /* LastActionMonitor.swift */,
+				24577C5CF85668715B4567CB /* LegacyMigrator.swift */,
+				4B688B1ECC74B64F18E083BD /* LicenseChecker.swift */,
+				3C72B3CE62B297331F41AD6B /* LicenseRevalidator.swift */,
+				9E2E25A232F7E2251DF9DD0E /* NewPackagesService.swift */,
+				9B23D45056E079218AFF363B /* NotificationSender.swift */,
+				3805B7BBA7147A321817673A /* SchedulerService.swift */,
+				C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */,
+				AD29AE41DC1866A8A0A60627 /* SecurityMonitor.swift */,
+				61E1A71C48ACBE24ECAF4746 /* SyncMonitor.swift */,
+				A9BA6E7F07281787514CC3A4 /* VersionChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
 		};
-		8AFBBC53A0A5C2D44DC22FDA /* Derived */ = {
+		0AEAB5135F69FEA99FE530A8 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				313717B20F91BFBDA8519790 /* InfoPlists */,
-				D1775CB2BDD4E22F05001557 /* Sources */,
+				2652607E1C1FA09F767EDF27 /* BrewTUIBarTests.swift */,
+				0A03DFF6A2096C386C36FAD9 /* LegacyMigratorTests.swift */,
+				63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */,
+				E8E8B12B1EF29C5410ECF23A /* NewPackagesServiceTests.swift */,
+				0144155EBC0335064B5569C9 /* ScreenshotGenerator.swift */,
+				157C6C56628E53AC98E15068 /* ServiceTests.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		358D749C5D08309ABD3202E4 /* Derived */ = {
+			isa = PBXGroup;
+			children = (
+				444F5F5C01C8B8097EDE4126 /* InfoPlists */,
+				BE698D295FCAB1CB43FA4723 /* Sources */,
 			);
 			path = Derived;
 			sourceTree = "<group>";
 		};
-		9745C51E7B8765D5883D30B7 /* Brew-TUI-BarTests */ = {
+		380C96AABDCDB1016D56DBD1 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				EE2F32ADAE9B1BDCA8125D98 /* Sources */,
-			);
-			path = "Brew-TUI-BarTests";
-			sourceTree = "<group>";
-		};
-		B94D885B322A122380DC77B6 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				FBA80BFD9D4DB4C2E58229BB /* AppState.swift */,
-				BC73CF892A1A5630E40A5421 /* BadgePreferences.swift */,
-				5C180F0997601FDABF09FC56 /* BrewService.swift */,
-				566A60980B7441F437DEB972 /* CVEAlert.swift */,
-				41392E0984972D0094FB5B0D /* InstallProgress.swift */,
-				F4045BBDCB68DFB452875CF7 /* NewPackage.swift */,
-				0446776C656D23841D165CC8 /* OutdatedPackage.swift */,
-				E9A779B950A79E2551ADEB81 /* PreviewData.swift */,
-				E886004FD8268509823CE847 /* ServiceDiagnostics.swift */,
+				B86AC93D8E3C1C741320E4F1 /* AppState.swift */,
+				FFF8F0B709D4ED6FFBC3EF3D /* BadgePreferences.swift */,
+				E4813C643345D121908AD875 /* BrewService.swift */,
+				C3F5CF9BDA8E0850BD3F4768 /* CVEAlert.swift */,
+				AFA2D6A6DCD8B5D2E2D1130C /* InstallProgress.swift */,
+				E90884D675A9ED4B566BAD94 /* NewPackage.swift */,
+				E59741045F87EBF1FA2C3371 /* OutdatedPackage.swift */,
+				2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */,
+				B0E0B2DB9186AB41C971059A /* ServiceDiagnostics.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		C063F6AA1021E30C0A4DD750 /* App */ = {
+		416C31EE349C3EA75A56C841 /* BrewTUI-BarTests */ = {
 			isa = PBXGroup;
 			children = (
-				2BDDB6F017DD07533F3C7561 /* AppDelegate.swift */,
-				B042D77338E8CBBCD4F40DB2 /* BrewTUIBarApp.swift */,
-				4EFCA978395BAA55D5C7995D /* MenuBarIconComposer.swift */,
+				0AEAB5135F69FEA99FE530A8 /* Sources */,
 			);
-			path = App;
+			path = "BrewTUI-BarTests";
 			sourceTree = "<group>";
 		};
-		C5BEDA84560EEC5E421A4539 /* Views */ = {
+		444F5F5C01C8B8097EDE4126 /* InfoPlists */ = {
 			isa = PBXGroup;
 			children = (
-				0B609E800610B3D260461F19 /* CrystalGlass.swift */,
-				E7FBB2994AE982723D8FDEC3 /* InstallProgressView.swift */,
-				8BD95CAC0367F03316FE91FE /* NewPackagesView.swift */,
-				93DD88D7F0196E7A166E2A1F /* OutdatedListView.swift */,
-				54146A14A0AFBFFA5E89DD14 /* PopoverView.swift */,
-				599B1375570B9D952468A7BB /* ServiceDiagnosticsView.swift */,
-				C46FD62F3B01E2C3D4F8F8BE /* SettingsView.swift */,
-				F4D3AA3D3209602DA288FE9F /* Theme.swift */,
+				7181974B139A78171F894360 /* BrewTUI-Bar-Info.plist */,
+				BFFE805F45DC47A79BE7360E /* BrewTUI-BarTests-Info.plist */,
+			);
+			path = InfoPlists;
+			sourceTree = "<group>";
+		};
+		6015FD79A49EC68D3893A5BF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1B3F6ABD3AFDB31A54BB651 /* CrystalGlass.swift */,
+				0E5DC06394E21BF72F80CA49 /* InstallProgressView.swift */,
+				1A7B2E9E871E908775C442B5 /* NewPackagesView.swift */,
+				F305B2E7FFA7C218B265E599 /* OutdatedListView.swift */,
+				263A1925A77B19FC962069D1 /* PopoverView.swift */,
+				7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */,
+				7F431946D7E578442AD9C958 /* SettingsView.swift */,
+				C6994AFDF7EAE316D557C82F /* Theme.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		D1775CB2BDD4E22F05001557 /* Sources */ = {
+		6D47FB2B2BBEE4F0820D7DB1 /* Project */ = {
 			isa = PBXGroup;
 			children = (
-				423A7F25D5838ACF21ADE4A0 /* TuistAssets+BrewTUIBar.swift */,
-				0FBD15B0FDE88E0F49870D90 /* TuistBundle+BrewTUIBar.swift */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		DA829470D7944B8FD4D3449A = {
-			isa = PBXGroup;
-			children = (
-				2E7F16CDEB3B7042F337A978 /* Products */,
-				FEF680D8E2671357E0BF6219 /* Project */,
-			);
-			sourceTree = "<group>";
-		};
-		E47FE87E1628937FC82F6DAB /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				C063F6AA1021E30C0A4DD750 /* App */,
-				B94D885B322A122380DC77B6 /* Models */,
-				85D69C4D30D67EE0A80746D9 /* Services */,
-				C5BEDA84560EEC5E421A4539 /* Views */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		EE2F32ADAE9B1BDCA8125D98 /* Sources */ = {
-			isa = PBXGroup;
-			children = (
-				28C0AEAA4687F5A310824BA3 /* BrewTUIBarTests.swift */,
-				7CEFFCE79214FF76868D0B09 /* LegacyMigratorTests.swift */,
-				80E03AFF0E3CA154CDEB7459 /* LicenseCheckerTests.swift */,
-				BD611D71E242F149C9510432 /* NewPackagesServiceTests.swift */,
-				512E0DB8E9E9A63F934E205D /* ScreenshotGenerator.swift */,
-				8F9473CD8BAABEE1889CB47D /* ServiceTests.swift */,
-			);
-			path = Sources;
-			sourceTree = "<group>";
-		};
-		F996513190E0B70F02D00C9B /* Brew-TUI-Bar */ = {
-			isa = PBXGroup;
-			children = (
-				2F9EC1F5A848A185DF16F629 /* Resources */,
-				E47FE87E1628937FC82F6DAB /* Sources */,
-			);
-			path = "Brew-TUI-Bar";
-			sourceTree = "<group>";
-		};
-		FEF680D8E2671357E0BF6219 /* Project */ = {
-			isa = PBXGroup;
-			children = (
-				F996513190E0B70F02D00C9B /* Brew-TUI-Bar */,
-				9745C51E7B8765D5883D30B7 /* Brew-TUI-BarTests */,
-				8AFBBC53A0A5C2D44DC22FDA /* Derived */,
+				8F6841773D6CE0E94715D05D /* BrewTUI-Bar */,
+				416C31EE349C3EA75A56C841 /* BrewTUI-BarTests */,
+				358D749C5D08309ABD3202E4 /* Derived */,
 			);
 			name = Project;
+			sourceTree = "<group>";
+		};
+		8F6841773D6CE0E94715D05D /* BrewTUI-Bar */ = {
+			isa = PBXGroup;
+			children = (
+				B8123947336C2EBCFF8A03FA /* Resources */,
+				B4020227972EC97A834B5579 /* Sources */,
+			);
+			path = "BrewTUI-Bar";
+			sourceTree = "<group>";
+		};
+		B4020227972EC97A834B5579 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F7B4193C9608FF5CAF1E888C /* App */,
+				380C96AABDCDB1016D56DBD1 /* Models */,
+				09EE1FC31630F683A5B4A99B /* Services */,
+				6015FD79A49EC68D3893A5BF /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		B8123947336C2EBCFF8A03FA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B0CF27494D81FFC7468D5EF4 /* Assets.xcassets */,
+				F187999A0402910D940F3A74 /* Localizable.xcstrings */,
+				3DF27DA7DCFEEE8630D3D10E /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		BE698D295FCAB1CB43FA4723 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				6F8F46ECA397FB54D79A17CC /* TuistAssets+BrewTUIBar.swift */,
+				00CCAC4E3AE04180BA9348FA /* TuistBundle+BrewTUIBar.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		E672BAFA9597B077715E8485 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E160005EFEC134AAD22E8A89 /* BrewTUI_BarTests.xctest */,
+				E915CCA2B5B927CE2720FA97 /* BrewTUI-Bar.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F7B4193C9608FF5CAF1E888C /* App */ = {
+			isa = PBXGroup;
+			children = (
+				DBD14E475F9B3B2197DBF21B /* AppDelegate.swift */,
+				93F4EB01940C6D8792F8821A /* BrewTUI-BarApp.swift */,
+				B1A6FA32D3AD9C22170F8104 /* MenuBarIconComposer.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		FBDB4EB8445530820624EA6A = {
+			isa = PBXGroup;
+			children = (
+				E672BAFA9597B077715E8485 /* Products */,
+				6D47FB2B2BBEE4F0820D7DB1 /* Project */,
+			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D4E72B77321FB2E6913EBE52 /* Brew-TUI-Bar */ = {
+		436A66178598403529899092 /* BrewTUI-Bar */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B809628FCC335AC9EE34D414 /* Build configuration list for PBXNativeTarget "Brew-TUI-Bar" */;
+			buildConfigurationList = C65DBB04A1E58F55910DE366 /* Build configuration list for PBXNativeTarget "BrewTUI-Bar" */;
 			buildPhases = (
-				546966F50139A0A586AB2F20 /* Sources */,
-				1E8B615FC685E57EB950EA22 /* Resources */,
-				306A4D3793225CA7E485825F /* Frameworks */,
-				6EF68A66D9679E57AACE9861 /* Embed Frameworks */,
+				B069CD087419D7D4476A4A5D /* Sources */,
+				308AA88B9F5C0102DE226D80 /* Resources */,
+				6C4C5AE7D6BB73CC3F539526 /* Frameworks */,
+				EFD6678234850FF59F0115C4 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "Brew-TUI-Bar";
+			name = "BrewTUI-Bar";
 			packageProductDependencies = (
 			);
-			productName = Brew_TUI_Bar;
-			productReference = A739E6DE59C27D5322B955D1 /* Brew-TUI-Bar.app */;
+			productName = BrewTUI_Bar;
+			productReference = E915CCA2B5B927CE2720FA97 /* BrewTUI-Bar.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F450362C70366A4970331B24 /* Brew-TUI-BarTests */ = {
+		754F397E534ACCA90D0B6C9E /* BrewTUI-BarTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D2384B743E4FE7834B937E95 /* Build configuration list for PBXNativeTarget "Brew-TUI-BarTests" */;
+			buildConfigurationList = D16F4DDDE20B9B6A916504E4 /* Build configuration list for PBXNativeTarget "BrewTUI-BarTests" */;
 			buildPhases = (
-				1F8444830133484FDD5360B9 /* Sources */,
-				83EE0537E1C37F41579FE370 /* Resources */,
-				8680BA7D465174FD1F86595E /* Frameworks */,
-				151F523FDEBC019F9E730A88 /* Embed Frameworks */,
+				81F20D9055F264FBDF5BBFBD /* Sources */,
+				06B31C13F63B4DCE1D14EB5E /* Resources */,
+				678AD75D2FCC69EAFCBA2AC5 /* Frameworks */,
+				9E81297BC4B0F255866C30AA /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				D241CC873DC9080EB1267B16 /* PBXTargetDependency */,
+				210F842C9C5F907CD5BD51D7 /* PBXTargetDependency */,
 			);
-			name = "Brew-TUI-BarTests";
+			name = "BrewTUI-BarTests";
 			packageProductDependencies = (
 			);
-			productName = Brew_TUI_BarTests;
-			productReference = 74C6666845EFD9CAD3478A05 /* Brew_TUI_BarTests.xctest */;
+			productName = BrewTUI_BarTests;
+			productReference = E160005EFEC134AAD22E8A89 /* BrewTUI_BarTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		458EB0029190DAAF21C8B8DD /* Project object */ = {
+		BB256F911AF42CC7F3DEB616 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				TargetAttributes = {
-					F450362C70366A4970331B24 = {
-						TestTargetID = D4E72B77321FB2E6913EBE52;
+					754F397E534ACCA90D0B6C9E = {
+						TestTargetID = 436A66178598403529899092;
 					};
 				};
 			};
-			buildConfigurationList = BD3A086C254B56EFDCCF40B9 /* Build configuration list for PBXProject "Brew-TUI-Bar" */;
+			buildConfigurationList = DFE99183AEF741BE4CFA1669 /* Build configuration list for PBXProject "BrewTUI-Bar" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -401,111 +401,268 @@
 				en,
 				es,
 			);
-			mainGroup = DA829470D7944B8FD4D3449A;
-			productRefGroup = 2E7F16CDEB3B7042F337A978 /* Products */;
+			mainGroup = FBDB4EB8445530820624EA6A;
+			productRefGroup = E672BAFA9597B077715E8485 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D4E72B77321FB2E6913EBE52 /* Brew-TUI-Bar */,
-				F450362C70366A4970331B24 /* Brew-TUI-BarTests */,
+				436A66178598403529899092 /* BrewTUI-Bar */,
+				754F397E534ACCA90D0B6C9E /* BrewTUI-BarTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		1E8B615FC685E57EB950EA22 /* Resources */ = {
+		06B31C13F63B4DCE1D14EB5E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1E2143FCE65ADA91E2392CF /* Assets.xcassets in Resources */,
-				A4F3D84650016C35784A0DCE /* Localizable.xcstrings in Resources */,
-				D483FF1CF2343414924A5ADB /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		83EE0537E1C37F41579FE370 /* Resources */ = {
+		308AA88B9F5C0102DE226D80 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				292BF5231D1F526AEC78A8EF /* Assets.xcassets in Resources */,
+				AAC329365B2871F0B9DB69DF /* Localizable.xcstrings in Resources */,
+				F09227024F751FA24183E10E /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		1F8444830133484FDD5360B9 /* Sources */ = {
+		81F20D9055F264FBDF5BBFBD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F37B692C452A2F8871DC51A /* BrewTUIBarTests.swift in Sources */,
-				A1721ADB928D705482B34F00 /* LegacyMigratorTests.swift in Sources */,
-				D777C64795C11E9F76E1057D /* LicenseCheckerTests.swift in Sources */,
-				B8AF7CE840C66A0BBF0225BA /* NewPackagesServiceTests.swift in Sources */,
-				8531E6E7A0F84796795E6D33 /* ScreenshotGenerator.swift in Sources */,
-				E458EAF391D52968D41463E1 /* ServiceTests.swift in Sources */,
+				8A00C28527298892DA00BF13 /* BrewTUIBarTests.swift in Sources */,
+				64FA4D2DC4AEED32804D0F47 /* LegacyMigratorTests.swift in Sources */,
+				0B0FE81EE0F031EE6B5DF217 /* LicenseCheckerTests.swift in Sources */,
+				BD184BE92D579DAB2904559B /* NewPackagesServiceTests.swift in Sources */,
+				F3B56887D592EBE9A2E51D28 /* ScreenshotGenerator.swift in Sources */,
+				D84A510FC20FCBFFF86F1F8A /* ServiceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		546966F50139A0A586AB2F20 /* Sources */ = {
+		B069CD087419D7D4476A4A5D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ADFB922904B579A16D7577F /* AppDelegate.swift in Sources */,
-				186F1CBB2A2181A8736D437C /* BrewTUIBarApp.swift in Sources */,
-				A3F3431907466DDAFEABDED7 /* MenuBarIconComposer.swift in Sources */,
-				CBBEA33602824043A49C4588 /* AppState.swift in Sources */,
-				65A3240F983FA372AE305434 /* BadgePreferences.swift in Sources */,
-				E282C483D8BA4B88BF10E69D /* BrewService.swift in Sources */,
-				2B90352D735FC549902CE020 /* CVEAlert.swift in Sources */,
-				AF92D45204E407973D2A0B5D /* InstallProgress.swift in Sources */,
-				F68E6BB8880EB0432DBE1B13 /* NewPackage.swift in Sources */,
-				56443B0C9644226CFEF12023 /* OutdatedPackage.swift in Sources */,
-				EBDAACC2F5E1C7530EAFAC94 /* PreviewData.swift in Sources */,
-				8E3C12B9C4C8A47B5FCABB25 /* ServiceDiagnostics.swift in Sources */,
-				103F53943812C710D9F69DC2 /* BrewChecker.swift in Sources */,
-				C5A2863B5D3F0BCFE625008B /* BrewChecking.swift in Sources */,
-				B33F7511CC5500056B468262 /* BrewProcess.swift in Sources */,
-				AF2569D8D195C89ED62E3BB6 /* BrewServiceDiagnostics.swift in Sources */,
-				F09F7EDA460F847403922C5E /* BrewUpgradeStream.swift in Sources */,
-				3725F60746FBDB6BFAF68668 /* CatalogSearchService.swift in Sources */,
-				2030E93A77D189C8C9F5C291 /* CrashReporter.swift in Sources */,
-				4BDB290E21EAE5611D2A0BC5 /* LastActionMonitor.swift in Sources */,
-				E70D92D6CA2F010643C71541 /* LegacyMigrator.swift in Sources */,
-				87F943ED0E8F73CEEB88100F /* LicenseChecker.swift in Sources */,
-				EA27609A34023EFD3D56B329 /* LicenseRevalidator.swift in Sources */,
-				B5382F5B751EEABB4B902FFC /* NewPackagesService.swift in Sources */,
-				D326D7E7B69DC82794CBDD5A /* NotificationSender.swift in Sources */,
-				B7719B7B9929DABC6BC3F21A /* SchedulerService.swift in Sources */,
-				64CDF7BA0094719AF276C636 /* SecurityChecking.swift in Sources */,
-				3E6D3A27461842B37D2F6B74 /* SecurityMonitor.swift in Sources */,
-				4C25EAFA366855F4D694E19F /* SyncMonitor.swift in Sources */,
-				CD7B74455BAD25D5438144FF /* VersionChecker.swift in Sources */,
-				3E0AD11E5095E15C5C55C7A8 /* CrystalGlass.swift in Sources */,
-				F816E1EE5DC27787AD73CE5C /* InstallProgressView.swift in Sources */,
-				E0D7F59FBF1CFD2BA0C1F595 /* NewPackagesView.swift in Sources */,
-				2FD5479DD4C81D969AB38639 /* OutdatedListView.swift in Sources */,
-				28CFEDEB9D3945B7ECF52F79 /* PopoverView.swift in Sources */,
-				36E15F6B07497C154E8372AB /* ServiceDiagnosticsView.swift in Sources */,
-				12D8F19C361FEF414B035795 /* SettingsView.swift in Sources */,
-				5FFB38F57D477DA4FAB3F1D3 /* Theme.swift in Sources */,
-				3E1708FF6CC152FF41CEB544 /* TuistAssets+BrewTUIBar.swift in Sources */,
-				0A02500CDE62CF27EE1C5B66 /* TuistBundle+BrewTUIBar.swift in Sources */,
+				2147084C94F28A1919D7242C /* AppDelegate.swift in Sources */,
+				E95B57CB309600892EE3F60D /* BrewTUI-BarApp.swift in Sources */,
+				89830BE3312D0E47CDCF083B /* MenuBarIconComposer.swift in Sources */,
+				BC60D48A6E5CC3BE2E1FF29B /* AppState.swift in Sources */,
+				78C6EA4873F10C45C23668C3 /* BadgePreferences.swift in Sources */,
+				3C6BB02EF2B388C2E8CCB08C /* BrewService.swift in Sources */,
+				F72D64E1CD37242384E4D27A /* CVEAlert.swift in Sources */,
+				83C49904E8134A34B700A38D /* InstallProgress.swift in Sources */,
+				A5C9A57ADF2A973B5DC63325 /* NewPackage.swift in Sources */,
+				75C4A19A32FD9983D16ADFC8 /* OutdatedPackage.swift in Sources */,
+				A634569C03613A045FB8CF30 /* PreviewData.swift in Sources */,
+				3EFC14FB58F69A4066634532 /* ServiceDiagnostics.swift in Sources */,
+				818EF64291A268BAB5BF9EF4 /* BrewChecker.swift in Sources */,
+				45E8E4CB8420F708CF43903A /* BrewChecking.swift in Sources */,
+				FF57FBD91A91C9CDFEE3D661 /* BrewProcess.swift in Sources */,
+				EEB268552533BE695556BE9A /* BrewServiceDiagnostics.swift in Sources */,
+				659C0999E6959CAAB322FC48 /* BrewUpgradeStream.swift in Sources */,
+				0C14525CAB56FB0806E18A99 /* CatalogSearchService.swift in Sources */,
+				B99DC34A3CEB0B46B2E6BF31 /* CrashReporter.swift in Sources */,
+				08FEFB317002C3EF40AB6AEA /* LastActionMonitor.swift in Sources */,
+				2101C8E0EF7FA5182FDA5A32 /* LegacyMigrator.swift in Sources */,
+				60C78BCD3FBB824483644F67 /* LicenseChecker.swift in Sources */,
+				8A0042C9F4CACC2E29D85E6F /* LicenseRevalidator.swift in Sources */,
+				CE83F8A05166EAD700CC214D /* NewPackagesService.swift in Sources */,
+				D8CF13065CC2A87D25B46E7F /* NotificationSender.swift in Sources */,
+				63A0FCD8C81043394B2727F9 /* SchedulerService.swift in Sources */,
+				B43EFD3B5D5822F918CF753F /* SecurityChecking.swift in Sources */,
+				5E99EE588662855D7C207894 /* SecurityMonitor.swift in Sources */,
+				1FC4EBFE430B4221870447F7 /* SyncMonitor.swift in Sources */,
+				12814FC35BCAAFBC3726D91B /* VersionChecker.swift in Sources */,
+				4CF49E26130611E7FF55D8F5 /* CrystalGlass.swift in Sources */,
+				6A9D38255C5470BFB79CC9DF /* InstallProgressView.swift in Sources */,
+				E58BA0B8D0B5F1F0B4E107CD /* NewPackagesView.swift in Sources */,
+				F530066AD5EB4EC0ED261FCB /* OutdatedListView.swift in Sources */,
+				D57854316651EC2199918743 /* PopoverView.swift in Sources */,
+				47083A41E4AB595976277B64 /* ServiceDiagnosticsView.swift in Sources */,
+				8E87AA13EE7356729D1FDB58 /* SettingsView.swift in Sources */,
+				2F86BF686284096A0D9C5BB2 /* Theme.swift in Sources */,
+				4FB44039A253560986CF14C4 /* TuistAssets+BrewTUIBar.swift in Sources */,
+				D0AE1A561287031A3062AE62 /* TuistBundle+BrewTUIBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D241CC873DC9080EB1267B16 /* PBXTargetDependency */ = {
+		210F842C9C5F907CD5BD51D7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = "Brew-TUI-Bar";
-			target = D4E72B77321FB2E6913EBE52 /* Brew-TUI-Bar */;
-			targetProxy = EAD332BE3576B4CB0840D67A /* PBXContainerItemProxy */;
+			name = "BrewTUI-Bar";
+			target = 436A66178598403529899092 /* BrewTUI-Bar */;
+			targetProxy = 4C4BBC198DD05716183528EB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		352D8111E559BFE25B4B3228 /* Debug */ = {
+		1D84B68FF18358E6FB13F21F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = GD6M44DYPQ;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_PREVIEWS = YES;
+				EXECUTABLE_NAME = "BrewTUI-Bar";
+				INFOPLIST_FILE = "Derived/InfoPlists/BrewTUI-Bar-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar;
+				PRODUCT_MODULE_NAME = BrewTUI_Bar;
+				PRODUCT_NAME = "BrewTUI-Bar";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		51CD8A654D8ADCAB9D598C59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				INFOPLIST_FILE = "Derived/InfoPlists/BrewTUI-BarTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.molinesdesigns.brewtui-bar.tests";
+				PRODUCT_NAME = BrewTUI_BarTests;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BrewTUI-Bar.app/Contents/MacOS/BrewTUI-Bar";
+				TEST_TARGET_NAME = "BrewTUI-Bar";
+			};
+			name = Release;
+		};
+		5FFA45E0D8A0D76C1E7BD51F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = GD6M44DYPQ;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				EXECUTABLE_NAME = "BrewTUI-Bar";
+				INFOPLIST_FILE = "Derived/InfoPlists/BrewTUI-Bar-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_CODE_SIGN_FLAGS = "--timestamp";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar;
+				PRODUCT_MODULE_NAME = BrewTUI_Bar;
+				PRODUCT_NAME = "BrewTUI-Bar";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		698B23BFE98CC81D5566EE40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.2)";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D0231D9E3247E0AE63C64512 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -572,49 +729,12 @@
 			};
 			name = Debug;
 		};
-		5BB3F37F3E4A28EA1A0C868A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = GD6M44DYPQ;
-				ENABLE_HARDENED_RUNTIME = NO;
-				ENABLE_PREVIEWS = YES;
-				EXECUTABLE_NAME = "Brew-TUI-Bar";
-				INFOPLIST_FILE = "Derived/InfoPlists/Brew-TUI-Bar-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OTHER_CODE_SIGN_FLAGS = "";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar;
-				PRODUCT_MODULE_NAME = Brew_TUI_Bar;
-				PRODUCT_NAME = "Brew-TUI-Bar";
-				SDKROOT = macosx;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
-					"$(inherited)",
-					DEBUG,
-				);
-				SWIFT_COMPILATION_MODE = singlefile;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-			};
-			name = Debug;
-		};
-		5F3D23C521C1773D53E55BBC /* Debug */ = {
+		F6C264D145E789D7D7DA0204 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_IDENTITY = "-";
-				INFOPLIST_FILE = "Derived/InfoPlists/Brew-TUI-BarTests-Info.plist";
+				INFOPLIST_FILE = "Derived/InfoPlists/BrewTUI-BarTests-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -625,8 +745,8 @@
 					"$(inherited)",
 					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar.tests;
-				PRODUCT_NAME = Brew_TUI_BarTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.molinesdesigns.brewtui-bar.tests";
+				PRODUCT_NAME = BrewTUI_BarTests;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
 					"$(inherited)",
@@ -634,162 +754,42 @@
 				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Brew-TUI-Bar.app/Contents/MacOS/Brew-TUI-Bar";
-				TEST_TARGET_NAME = "Brew-TUI-Bar";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BrewTUI-Bar.app/Contents/MacOS/BrewTUI-Bar";
+				TEST_TARGET_NAME = "BrewTUI-Bar";
 			};
 			name = Debug;
-		};
-		907B5C0078D687F3D626F741 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "Developer ID Application";
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = GD6M44DYPQ;
-				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_PREVIEWS = YES;
-				EXECUTABLE_NAME = "Brew-TUI-Bar";
-				INFOPLIST_FILE = "Derived/InfoPlists/Brew-TUI-Bar-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar;
-				PRODUCT_MODULE_NAME = Brew_TUI_Bar;
-				PRODUCT_NAME = "Brew-TUI-Bar";
-				SDKROOT = macosx;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-			};
-			name = Release;
-		};
-		E1B7AA256F21AD038C62C570 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.2)";
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_STRICT_CONCURRENCY = complete;
-				SWIFT_VERSION = 6.0;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		F51E3FDE460C5168AFC33DCA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "-";
-				INFOPLIST_FILE = "Derived/InfoPlists/Brew-TUI-BarTests-Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@loader_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.molinesdesigns.brewtuibar.tests;
-				PRODUCT_NAME = Brew_TUI_BarTests;
-				SDKROOT = macosx;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Brew-TUI-Bar.app/Contents/MacOS/Brew-TUI-Bar";
-				TEST_TARGET_NAME = "Brew-TUI-Bar";
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B809628FCC335AC9EE34D414 /* Build configuration list for PBXNativeTarget "Brew-TUI-Bar" */ = {
+		C65DBB04A1E58F55910DE366 /* Build configuration list for PBXNativeTarget "BrewTUI-Bar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				5BB3F37F3E4A28EA1A0C868A /* Debug */,
-				907B5C0078D687F3D626F741 /* Release */,
+				1D84B68FF18358E6FB13F21F /* Debug */,
+				5FFA45E0D8A0D76C1E7BD51F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BD3A086C254B56EFDCCF40B9 /* Build configuration list for PBXProject "Brew-TUI-Bar" */ = {
+		D16F4DDDE20B9B6A916504E4 /* Build configuration list for PBXNativeTarget "BrewTUI-BarTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				352D8111E559BFE25B4B3228 /* Debug */,
-				E1B7AA256F21AD038C62C570 /* Release */,
+				F6C264D145E789D7D7DA0204 /* Debug */,
+				51CD8A654D8ADCAB9D598C59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D2384B743E4FE7834B937E95 /* Build configuration list for PBXNativeTarget "Brew-TUI-BarTests" */ = {
+		DFE99183AEF741BE4CFA1669 /* Build configuration list for PBXProject "BrewTUI-Bar" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				5F3D23C521C1773D53E55BBC /* Debug */,
-				F51E3FDE460C5168AFC33DCA /* Release */,
+				D0231D9E3247E0AE63C64512 /* Debug */,
+				698B23BFE98CC81D5566EE40 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 458EB0029190DAAF21C8B8DD /* Project object */;
+	rootObject = BB256F911AF42CC7F3DEB616 /* Project object */;
 }

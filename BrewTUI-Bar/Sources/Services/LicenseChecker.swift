@@ -18,7 +18,7 @@ struct LicenseData: Codable {
 
 struct LicenseFile: Codable {
     let version: Int
-    /// v2 (current): the LicenseData payload signed by the brewtui-api backend.
+    /// v2 (current): the LicenseData payload signed by the brewtui-bar API backend.
     /// v1 envelopes set this too but combine it with `encrypted/iv/tag`; we
     /// reject those in checkLicense() regardless of the field's presence.
     let license: LicenseData?
@@ -144,11 +144,11 @@ struct LicenseChecker {
     private static let logger = Logger(subsystem: "com.molinesdesigns.brewtuibar", category: "LicenseChecker")
 
     private static let licensePath: String = {
-        NSHomeDirectory() + "/.brew-tui/license.json"
+        NSHomeDirectory() + "/.brewtui-bar/license.json"
     }()
 
     // SEG-009 v2 (4.0.0): the symmetric HKDF/AES-GCM scheme was replaced by
-    // an Ed25519 signature issued by the brewtui-api backend. The private key
+    // an Ed25519 signature issued by the brewtui-bar API backend. The private key
     // lives only on the NAS (LICENSE_SIGNING_PRIVATE_KEY env var); the public
     // counterpart below is embedded so the app verifies offline without ever
     // round-tripping the network. Exposing the public key is by design — a
@@ -245,11 +245,11 @@ struct LicenseChecker {
 
         // v1 (any shape): AES-GCM envelope or unencrypted plaintext. Both are
         // rejected — the symmetric HKDF key was shipped in the public npm
-        // bundle, so any v1 file is forgeable. The TUI's `brew-tui revalidate`
+        // bundle, so any v1 file is forgeable. The TUI's `brewtui-bar revalidate`
         // re-issues a v2 signed envelope; users with a genuinely v1 license
         // just need to run it once.
         if file.version == 1 {
-            logger.warning("License file is in legacy v1 format — refusing to authorize. Run `brew-tui revalidate` to migrate.")
+            logger.warning("License file is in legacy v1 format — refusing to authorize. Run `brewtui-bar revalidate` to migrate.")
             return .notFound
         }
 

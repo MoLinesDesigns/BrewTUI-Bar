@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D4E72B77321FB2E6913EBE52"
-               BuildableName = "Brew-TUI-Bar.app"
-               BlueprintName = "Brew-TUI-Bar"
-               ReferencedContainer = "container:Brew-TUI-Bar.xcodeproj">
+               BlueprintIdentifier = "436A66178598403529899092"
+               BuildableName = "BrewTUI-Bar.app"
+               BlueprintName = "BrewTUI-Bar"
+               ReferencedContainer = "container:BrewTUI-Bar.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -28,10 +28,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F450362C70366A4970331B24"
-               BuildableName = "Brew_TUI_BarTests.xctest"
-               BlueprintName = "Brew-TUI-BarTests"
-               ReferencedContainer = "container:Brew-TUI-Bar.xcodeproj">
+               BlueprintIdentifier = "754F397E534ACCA90D0B6C9E"
+               BuildableName = "BrewTUI_BarTests.xctest"
+               BlueprintName = "BrewTUI-BarTests"
+               ReferencedContainer = "container:BrewTUI-Bar.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,10 +47,10 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "F450362C70366A4970331B24"
-               BuildableName = "Brew_TUI_BarTests.xctest"
-               BlueprintName = "Brew-TUI-BarTests"
-               ReferencedContainer = "container:Brew-TUI-Bar.xcodeproj">
+               BlueprintIdentifier = "754F397E534ACCA90D0B6C9E"
+               BuildableName = "BrewTUI_BarTests.xctest"
+               BlueprintName = "BrewTUI-BarTests"
+               ReferencedContainer = "container:BrewTUI-Bar.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -69,10 +69,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D4E72B77321FB2E6913EBE52"
-            BuildableName = "Brew-TUI-Bar.app"
-            BlueprintName = "Brew-TUI-Bar"
-            ReferencedContainer = "container:Brew-TUI-Bar.xcodeproj">
+            BlueprintIdentifier = "436A66178598403529899092"
+            BuildableName = "BrewTUI-Bar.app"
+            BlueprintName = "BrewTUI-Bar"
+            ReferencedContainer = "container:BrewTUI-Bar.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -86,10 +86,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D4E72B77321FB2E6913EBE52"
-            BuildableName = "Brew-TUI-Bar.app"
-            BlueprintName = "Brew-TUI-Bar"
-            ReferencedContainer = "container:Brew-TUI-Bar.xcodeproj">
+            BlueprintIdentifier = "436A66178598403529899092"
+            BuildableName = "BrewTUI-Bar.app"
+            BlueprintName = "BrewTUI-Bar"
+            ReferencedContainer = "container:BrewTUI-Bar.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

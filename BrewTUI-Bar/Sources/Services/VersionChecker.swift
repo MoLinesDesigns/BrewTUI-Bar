@@ -1,28 +1,28 @@
 import Foundation
 import os
 
-/// Cross-platform version contract: Brew-TUI-Bar's marketing version must match
-/// the Brew-TUI CLI it talks to (license schema + future IPC). On mismatch we
+/// Cross-platform version contract: BrewTUI-Bar's marketing version must match
+/// the BrewTUI-Bar CLI it talks to (license schema + future IPC). On mismatch we
 /// surface a non-blocking warning at launch — license decryption may still
 /// succeed today, but skew is the early signal that something will break.
 struct VersionChecker {
     private static let logger = Logger(subsystem: "com.molinesdesigns.brewtuibar", category: "VersionChecker")
 
     enum Status: Equatable {
-        case match(brewTui: String)
-        case mismatch(brewTui: String, brewBar: String)
-        case unknown // brew-tui present but version unreadable
+        case match(brewTUIBar: String)
+        case mismatch(brewTUIBar: String, brewBar: String)
+        case unknown // brewtui-bar present but version unreadable
     }
 
-    /// Marketing version embedded in Brew-TUI-Bar's bundle.
+    /// Marketing version embedded in BrewTUI-Bar's bundle.
     static var brewBarVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
     }
 
-    /// Calls `brew-tui --version` and parses the single-line output.
-    /// Returns nil if brew-tui is missing or the call fails.
-    static func brewTuiVersion() async -> String? {
-        let executable = await locateBrewTui()
+    /// Calls `brewtui-bar --version` and parses the single-line output.
+    /// Returns nil if brewtui-bar is missing or the call fails.
+    static func brewTUIBarVersion() async -> String? {
+        let executable = await locateBrewTUIBar()
         guard let executable else { return nil }
 
         let process = Process()
@@ -39,7 +39,7 @@ struct VersionChecker {
                 do { try process.run() } catch { cont.resume(throwing: error) }
             }
         } catch {
-            logger.error("brew-tui --version failed to launch: \(error.localizedDescription, privacy: .public)")
+            logger.error("brewtui-bar --version failed to launch: \(error.localizedDescription, privacy: .public)")
             return nil
         }
 
@@ -49,29 +49,29 @@ struct VersionChecker {
         guard let token = raw.split(whereSeparator: { $0.isWhitespace }).first.map(String.init),
               !token.isEmpty
         else {
-            logger.error("brew-tui --version returned empty output")
+            logger.error("brewtui-bar --version returned empty output")
             return nil
         }
         return token.hasPrefix("v") ? String(token.dropFirst()) : token
     }
 
     static func check() async -> Status {
-        guard let cliVersion = await brewTuiVersion() else {
+        guard let cliVersion = await brewTUIBarVersion() else {
             return .unknown
         }
         if cliVersion == brewBarVersion {
-            return .match(brewTui: cliVersion)
+            return .match(brewTUIBar: cliVersion)
         }
-        return .mismatch(brewTui: cliVersion, brewBar: brewBarVersion)
+        return .mismatch(brewTUIBar: cliVersion, brewBar: brewBarVersion)
     }
 
     // MARK: - Helpers
 
-    private static func locateBrewTui() async -> String? {
+    private static func locateBrewTUIBar() async -> String? {
         let knownPaths = [
-            "/opt/homebrew/bin/brew-tui",
-            "/usr/local/bin/brew-tui",
-            "\(NSHomeDirectory())/.npm/bin/brew-tui",
+            "/opt/homebrew/bin/brewtui-bar",
+            "/usr/local/bin/brewtui-bar",
+            "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
         ]
         for path in knownPaths where FileManager.default.isExecutableFile(atPath: path) {
             return path
@@ -80,7 +80,7 @@ struct VersionChecker {
         // Fallback: ask the shell PATH via /usr/bin/which
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brew-tui"]
+        process.arguments = ["brewtui-bar"]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice

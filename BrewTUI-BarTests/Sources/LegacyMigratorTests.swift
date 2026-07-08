@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 // MARK: - LegacyMigrator tests
 //

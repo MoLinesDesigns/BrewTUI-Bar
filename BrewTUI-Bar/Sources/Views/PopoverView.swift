@@ -493,13 +493,13 @@ struct PopoverView: View {
     private var footerView: some View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
             Button {
-                openBrewTUI()
+                openBrewTUIBar()
             } label: {
-                Label("Open BrewTUI", systemImage: "terminal")
+                Label("Open BrewTUI-Bar", systemImage: "terminal")
                     .font(.caption)
             }
             .buttonStyle(.glassPill)
-            .accessibilityLabel(String(localized: "Open BrewTUI"))
+            .accessibilityLabel(String(localized: "Open BrewTUI-Bar"))
 
             Spacer()
 
@@ -537,9 +537,9 @@ struct PopoverView: View {
     // Deep-link to the pricing cards (Pro + Team) anchor on the landing page,
     // so the user lands directly at the badges instead of having to scroll
     // through the feature grid first.
-    private static let pricingURL = URL(string: "https://molinesdesigns.com/brewtui/#pricing")!
+    private static let pricingURL = URL(string: "https://molinesdesigns.com/brewtui-bar/#pricing")!
 
-    private static let activateCommand = "brew-tui activate <your-license-key>"
+    private static let activateCommand = "brewtui-bar activate <your-license-key>"
 
     private var freeTierView: some View {
         // No ScrollView: the popover is fixed at 340×420 and Free funnel must
@@ -556,7 +556,7 @@ struct PopoverView: View {
                         Text(String(localized: "Unlock BrewTUI-Bar"))
                             .font(.headline)
                             .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
-                        Text(String(localized: "BrewTUI-Bar is part of BrewTUI Pro"))
+                        Text(String(localized: "BrewTUI-Bar is part of BrewTUI-Bar Pro"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -568,7 +568,7 @@ struct PopoverView: View {
                 // Features list — tight spacing so all five rows + label
                 // fit inside the fixed-height popover without scrolling.
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(String(localized: "BrewTUI Pro unlocks:"))
+                    Text(String(localized: "BrewTUI-Bar Pro unlocks:"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     proFeatureRow(systemImage: "menubar.rectangle", text: String(localized: "BrewTUI-Bar (this menu bar app)"))
@@ -710,19 +710,19 @@ struct PopoverView: View {
         .glassPanel(strokeOpacity: 0.4, ambientGlow: 0.08)
     }
 
-    private func openBrewTUI() {
+    private func openBrewTUIBar() {
         do {
             let scriptURL = try makeLaunchScript()
             guard NSWorkspace.shared.open(scriptURL) else {
                 throw NSError(
                     domain: "BrewTUI-Bar",
                     code: 1,
-                    userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not open BrewTUI in your terminal app.")]
+                    userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not open BrewTUI-Bar in your terminal app.")]
                 )
             }
         } catch {
             let alert = NSAlert()
-            alert.messageText = String(localized: "Could not open BrewTUI")
+            alert.messageText = String(localized: "Could not open BrewTUI-Bar")
             alert.informativeText = error.localizedDescription
             alert.alertStyle = .warning
             alert.addButton(withTitle: String(localized: "Continue"))
@@ -732,13 +732,13 @@ struct PopoverView: View {
 
     private func makeLaunchScript() throws -> URL {
         let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("brew-tui-launch", isDirectory: true)
+            .appendingPathComponent("brewtui-bar-launch", isDirectory: true)
         try FileManager.default.createDirectory(at: tempURL, withIntermediateDirectories: true, attributes: nil)
 
-        let scriptURL = tempURL.appendingPathComponent("brew-tui.command")
+        let scriptURL = tempURL.appendingPathComponent("brewtui-bar.command")
         let script = """
         #!/bin/zsh
-        exec brew-tui
+        exec brewtui-bar
         """
 
         try script.write(to: scriptURL, atomically: true, encoding: .utf8)
@@ -749,20 +749,20 @@ struct PopoverView: View {
         return scriptURL
     }
 
-    /// Opens Terminal with `brew upgrade --cask brew-tui-bar`. Shares the
-    /// same .command-script pattern as `openBrewTUI` so the user sees the
+    /// Opens Terminal with `brew upgrade --cask brewtui-bar`. Shares the
+    /// same .command-script pattern as `openBrewTUIBar` so the user sees the
     /// brew output and we don't need to drive the upgrade in-process
     /// (which would require quitting the app mid-upgrade).
     private func runSelfUpgrade() {
         do {
             let tempURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("brew-tui-bar-upgrade", isDirectory: true)
+                .appendingPathComponent("brewtui-bar-upgrade", isDirectory: true)
             try FileManager.default.createDirectory(at: tempURL, withIntermediateDirectories: true, attributes: nil)
-            let scriptURL = tempURL.appendingPathComponent("brew-tui-bar-upgrade.command")
+            let scriptURL = tempURL.appendingPathComponent("brewtui-bar-upgrade.command")
             let script = """
             #!/bin/zsh
             echo "Upgrading BrewTUI-Bar via Homebrew..."
-            brew upgrade --cask brew-tui-bar
+            brew upgrade --cask brewtui-bar
             """
             try script.write(to: scriptURL, atomically: true, encoding: .utf8)
             try FileManager.default.setAttributes(

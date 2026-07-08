@@ -6,7 +6,8 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private static let isRunningForPreviews =
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" ||
-        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1"
+        ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1" ||
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     private static let didAutoRegisterLoginItemKey = "didAutoRegisterLoginItem"
 
     private var statusItem: NSStatusItem!
@@ -46,18 +47,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         LegacyMigrator.completePendingLoginItemMigration()
 
         launchTask = Task {
-            guard await checkBrewTuiInstalled() else {
-                showBrewTuiRequired()
+            guard await checkBrewTUIBarInstalled() else {
+                showBrewTUIBarRequired()
                 return
             }
 
             // Cross-platform version contract: warn (non-blocking) when the
-            // installed BrewTUI-Bar drifts from the brew-tui CLI. License decryption
+            // installed BrewTUI-Bar drifts from the brewtui-bar CLI. License decryption
             // may still work today, but skew has bitten us before (HKDF schema
             // bump). Continue to license check either way.
             let versionStatus = await VersionChecker.check()
-            if case let .mismatch(brewTui, brewBar) = versionStatus {
-                showVersionMismatch(brewTui: brewTui, brewBar: brewBar)
+            if case let .mismatch(brewTUIBar, brewBar) = versionStatus {
+                showVersionMismatch(brewTUIBar: brewTUIBar, brewBar: brewBar)
             }
 
             // Check Pro license. Attempt silent auto-revalidation before denying
@@ -98,13 +99,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             // Built from the same value `checkLicense()` returned so we never
             // re-decode the file.
             appState.licenseSummary = LicenseSummary(from: licenseStatus)
-            // Surface the brew-tui CLI version alongside BrewTUI-Bar's in the
+            // Surface the brewtui-bar CLI version alongside BrewTUI-Bar's in the
             // About section. Reused from VersionChecker so we do not spawn
-            // a second `brew-tui --version` process at launch.
+            // a second `brewtui-bar --version` process at launch.
             if case let .match(version) = versionStatus {
-                appState.brewTuiCliVersion = version
-            } else if case let .mismatch(brewTui, _) = versionStatus {
-                appState.brewTuiCliVersion = brewTui
+                appState.brewTUIBarCliVersion = version
+            } else if case let .mismatch(brewTUIBar, _) = versionStatus {
+                appState.brewTUIBarCliVersion = brewTUIBar
             }
 
             setupStatusItem()
@@ -128,7 +129,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             let machineCount = await SyncMonitor.shared.getKnownMachineCount()
             appState.updateSyncStatus(hasActivity: hasSyncActivity, machineCount: machineCount)
 
-            // Listen for actions performed in the BrewTUI CLI so the popover
+            // Listen for actions performed in the BrewTUI-Bar CLI so the popover
             // reflects them immediately and shows a friendly status banner.
             LastActionMonitor.shared.start { [weak self] action in
                 guard let self else { return }
@@ -175,13 +176,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
-    // MARK: - brew-tui dependency check
+    // MARK: - brewtui-bar dependency check
 
-    private func checkBrewTuiInstalled() async -> Bool {
+    private func checkBrewTUIBarInstalled() async -> Bool {
         let paths = [
-            "/usr/local/bin/brew-tui",
-            "/opt/homebrew/bin/brew-tui",
-            "\(NSHomeDirectory())/.npm/bin/brew-tui",
+            "/usr/local/bin/brewtui-bar",
+            "/opt/homebrew/bin/brewtui-bar",
+            "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
         ]
 
         // Check known paths
@@ -194,7 +195,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // Fallback: check via shell PATH (non-blocking via terminationHandler)
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brew-tui"]
+        process.arguments = ["brewtui-bar"]
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
 
@@ -215,10 +216,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
-    private func showBrewTuiRequired() {
+    private func showBrewTUIBarRequired() {
         let alert = NSAlert()
-        alert.messageText = String(localized: "BrewTUI is required")
-        alert.informativeText = String(localized: "BrewTUI-Bar requires BrewTUI to be installed.\n\nInstall it with:\n  npm install -g brew-tui\n\nThen relaunch BrewTUI-Bar.")
+        alert.messageText = String(localized: "BrewTUI-Bar is required")
+        alert.informativeText = String(localized: "BrewTUI-Bar requires BrewTUI-Bar to be installed.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen relaunch BrewTUI-Bar.")
         alert.alertStyle = .critical
         alert.addButton(withTitle: String(localized: "Copy Install Command"))
         alert.addButton(withTitle: String(localized: "Quit"))
@@ -227,19 +228,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         if response == .alertFirstButtonReturn {
             NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString("npm install -g brew-tui", forType: .string)
+            NSPasteboard.general.setString("npm install -g brewtui-bar", forType: .string)
         }
 
         NSApp.terminate(nil)
     }
 
-    private func showVersionMismatch(brewTui: String, brewBar: String) {
+    private func showVersionMismatch(brewTUIBar: String, brewBar: String) {
         let alert = NSAlert()
         alert.messageText = String(localized: "BrewTUI-Bar version mismatch")
         let template = String(
-            localized: "BrewTUI-Bar %@ is out of sync with BrewTUI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brew-tui install-brew-tui-bar --force"
+            localized: "BrewTUI-Bar %@ is out of sync with BrewTUI-Bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force"
         )
-        alert.informativeText = String(format: template, brewBar, brewTui)
+        alert.informativeText = String(format: template, brewBar, brewTUIBar)
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Copy Update Command"))
         alert.addButton(withTitle: String(localized: "Continue Anyway"))
@@ -247,7 +248,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
             NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString("brew-tui install-brew-tui-bar --force", forType: .string)
+            NSPasteboard.general.setString("brewtui-bar install-brewtui-bar --force", forType: .string)
         }
     }
 
@@ -255,7 +256,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         let alert = NSAlert()
         alert.messageText = String(localized: "Pro license expired")
         alert.informativeText = String(
-            localized: "Your Pro license has expired or needs revalidation.\n\nRun `brew-tui revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode."
+            localized: "Your Pro license has expired or needs revalidation.\n\nRun `brewtui-bar revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode."
         )
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Continue"))

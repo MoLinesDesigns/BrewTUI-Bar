@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Brew-TUI-Bar.xcodeproj">
+      location = "group:BrewTUI-Bar.xcodeproj">
    </FileRef>
 </Workspace>

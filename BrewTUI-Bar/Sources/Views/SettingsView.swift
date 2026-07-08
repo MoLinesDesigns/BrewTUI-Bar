@@ -236,8 +236,8 @@ struct SettingsView: View {
     private var advancedSection: some View {
         Section(String(localized: "Advanced")) {
             LabeledContent(String(localized: "BrewTUI-Bar version"), value: bundleVersion)
-            if let cli = appState.brewTuiCliVersion {
-                LabeledContent(String(localized: "BrewTUI CLI"), value: cli)
+            if let cli = appState.brewTUIBarCliVersion {
+                LabeledContent(String(localized: "BrewTUI-Bar CLI"), value: cli)
             }
             HStack {
                 Button {
@@ -261,19 +261,19 @@ struct SettingsView: View {
     }
 
     private func runRevalidate() {
-        // Same pattern PopoverView uses for `Open BrewTUI`: drop a one-shot
+        // Same pattern PopoverView uses for `Open BrewTUI-Bar`: drop a one-shot
         // .command script and hand it to NSWorkspace so the user's default
-        // terminal launches `brew-tui revalidate`. We don't shell out
+        // terminal launches `brewtui-bar revalidate`. We don't shell out
         // in-process — BrewTUI-Bar is sandbox-adjacent and we'd lose the user's
         // shell config + interactive prompts.
         do {
             let tempDir = FileManager.default.temporaryDirectory
-                .appendingPathComponent("brew-tui-revalidate", isDirectory: true)
+                .appendingPathComponent("brewtui-bar-revalidate", isDirectory: true)
             try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-            let scriptURL = tempDir.appendingPathComponent("brew-tui-revalidate.command")
+            let scriptURL = tempDir.appendingPathComponent("brewtui-bar-revalidate.command")
             let script = """
             #!/bin/zsh
-            exec brew-tui revalidate
+            exec brewtui-bar revalidate
             """
             try script.write(to: scriptURL, atomically: true, encoding: .utf8)
             try FileManager.default.setAttributes(
@@ -289,7 +289,7 @@ struct SettingsView: View {
     }
 
     private func openDataDirectory() {
-        let path = NSHomeDirectory() + "/.brew-tui"
+        let path = NSHomeDirectory() + "/.brewtui-bar"
         let url = URL(fileURLWithPath: path)
         if FileManager.default.fileExists(atPath: path) {
             NSWorkspace.shared.activateFileViewerSelecting([url])

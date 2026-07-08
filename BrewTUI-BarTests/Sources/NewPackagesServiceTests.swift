@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 @Suite("NewPackagesService commit message parser")
 struct NewPackagesServiceParserTests {

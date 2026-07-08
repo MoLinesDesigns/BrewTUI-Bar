@@ -21,7 +21,7 @@ actor SyncMonitor: SyncMonitoring {
             .first?
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-            .appendingPathComponent("Mobile Documents/com~apple~CloudDocs/BrewTUI/sync.json")
+            .appendingPathComponent("Mobile Documents/com~apple~CloudDocs/BrewTUI-Bar/sync.json")
         return icloud ?? URL(fileURLWithPath: "/dev/null")
     }()
 

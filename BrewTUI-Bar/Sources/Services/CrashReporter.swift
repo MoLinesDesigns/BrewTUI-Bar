@@ -153,7 +153,7 @@ enum CrashReporter {
         guard let endpoint, isAllowedHost(endpoint) else { return }
 
         let report = Report(
-            app: "brew-tui-bar",
+            app: "brewtui-bar",
             version: marketingVersion(),
             platform: "macos",
             os: ProcessInfo.processInfo.operatingSystemVersionString,
@@ -205,7 +205,7 @@ enum CrashReporter {
     }
 
     private static func machineId() -> String {
-        let path = NSHomeDirectory() + "/.brew-tui/machine-id"
+        let path = NSHomeDirectory() + "/.brewtui-bar/machine-id"
         if let raw = try? String(contentsOfFile: path, encoding: .utf8) {
             let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { return trimmed }

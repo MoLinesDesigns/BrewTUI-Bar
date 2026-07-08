@@ -27,7 +27,7 @@ struct NotificationSender: Notifying {
         content.title = String(localized: "Homebrew Updates")
         content.body = String(format: String(localized: "%lld packages can be updated."), Int64(count))
         content.sound = .default
-        post(content, idPrefix: "brew-tui-bar-outdated")
+        post(content, idPrefix: "brewtui-bar-outdated")
     }
 
     func sendSyncNotification(machineCount: Int) {
@@ -39,7 +39,7 @@ struct NotificationSender: Notifying {
             Int64(machineCount)
         )
         content.sound = .default
-        post(content, idPrefix: "brew-tui-bar-sync")
+        post(content, idPrefix: "brewtui-bar-sync")
     }
 
     func sendCVENotification(alerts: [CVEAlert]) {
@@ -52,7 +52,7 @@ struct NotificationSender: Notifying {
         let content = UNMutableNotificationContent()
         content.sound = .default
         if hasCriticalOrHigh, let worst = sorted.first {
-            content.title = String(localized: "Security Alert — BrewTUI")
+            content.title = String(localized: "Security Alert — BrewTUI-Bar")
             content.body = String(
                 format: String(localized: "%lld vulnerable packages found, including %@"),
                 Int64(count),
@@ -60,13 +60,13 @@ struct NotificationSender: Notifying {
             )
             content.userInfo = ["cveId": worst.id]
         } else {
-            content.title = String(localized: "Security Notice — BrewTUI")
+            content.title = String(localized: "Security Notice — BrewTUI-Bar")
             content.body = String(format: String(localized: "%lld vulnerable packages found"), Int64(count))
             if let worst = sorted.first {
                 content.userInfo = ["cveId": worst.id]
             }
         }
-        post(content, idPrefix: "brew-tui-bar-cve")
+        post(content, idPrefix: "brewtui-bar-cve")
     }
 
     private func post(_ content: UNMutableNotificationContent, idPrefix: String) {

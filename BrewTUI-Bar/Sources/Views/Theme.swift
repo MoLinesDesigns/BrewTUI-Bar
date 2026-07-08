@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Centralised colour tokens for Brew-TUI-Bar. Each token resolves to a different
+/// Centralised colour tokens for BrewTUI-Bar. Each token resolves to a different
 /// hue when "Increase Contrast" is on (DS-002), so views never have to spell
 /// out the high-contrast variant locally.
 enum BrewTUIBarTheme {

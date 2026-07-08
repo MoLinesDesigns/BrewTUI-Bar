@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 // MARK: - Stub conformances
 

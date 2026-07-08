@@ -23,7 +23,7 @@ actor SecurityMonitor {
 
     init(session: SecurityHTTPSession = URLSession.shared, cachePath: String? = nil) {
         self.session = session
-        self.cachePath = cachePath ?? (NSHomeDirectory() + "/.brew-tui/cve-cache.json")
+        self.cachePath = cachePath ?? (NSHomeDirectory() + "/.brewtui-bar/cve-cache.json")
     }
 
     // MARK: - Public API

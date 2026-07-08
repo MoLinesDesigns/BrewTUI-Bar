@@ -36,7 +36,7 @@ Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest. C
 
 This app ships in lockstep with the **`brewtui-bar` CLI**, a *separate* repo and the real npm package. `AppDelegate`'s `VersionChecker` warns when the two versions drift, so **both must be bumped to the same version together**.
 
-- **`brewtui-bar` CLI** — `/Volumes/SSD/Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`, npm package `brewtui` (the one users `npm install -g`). This is the npm publish target — `brewtui-bar` is not.
+- **`brewtui-bar` CLI** — `/Volumes/SSD/Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`, npm package `brewtui-bar` (the one users `npm install -g`). This is the npm publish target.
 - **This app** — `/Volumes/SSD/xCode_Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`.
 - **The app's binary GitHub Release lives in the CLI repo `MoLinesDesigns/BrewTUI-Bar`, not in `BrewTUI-Bar`** — the cask's `url`/`homepage` point there. (`BrewTUI-Bar` holds only source + the `vX.Y.Z` source tag.)
 - **Cask**: `MoLinesDesigns/homebrew-tap`, cloned locally at `/opt/homebrew/Library/Taps/molinesdesigns/homebrew-tap/Casks/brewtui-bar.rb`. Bump `version` + `sha256` (the SHA from `release.sh`), `brew style` it, commit, push `main` directly.
@@ -52,7 +52,7 @@ Full release sequence for version `X.Y.Z`:
 
 ## Signing config (in `Project.swift`)
 
-Debug deliberately relaxes signing (Automatic / Apple Development / Hardened Runtime OFF) so Xcode Previews' JIT injection works. Release uses Manual / Developer ID Application / Hardened Runtime ON. `PRODUCT_NAME`/`EXECUTABLE_NAME` stay `BrewTUI-Bar` on disk (cask + installer compatibility) while `CFBundleDisplayName` is **BrewTUI-Bar** (commercial branding). `PRODUCT_MODULE_NAME` is the identifier-safe `Brew_TUI_Bar`.
+Debug deliberately relaxes signing (Automatic / Apple Development / Hardened Runtime OFF) so Xcode Previews' JIT injection works. Release uses Manual / Developer ID Application / Hardened Runtime ON. `PRODUCT_NAME`/`EXECUTABLE_NAME` stay `BrewTUI-Bar` on disk (cask + installer compatibility) while `CFBundleDisplayName` is **BrewTUI-Bar** (commercial branding). `PRODUCT_MODULE_NAME` is the identifier-safe `BrewTUI_Bar`.
 
 ## Naming
 

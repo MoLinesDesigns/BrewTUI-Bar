@@ -1,8 +1,8 @@
 import Foundation
 import os
 
-/// Silently refreshes the local license envelope via `brew-tui revalidate`.
-/// Brew-TUI-Bar reads license.json offline; when degradation blocks Pro but
+/// Silently refreshes the local license envelope via `brewtui-bar revalidate`.
+/// BrewTUI-Bar reads license.json offline; when degradation blocks Pro but
 /// the subscription is still active, this self-heals without user intervention.
 enum LicenseRevalidator {
     private static let logger = Logger(
@@ -10,7 +10,7 @@ enum LicenseRevalidator {
         category: "LicenseRevalidator"
     )
 
-    /// Runs `brew-tui revalidate` when a recoverable license exists. Returns
+    /// Runs `brewtui-bar revalidate` when a recoverable license exists. Returns
     /// true when the CLI exits 0 (valid or grace).
     @discardableResult
     static func revalidateIfNeeded() async -> Bool {
@@ -18,8 +18,8 @@ enum LicenseRevalidator {
             return false
         }
 
-        guard let executable = await locateBrewTui() else {
-            logger.warning("brew-tui not found — skipping auto-revalidation")
+        guard let executable = await locateBrewTUIBar() else {
+            logger.warning("brewtui-bar not found — skipping auto-revalidation")
             return false
         }
 
@@ -47,16 +47,16 @@ enum LicenseRevalidator {
             logger.info("Auto-revalidation failed with exit code \(exitCode, privacy: .public)")
             return false
         } catch {
-            logger.error("Auto-revalidation could not launch brew-tui: \(error.localizedDescription, privacy: .public)")
+            logger.error("Auto-revalidation could not launch brewtui-bar: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
 
-    private static func locateBrewTui() async -> String? {
+    private static func locateBrewTUIBar() async -> String? {
         let knownPaths = [
-            "/opt/homebrew/bin/brew-tui",
-            "/usr/local/bin/brew-tui",
-            "\(NSHomeDirectory())/.npm/bin/brew-tui",
+            "/opt/homebrew/bin/brewtui-bar",
+            "/usr/local/bin/brewtui-bar",
+            "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
         ]
         for path in knownPaths where FileManager.default.isExecutableFile(atPath: path) {
             return path
@@ -64,7 +64,7 @@ enum LicenseRevalidator {
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brew-tui"]
+        process.arguments = ["brewtui-bar"]
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice

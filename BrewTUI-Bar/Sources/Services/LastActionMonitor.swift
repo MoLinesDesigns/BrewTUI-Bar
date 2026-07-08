@@ -3,7 +3,7 @@ import os
 
 private let lastActionLogger = Logger(subsystem: "com.molinesdesigns.brewtuibar", category: "LastActionMonitor")
 
-// Payload Brew-TUI writes to ~/.brew-tui/last-action.json after a brew action
+// Payload BrewTUI-Bar writes to ~/.brewtui-bar/last-action.json after a brew action
 // completes. Decoded once per file change and forwarded to AppState as a banner
 // update. Keep field names in sync with src/lib/data-dir.ts.
 struct LastAction: Decodable, Sendable {
@@ -14,9 +14,9 @@ struct LastAction: Decodable, Sendable {
     let source: String
 }
 
-// Watches `~/.brew-tui/` for atomic renames of `last-action.json`.
+// Watches `~/.brewtui-bar/` for atomic renames of `last-action.json`.
 // Events are handled off the main thread with debounce so unrelated writes
-// under `~/.brew-tui/` (history, license, CVE cache, profiles) do not block UI.
+// under `~/.brewtui-bar/` (history, license, CVE cache, profiles) do not block UI.
 final class LastActionMonitor: @unchecked Sendable {
     static let shared = LastActionMonitor()
 
@@ -37,7 +37,7 @@ final class LastActionMonitor: @unchecked Sendable {
             return
         }
         let home = FileManager.default.homeDirectoryForCurrentUser
-        self.path = home.appendingPathComponent(".brew-tui/last-action.json")
+        self.path = home.appendingPathComponent(".brewtui-bar/last-action.json")
     }
 
     func start(onChange: @escaping @MainActor (LastAction) -> Void) {

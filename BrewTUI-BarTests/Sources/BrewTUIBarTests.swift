@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 // MARK: - OutdatedPackage Tests
 
@@ -63,7 +63,7 @@ struct OutdatedPackageTests {
 
     // QA-006: regression test for the 0.6.1 fix that made `pinned` optional
     // in the cask payload. brew omits the key for casks; without the fallback
-    // decoding fails and the Brew-TUI-Bar outdated list goes blank.
+    // decoding fails and the BrewTUI-Bar outdated list goes blank.
     @Test("JSON decoding without pinned key (cask shape)")
     func jsonDecodingWithoutPinned() throws {
         let json = """

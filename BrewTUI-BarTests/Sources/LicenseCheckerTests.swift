@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import Brew_TUI_Bar
+@testable import BrewTUI_Bar
 
 // Cross-platform contract: the same fixture is verified by the JS TUI in
 // src/lib/license/signature-cross-check.test.ts. If either side drifts on

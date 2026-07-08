@@ -6,7 +6,7 @@ private let migratorLogger = Logger(subsystem: "com.molinesdesigns.brewtuibar", 
 
 /// Two-phase migrator that lifts user state from the previous bundle ID
 /// (`com.molinesdesigns.brewbar`, the app formerly known as BrewBar) into the
-/// current Brew-TUI-Bar domain. Idempotent via flags stored in the new domain.
+/// current BrewTUI-Bar domain. Idempotent via flags stored in the new domain.
 ///
 /// Why two phases:
 /// - UserDefaults migration must happen *before* any service reads
