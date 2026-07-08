@@ -60,10 +60,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 showVersionMismatch(brewTui: brewTui, brewBar: brewBar)
             }
 
-            // Check Pro license. 2.1.0: .notFound no longer terminates — the
-            // popover shows an in-app upgrade prompt instead, so Free users
-            // get the same menu bar presence and click flow as Pro users.
-            let licenseStatus = LicenseChecker.checkLicense()
+            // Check Pro license. Attempt silent auto-revalidation before denying
+            // Pro — stale lastValidatedAt or benign clock skew self-heals when
+            // the API is reachable, without surfacing a blocking alert.
+            var licenseStatus = LicenseChecker.checkLicense()
+            if let recoverable = LicenseChecker.recoverableLicense() {
+                let shouldRefresh = switch licenseStatus {
+                case .expired: true
+                case .pro: LicenseChecker.needsRevalidation(for: recoverable)
+                default: false
+                }
+                if shouldRefresh, await LicenseRevalidator.revalidateIfNeeded() {
+                    licenseStatus = LicenseChecker.checkLicense()
+                }
+            }
+
             switch licenseStatus {
             case .pro:
                 appState.canUpgrade = true
@@ -71,7 +82,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 // future: surface DegradationLevel.warning/.limited in UI
             case .expired:
                 appState.canUpgrade = false
-                showLicenseExpired()
+                // Only alert when the license is genuinely gone/revoked — not when
+                // offline degradation blocked Pro but the subscription may still be valid.
+                if LicenseChecker.recoverableLicense() == nil {
+                    showLicenseExpired()
+                }
                 // Continue in degraded mode — app stays open without Pro badge
             case .notFound:
                 appState.canUpgrade = false

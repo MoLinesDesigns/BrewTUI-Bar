@@ -51,6 +51,7 @@
 		E282C483D8BA4B88BF10E69D /* BrewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C180F0997601FDABF09FC56 /* BrewService.swift */; };
 		E458EAF391D52968D41463E1 /* ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9473CD8BAABEE1889CB47D /* ServiceTests.swift */; };
 		E70D92D6CA2F010643C71541 /* LegacyMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FF089615AD254B855B86D5 /* LegacyMigrator.swift */; };
+		EA27609A34023EFD3D56B329 /* LicenseRevalidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */; };
 		EBDAACC2F5E1C7530EAFAC94 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9A779B950A79E2551ADEB81 /* PreviewData.swift */; };
 		F09F7EDA460F847403922C5E /* BrewUpgradeStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */; };
 		F68E6BB8880EB0432DBE1B13 /* NewPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4045BBDCB68DFB452875CF7 /* NewPackage.swift */; };
@@ -134,6 +135,7 @@
 		C6B02B13112A5F11D9350564 /* Brew-TUI-BarTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Brew-TUI-BarTests-Info.plist"; sourceTree = "<group>"; };
 		D0ADD005704E1B8B6CA85DCD /* BrewUpgradeStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewUpgradeStream.swift; sourceTree = "<group>"; };
 		DAE5DAD29BCD071C8CBAF17B /* CatalogSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSearchService.swift; sourceTree = "<group>"; };
+		DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseRevalidator.swift; sourceTree = "<group>"; };
 		E668FB288FAF0CE8E76361DC /* BrewProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewProcess.swift; sourceTree = "<group>"; };
 		E7FBB2994AE982723D8FDEC3 /* InstallProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallProgressView.swift; sourceTree = "<group>"; };
 		E886004FD8268509823CE847 /* ServiceDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnostics.swift; sourceTree = "<group>"; };
@@ -204,6 +206,7 @@
 				A00C784B0AF4873D58CDC9B9 /* LastActionMonitor.swift */,
 				18FF089615AD254B855B86D5 /* LegacyMigrator.swift */,
 				813E5666D16A203A409FDE7E /* LicenseChecker.swift */,
+				DEAED6B05E46229F88901252 /* LicenseRevalidator.swift */,
 				9C7525ADAF8F87BAB63B850B /* NewPackagesService.swift */,
 				6545BE6DB192C022A30B7E14 /* NotificationSender.swift */,
 				EB2FFD07568522FBE0B49D12 /* SchedulerService.swift */,
@@ -469,6 +472,7 @@
 				4BDB290E21EAE5611D2A0BC5 /* LastActionMonitor.swift in Sources */,
 				E70D92D6CA2F010643C71541 /* LegacyMigrator.swift in Sources */,
 				87F943ED0E8F73CEEB88100F /* LicenseChecker.swift in Sources */,
+				EA27609A34023EFD3D56B329 /* LicenseRevalidator.swift in Sources */,
 				B5382F5B751EEABB4B902FFC /* NewPackagesService.swift in Sources */,
 				D326D7E7B69DC82794CBDD5A /* NotificationSender.swift in Sources */,
 				B7719B7B9929DABC6BC3F21A /* SchedulerService.swift in Sources */,
@@ -558,7 +562,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.0)";
+				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.1)";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -719,7 +723,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.0)";
+				MARKETING_VERSION = "$(MARKETING_VERSION:default=4.3.1)";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;

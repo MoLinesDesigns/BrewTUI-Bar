@@ -173,6 +173,8 @@ struct LicenseChecker {
     private static let warningThresholdDays: Double = 7
     private static let limitedThresholdDays: Double = 14
     private static let expiredThresholdDays: Double = 30
+    /// Benign clock skew — must match `CLOCK_SKEW_TOLERANCE_MS` in license-manager.ts.
+    private static let clockSkewToleranceSeconds: TimeInterval = 24 * 60 * 60
 
     // SEG-009: built-in perennial PRO accounts removed in parity with the TS
     // bundle (src/lib/license/license-manager.ts). Operator licenses now go
@@ -188,6 +190,39 @@ struct LicenseChecker {
             return .notFound
         }
 
+        return checkLicenseData(data)
+    }
+
+    /// Returns a cryptographically valid, active license even when offline
+    /// degradation would block Pro — used to decide whether auto-revalidation
+    /// is worth attempting before surfacing an expired alert.
+    static func recoverableLicense() -> LicenseData? {
+        guard let data = FileManager.default.contents(atPath: licensePath),
+              let file = try? JSONDecoder().decode(LicenseFile.self, from: data),
+              file.version == 2,
+              let license = file.license,
+              let sig = file.sig,
+              verifySignedLicense(license, signatureBase64: sig),
+              license.status == "active"
+        else { return nil }
+
+        if let expiresAt = license.expiresAt,
+           let expDate = parseDate(expiresAt),
+           expDate < Date() {
+            return nil
+        }
+        return license
+    }
+
+    /// True when the server stamp should be refreshed (24h elapsed or clock skew).
+    static func needsRevalidation(for license: LicenseData) -> Bool {
+        guard let lastValidated = parseDate(license.lastValidatedAt) else { return true }
+        let elapsed = Date().timeIntervalSince(lastValidated)
+        if elapsed < 0 { return true }
+        return elapsed > 24 * 60 * 60
+    }
+
+    private static func checkLicenseData(_ data: Data) -> LicenseStatus {
         guard let file = try? JSONDecoder().decode(LicenseFile.self, from: data) else {
             logger.error("Failed to decode license file")
             return .notFound
@@ -344,10 +379,11 @@ struct LicenseChecker {
             return .expired
         }
         let elapsed = Date().timeIntervalSince(lastValidated)
-        // SEC-L1: future lastValidatedAt is almost always a clock-skew
-        // exploit (user advances system clock to keep Pro forever). Fail
-        // closed; the next online revalidate resets things if benign.
-        if elapsed < 0 { return .expired }
+        // SEC-L1: large future skew is treated as exploitation; small skew (≤24h)
+        // is tolerated while auto-revalidation corrects the server stamp.
+        if elapsed < 0 {
+            return abs(elapsed) <= clockSkewToleranceSeconds ? .none : .expired
+        }
         let days = elapsed / (24 * 60 * 60)
         if days <= warningThresholdDays { return .none }
         if days <= limitedThresholdDays { return .warning }

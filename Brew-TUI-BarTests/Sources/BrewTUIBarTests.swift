@@ -259,6 +259,30 @@ struct LicenseCheckerTests {
         #expect(LicenseChecker.degradationLevel(for: licenseValidated(20)) == .limited)
         #expect(LicenseChecker.degradationLevel(for: licenseValidated(31)) == .expired)
     }
+
+    @Test("small future clock skew is tolerated (≤24h)")
+    func smallFutureClockSkew() {
+        let eightHoursAhead = Date().addingTimeInterval(8 * 60 * 60)
+        let license = LicenseData(
+            key: "k", instanceId: "i", status: "active",
+            customerEmail: "e", customerName: "n", plan: "pro",
+            activatedAt: "2026-01-01T00:00:00.000Z", expiresAt: nil,
+            lastValidatedAt: ISO8601DateFormatter().string(from: eightHoursAhead)
+        )
+        #expect(LicenseChecker.degradationLevel(for: license) == .none)
+    }
+
+    @Test("large future clock skew is rejected")
+    func largeFutureClockSkew() {
+        let twoDaysAhead = Date().addingTimeInterval(2 * 24 * 60 * 60)
+        let license = LicenseData(
+            key: "k", instanceId: "i", status: "active",
+            customerEmail: "e", customerName: "n", plan: "pro",
+            activatedAt: "2026-01-01T00:00:00.000Z", expiresAt: nil,
+            lastValidatedAt: ISO8601DateFormatter().string(from: twoDaysAhead)
+        )
+        #expect(LicenseChecker.degradationLevel(for: license) == .expired)
+    }
 }
 
 // MARK: - AppState Tests
