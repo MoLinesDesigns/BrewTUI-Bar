@@ -49,8 +49,17 @@ This app ships in lockstep with the **`BrewTUI-Bar` CLI**, a *separate* repo and
 - **Ordering is enforced**: the CLI's `prepublishOnly` runs `scripts/check-brewtui-bar-release.mjs`, which hits the GitHub API and fails unless the `vX.Y.Z` release in `MoLinesDesigns/BrewTUI-Bar` already has both `BrewTUI-Bar.app.zip` and `BrewTUI-Bar.app.zip.sha256` assets. So the binary release must exist **before** publishing the CLI. Emergency bypass: `SKIP_BREWTUIBAR_CHECK=1`.
 - `npm publish` requires a one-time password (the account enforces 2FA) unless you use an **Automation** token (the only token type that bypasses 2FA).
 
+**Never bump one `package.json` by hand.** `npm run version:set X.Y.Z` (from this repo)
+writes the version into *both* repos at once, and `npm run version:check` fails if they
+have drifted. `release.sh` runs that check before archiving, and the CLI's prepublish
+guard runs it too — so a mismatch surfaces in seconds instead of after a ~10 min
+notarisation. The CLI checkout is found via `$BREWTUI_CLI_PATH` (default
+`/Volumes/SSD/Projects/BrewTUI-Bar`); with no local checkout, `check` reads the other
+`package.json` from GitHub.
+
 Full release sequence for version `X.Y.Z`:
-1. App: bump `package.json` → X.Y.Z, commit, `git tag vX.Y.Z`, push `main` + tag (this repo).
+1. Both: `npm run version:set X.Y.Z`, then commit, `git tag vX.Y.Z` and push `main` + tag
+   in each repo.
 2. App: `NOTARY_PROFILE=brewbar-notary ./scripts/release.sh` → notarized zip + SHA256.
 3. App: `gh release create vX.Y.Z -R MoLinesDesigns/BrewTUI-Bar --target main` uploading `build/BrewTUI-Bar.app.zip` and `build/BrewTUI-Bar.app.zip.sha256`.
 4. Cask: bump `version` + `sha256` in the tap, commit, push.

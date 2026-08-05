@@ -49,6 +49,13 @@ if ! xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>
 fi
 echo "✓ notary profile listo."
 
+# REL-002: la app y el CLI tienen que ir a la misma version. Si divergen, el
+# unico sitio donde salta hoy es el prepublish guard del CLI, que busca el tag
+# `v<version-del-CLI>` en el repo de la app — es decir, DESPUES de haber
+# firmado, notarizado (~10 min) y publicado la release. Se comprueba aqui.
+echo "→ Verificando que app y CLI comparten version..."
+node "$(dirname "$0")/version-sync.mjs" check
+
 # ── Step 1: regenerate workspace ──────────────────────────────────────────
 # Tuist caches the compiled manifest (not just the workspace). Without an
 # explicit clean, `readMarketingVersion()` is NOT re-run when package.json

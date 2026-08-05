@@ -14,6 +14,8 @@
   "author": "MoLines Designs",
   "license": "MIT",
   "scripts": {
+    "version:check": "node scripts/version-sync.mjs check",
+    "version:set": "node scripts/version-sync.mjs set",
     "generate": "tuist generate --no-open",
     "build": "xcodebuild -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO build",
     "test": "xcodebuild -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar -configuration Debug -destination 'platform=macOS' CODE_SIGN_IDENTITY='-' CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO test"
