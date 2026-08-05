@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-BrewTUI-Bar is a native macOS menu bar agent (SwiftUI, Swift 6) that companions the `brewtui-bar` CLI. It watches Homebrew for outdated packages, service status, CVE alerts, and cross-machine sync, surfacing them from a status-item popover. It is a `LSUIElement` app: no Dock icon, no main window — the entry point is `AppDelegate`, not the `App` scene.
+BrewTUI-Bar is a native macOS menu bar agent (SwiftUI, Swift 6) that companions the `BrewTUI-Bar` CLI. It watches Homebrew for outdated packages, service status, CVE alerts, and cross-machine sync, surfacing them from a status-item popover. It is a `LSUIElement` app: no Dock icon, no main window — the entry point is `AppDelegate`, not the `App` scene.
 
 ## Build / test / run
 
@@ -34,12 +34,12 @@ Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest. C
 
 ### Coordinated two-repo release (read before any version bump)
 
-This app ships in lockstep with the **`brewtui-bar` CLI**, a *separate* repo and the real npm package. `AppDelegate`'s `VersionChecker` warns when the two versions drift, so **both must be bumped to the same version together**.
+This app ships in lockstep with the **`BrewTUI-Bar` CLI**, a *separate* repo and the real npm package. `AppDelegate`'s `VersionChecker` warns when the two versions drift, so **both must be bumped to the same version together**.
 
-- **`brewtui-bar` CLI** — `/Volumes/SSD/Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`, npm package `brewtui-bar` (the one users `npm install -g`). This is the npm publish target.
+- **`BrewTUI-Bar` CLI** — `/Volumes/SSD/Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`, npm package `brewtui-bar`, installed/exposed as the `BrewTUI-Bar` terminal command.
 - **This app** — `/Volumes/SSD/xCode_Projects/BrewTUI-Bar`, repo `MoLinesDesigns/BrewTUI-Bar`.
-- **The app's binary GitHub Release lives in the CLI repo `MoLinesDesigns/BrewTUI-Bar`, not in `BrewTUI-Bar`** — the cask's `url`/`homepage` point there. (`BrewTUI-Bar` holds only source + the `vX.Y.Z` source tag.)
-- **Cask**: `MoLinesDesigns/homebrew-tap`, cloned locally at `/opt/homebrew/Library/Taps/molinesdesigns/homebrew-tap/Casks/brewtui-bar.rb`. Bump `version` + `sha256` (the SHA from `release.sh`), `brew style` it, commit, push `main` directly.
+- **The app's binary GitHub Release lives in the repo `MoLinesDesigns/BrewTUI-Bar`, not in `BrewTUI-Bar`** — the cask's `url`/`homepage` point there. (`BrewTUI-Bar` holds only source + the `vX.Y.Z` source tag.)
+- **Cask**: `MoLinesDesigns/homebrew-tap`, cloned locally at `/opt/homebrew/Library/Taps/molinesdesigns/homebrew-tap/Casks/brewtui-bar.rb`. Homebrew requires the file/token to stay normalized lowercase, but the visible app name and command are **BrewTUI-Bar**. Bump `version` + `sha256` (the SHA from `release.sh`), `brew style` it, commit, push `main` directly.
 - **Ordering is enforced**: the CLI's `prepublishOnly` runs `scripts/check-brewtui-bar-release.mjs`, which hits the GitHub API and fails unless the `vX.Y.Z` release in `MoLinesDesigns/BrewTUI-Bar` already has both `BrewTUI-Bar.app.zip` and `BrewTUI-Bar.app.zip.sha256` assets. So the binary release must exist **before** publishing the CLI. Emergency bypass: `SKIP_BREWTUIBAR_CHECK=1`.
 - `npm publish` requires a one-time password (the account enforces 2FA) unless you use an **Automation** token (the only token type that bypasses 2FA).
 
@@ -56,10 +56,22 @@ Debug deliberately relaxes signing (Automatic / Apple Development / Hardened Run
 
 ## Naming
 
-- **BrewTUI-Bar** — commercial branding in UI, `CFBundleDisplayName`, localized strings
-- **BrewTUI-Bar** — terminal companion branding (references to the CLI product in copy)
-- **BrewTUI-Bar.app** / process name `BrewTUI-Bar` — on-disk bundle + `pgrep` (do not rename without migration)
-- **brewtui-bar** / **brewtui-bar** — CLI command and Homebrew cask (unchanged)
+Four distinct entities. A global find-and-replace across them is how the shipped
+copy ended up saying "BrewTUI-Bar requires BrewTUI-Bar to be installed" and how
+working shell commands got rewritten into ones that do not exist — keep them apart:
+
+- **BrewTUI-Bar** — commercial branding: UI copy, `CFBundleDisplayName`, localized strings
+- **`brewtui-bar`** — the CLI's terminal command, lowercase, defined by the `bin` entry of the
+  npm package. **Every string that ends up on a shell line uses this**: `exec brewtui-bar`,
+  `brewtui-bar activate …`, `brewtui-bar install-brewtui-bar --force`. Subcommands are compared
+  as plain strings by the CLI, so a case-renamed subcommand fails outright — the
+  case-insensitive filesystem does not rescue those the way it does the binary name.
+- **BrewTUI-Bar.app** / process name `BrewTUI-Bar` — on-disk bundle + `pgrep` (do not rename
+  without migration)
+- **`brewtui-bar` cask** — Homebrew token for **the app**, not the CLI. `brew install --cask
+  brewtui-bar` installs this menu bar app; the CLI is the *formula* the cask declares via
+  `depends_on formula: "brewtui-bar"`, installable on its own with `npm install -g brewtui-bar`.
+  Homebrew requires the normalized lowercase token.
 
 ## Architecture
 
@@ -75,15 +87,15 @@ Sources/Views/    PopoverView and friends (SwiftUI)
 - **`BrewProcess`** is the one place that spawns `brew`. It resolves the brew path (Apple Silicon → Intel → Linuxbrew fallback), drains stdout incrementally via a `readabilityHandler` (filling the ~64KB kernel pipe buffer used to deadlock large `brew outdated --json`), enforces a timeout, and sets `HOMEBREW_NO_AUTO_UPDATE` by default. The `OnceGuard` ensures exactly-one continuation resume across the termination-handler thread and the timeout task.
 - **`AppDelegate`** drives a careful NSPopover lifecycle: the `NSHostingController` is recreated on every show (reusing it breaks the responder chain after a sheet dismiss), `makeKey()` is deferred one runloop tick, and a global click-outside monitor backstops `.transient` auto-close. Touch this code carefully — the comments document real bugs.
 
-## Cross-process contract with `brewtui-bar`
+## Cross-process contract with `BrewTUI-Bar`
 
-The app shares state with the `brewtui-bar` CLI and its backend through files under `~/.brewtui-bar/`. **These are contracts — field names and semantics must stay in sync with the CLI/backend:**
+The app shares state with the `BrewTUI-Bar` CLI and its backend through files under `~/.brewtui-bar/`. **These are contracts — field names and semantics must stay in sync with the CLI/backend:**
 
 - `license.json` — `LicenseChecker` reads it. v2 format: `LicenseData` payload + Ed25519 `sig`. Legacy v1 (encrypted/iv/tag) envelopes are **rejected** (forgeable). Degradation thresholds mirror the backend's `src/lib/license/license-manager.ts`. App runs Free/Pro/expired based on this; expiry degrades gracefully (no terminate).
 - `last-action.json` — `LastActionMonitor` watches it (DispatchSource on a util queue, debounced); when the CLI runs an action it pushes a banner into `AppState` and forces a refresh. Mirror field names with the CLI's `src/lib/data-dir.ts`.
 - `cve-cache.json` — `SecurityMonitor`. Sync state — `SyncMonitor`.
-- `brewtui-bar --version` — `VersionChecker` warns (non-blocking) when CLI and app versions drift, because version skew has broken license decryption before. At launch, missing `brewtui-bar` shows a required-install alert and quits.
-- **Self-cask filtering**: `brew outdated` lists `brewtui-bar` (the app itself); `BrewChecker` strips these from the user-facing outdated count and surfaces them separately as `selfUpdateVersion`.
+- `BrewTUI-Bar --version` — `VersionChecker` warns (non-blocking) when CLI and app versions drift, because version skew has broken license decryption before. At launch, missing `BrewTUI-Bar` shows a required-install alert and quits.
+- **Self-cask filtering**: `brew outdated` lists `BrewTUI-Bar` (the app itself); `BrewChecker` strips these from the user-facing outdated count and surfaces them separately as `selfUpdateVersion`.
 
 ## Conventions
 

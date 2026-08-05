@@ -121,7 +121,11 @@ struct AppStateInjectedTests {
         #expect(state.error == nil)
     }
 
-    @Test("upgrade(package:) surfaces a checker error and stops loading")
+    /// A failed upgrade must NOT land in `state.error`: PopoverView renders that
+    /// as a full-page state that replaces the package list, so one failure out
+    /// of N used to hide the remaining N-1. It goes to `upgradeFailureNotice`,
+    /// which the popover shows as a dismissible banner over the intact list.
+    @Test("upgrade(package:) reports failures as a banner, not a full-page error")
     @MainActor func upgradePropagatesErrors() async {
         let stub = StubBrewChecker()
         stub.upgradePackageError = BrewProcessError.timeout
@@ -130,8 +134,39 @@ struct AppStateInjectedTests {
 
         await state.upgrade(package: "wget")
 
-        #expect(state.error != nil)
+        #expect(state.upgradeFailureNotice != nil)
+        #expect(state.error == nil)
         #expect(state.isLoading == false)
+    }
+
+    /// The countdown lives in AppState precisely so it survives the popover
+    /// closing; cancelling it must stop the upgrade from ever being enqueued.
+    @Test("cancelling the countdown prevents the upgrade")
+    @MainActor func countdownCancelPreventsUpgrade() async {
+        let stub = StubBrewChecker()
+        let state = AppState(checker: stub)
+        state.canUpgrade = true
+
+        state.startUpgradeCountdown(for: "wget")
+        #expect(state.countdownRemaining["wget"] != nil)
+
+        state.cancelUpgradeCountdown(for: "wget")
+        #expect(state.countdownRemaining["wget"] == nil)
+
+        try? await Task.sleep(for: .seconds(1))
+        #expect(stub.upgradedPackages.isEmpty)
+    }
+
+    /// A notice raised while the popover is closed must wait for the user
+    /// instead of expiring unseen 30s later.
+    @Test("banner notices wait for the popover to become visible")
+    @MainActor func noticeWaitsForPopover() async {
+        let state = AppState(checker: StubBrewChecker())
+
+        state.popoverVisible = false
+        state.postNotice("upgraded git")
+
+        #expect(state.lastActionMessage == "upgraded git")
     }
 
     @Test("upgradeAll routes to the injected checker")

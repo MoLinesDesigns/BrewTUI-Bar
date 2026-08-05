@@ -11,7 +11,7 @@ struct VersionChecker {
     enum Status: Equatable {
         case match(brewTUIBar: String)
         case mismatch(brewTUIBar: String, brewBar: String)
-        case unknown // brewtui-bar present but version unreadable
+        case unknown // BrewTUI-Bar present but version unreadable
     }
 
     /// Marketing version embedded in BrewTUI-Bar's bundle.
@@ -19,8 +19,8 @@ struct VersionChecker {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0"
     }
 
-    /// Calls `brewtui-bar --version` and parses the single-line output.
-    /// Returns nil if brewtui-bar is missing or the call fails.
+    /// Calls `BrewTUI-Bar --version` and parses the single-line output.
+    /// Returns nil if BrewTUI-Bar is missing or the call fails.
     static func brewTUIBarVersion() async -> String? {
         let executable = await locateBrewTUIBar()
         guard let executable else { return nil }
@@ -39,7 +39,7 @@ struct VersionChecker {
                 do { try process.run() } catch { cont.resume(throwing: error) }
             }
         } catch {
-            logger.error("brewtui-bar --version failed to launch: \(error.localizedDescription, privacy: .public)")
+            logger.error("BrewTUI-Bar --version failed to launch: \(error.localizedDescription, privacy: .public)")
             return nil
         }
 
@@ -49,7 +49,7 @@ struct VersionChecker {
         guard let token = raw.split(whereSeparator: { $0.isWhitespace }).first.map(String.init),
               !token.isEmpty
         else {
-            logger.error("brewtui-bar --version returned empty output")
+            logger.error("BrewTUI-Bar --version returned empty output")
             return nil
         }
         return token.hasPrefix("v") ? String(token.dropFirst()) : token
@@ -69,6 +69,9 @@ struct VersionChecker {
 
     private static func locateBrewTUIBar() async -> String? {
         let knownPaths = [
+            "/opt/homebrew/bin/BrewTUI-Bar",
+            "/usr/local/bin/BrewTUI-Bar",
+            "\(NSHomeDirectory())/.npm/bin/BrewTUI-Bar",
             "/opt/homebrew/bin/brewtui-bar",
             "/usr/local/bin/brewtui-bar",
             "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
@@ -77,23 +80,26 @@ struct VersionChecker {
             return path
         }
 
-        // Fallback: ask the shell PATH via /usr/bin/which
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brewtui-bar"]
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        do {
-            try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
-                process.terminationHandler = { _ in cont.resume() }
-                do { try process.run() } catch { cont.resume(throwing: error) }
+        // Fallback: ask the shell PATH via /usr/bin/which.
+        for commandName in ["BrewTUI-Bar", "brewtui-bar"] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+            process.arguments = [commandName]
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = FileHandle.nullDevice
+            do {
+                try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+                    process.terminationHandler = { _ in cont.resume() }
+                    do { try process.run() } catch { cont.resume(throwing: error) }
+                }
+            } catch {
+                continue
             }
-        } catch {
-            return nil
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if !path.isEmpty { return path }
         }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return path.isEmpty ? nil : path
+        return nil
     }
 }

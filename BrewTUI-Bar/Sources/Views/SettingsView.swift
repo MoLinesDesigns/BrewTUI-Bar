@@ -166,11 +166,15 @@ struct SettingsView: View {
 
     private var menuBarSection: some View {
         Section(String(localized: "Menu Bar Badges")) {
-            Toggle("Blink icon on updates", isOn: Binding(
+            // Renamed from "Blink icon on updates": the blink is no longer the
+            // only presentation. Under Reduce Motion the same preference shows
+            // a static count badge instead, so the toggle now controls whether
+            // outdated packages are signalled at all.
+            Toggle("Show outdated packages", isOn: Binding(
                 get: { badgePreferences.showOutdated },
                 set: { badgePreferences.showOutdated = $0 }
             ))
-            .accessibilityLabel(String(localized: "Blink icon on updates"))
+            .accessibilityLabel(String(localized: "Show outdated packages"))
 
             Toggle("Show CVE alerts", isOn: Binding(
                 get: { badgePreferences.showCVE },
@@ -184,7 +188,7 @@ struct SettingsView: View {
             ))
             .accessibilityLabel(String(localized: "Show sync indicator"))
 
-            Text("Toggle the icons that appear next to BrewTUI-Bar's menu bar icon.")
+            Text("Toggle the indicators that appear next to BrewTUI-Bar's menu bar icon. Outdated packages blink the icon, or show a count when Reduce Motion is on.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -235,9 +239,13 @@ struct SettingsView: View {
 
     private var advancedSection: some View {
         Section(String(localized: "Advanced")) {
-            LabeledContent(String(localized: "BrewTUI-Bar version"), value: bundleVersion)
+            // These two sit next to each other and used to read
+            // "BrewTUI-Bar version" / "BrewTUI-Bar CLI", which gave the user no
+            // way to tell the menu bar app from the command line tool —
+            // precisely the screen they land on after a version-mismatch alert.
+            LabeledContent(String(localized: "Menu bar app"), value: bundleVersion)
             if let cli = appState.brewTUIBarCliVersion {
-                LabeledContent(String(localized: "BrewTUI-Bar CLI"), value: cli)
+                LabeledContent(String(localized: "brewtui-bar CLI"), value: cli)
             }
             HStack {
                 Button {
@@ -263,14 +271,14 @@ struct SettingsView: View {
     private func runRevalidate() {
         // Same pattern PopoverView uses for `Open BrewTUI-Bar`: drop a one-shot
         // .command script and hand it to NSWorkspace so the user's default
-        // terminal launches `brewtui-bar revalidate`. We don't shell out
+        // terminal launches `BrewTUI-Bar revalidate`. We don't shell out
         // in-process — BrewTUI-Bar is sandbox-adjacent and we'd lose the user's
         // shell config + interactive prompts.
         do {
             let tempDir = FileManager.default.temporaryDirectory
-                .appendingPathComponent("brewtui-bar-revalidate", isDirectory: true)
+                .appendingPathComponent("BrewTUI-Bar-revalidate", isDirectory: true)
             try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-            let scriptURL = tempDir.appendingPathComponent("brewtui-bar-revalidate.command")
+            let scriptURL = tempDir.appendingPathComponent("BrewTUI-Bar-revalidate.command")
             let script = """
             #!/bin/zsh
             exec brewtui-bar revalidate

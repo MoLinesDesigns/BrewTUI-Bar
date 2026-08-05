@@ -3,16 +3,14 @@ import SwiftUI
 struct OutdatedListView: View {
     let appState: AppState
     @State private var showUpgradeAllConfirm = false
-    /// Segundos restantes por paquete (clave = `OutdatedPackage.id`). Cada
-    /// paquete lleva su propia cuenta atrás independiente: arrancar una nueva
-    /// no detiene las demás en curso.
-    @State private var countdownRemaining: [OutdatedPackage.ID: Int] = [:]
-    @State private var countdownTasks: [OutdatedPackage.ID: Task<Void, Never>] = [:]
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
-    /// Segundos de margen antes de que un upgrade de un paquete arranque solo.
-    private static let countdownSeconds = 3
+    // La cuenta atrás vive en AppState, no en `@State`. AppDelegate recrea el
+    // NSHostingController en cada apertura del popover, así que un `@State`
+    // aquí se destruía con la vista: el upgrade seguía disparándose pero el
+    // botón para cancelarlo desaparecía, y reabrir el popover permitía encolar
+    // el mismo paquete otra vez.
 
     var body: some View {
         VStack(spacing: 0) {
@@ -102,10 +100,10 @@ struct OutdatedListView: View {
 
             // Note: Task in button action — .task modifier not applicable here
             if appState.canUpgrade {
-                if let remaining = countdownRemaining[pkg.id] {
+                if let remaining = appState.countdownRemaining[pkg.name] {
                     // Cuenta atrás en curso: pulsar cancela y aborta el upgrade.
                     Button {
-                        cancelCountdown(pkg.id)
+                        appState.cancelUpgradeCountdown(for: pkg.name)
                     } label: {
                         HStack(spacing: 4) {
                             Text("\(remaining)")
@@ -121,7 +119,7 @@ struct OutdatedListView: View {
                     )
                 } else {
                     Button {
-                        startCountdown(for: pkg)
+                        appState.startUpgradeCountdown(for: pkg.name)
                     } label: {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 11, weight: .semibold))
@@ -147,39 +145,7 @@ struct OutdatedListView: View {
             ambientGlow: 0.04
         )
         .contentShape(Rectangle())
-        .animation(.easeInOut(duration: 0.2), value: countdownRemaining[pkg.id])
-    }
-
-    // MARK: - Countdown
-
-    /// Arranca la cuenta atrás de `countdownSeconds` para `pkg`; al agotarse,
-    /// lanza el upgrade salvo que el usuario haya cancelado antes. Cada paquete
-    /// tiene su propia cuenta atrás: pulsar otro paquete arranca una cuenta
-    /// independiente sin detener las que ya están en marcha. Reclicar el mismo
-    /// paquete reinicia solo su propia cuenta.
-    private func startCountdown(for pkg: OutdatedPackage) {
-        let id = pkg.id
-        let name = pkg.name
-        countdownTasks[id]?.cancel()
-        countdownRemaining[id] = Self.countdownSeconds
-        countdownTasks[id] = Task {
-            for second in stride(from: Self.countdownSeconds, through: 1, by: -1) {
-                countdownRemaining[id] = second
-                try? await Task.sleep(for: .seconds(1))
-                if Task.isCancelled { return }
-            }
-            countdownRemaining[id] = nil
-            countdownTasks[id] = nil
-            // Sin handle retenido: el upgrade debe sobrevivir al cierre del
-            // popover (click fuera, foco a otra app).
-            await appState.upgrade(package: name)
-        }
-    }
-
-    private func cancelCountdown(_ id: OutdatedPackage.ID) {
-        countdownTasks[id]?.cancel()
-        countdownTasks[id] = nil
-        countdownRemaining[id] = nil
+        .animation(.easeInOut(duration: 0.2), value: appState.countdownRemaining[pkg.name])
     }
 }
 

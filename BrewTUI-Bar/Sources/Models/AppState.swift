@@ -19,28 +19,48 @@ final class AppState {
     var cveCheckError: String?
     var syncActivity = false
     var syncMachineCount = 0
-    // Friendly toast shown after BrewTUI-Bar publishes a `last-action.json`.
-    // Auto-clears after 30s via lastActionFadeTask.
+    // Friendly toast shown after BrewTUI-Bar publishes a `last-action.json`,
+    // and after an upgrade finishes. The 30s auto-clear only starts once the
+    // popover is actually on screen — the popover is closed most of the time,
+    // so a timer started on arrival used to expire before anyone saw it.
     var lastActionMessage: String?
     private var lastActionFadeTask: Task<Void, Never>?
+    /// Set by AppDelegate as the popover is shown/hidden. Gates the toast's
+    /// auto-fade so a message can wait for the user instead of expiring unseen.
+    var popoverVisible = false {
+        didSet {
+            guard popoverVisible != oldValue else { return }
+            if popoverVisible {
+                scheduleLastActionFade()
+            } else {
+                lastActionFadeTask?.cancel()
+                lastActionFadeTask = nil
+            }
+        }
+    }
     /// Snapshot of the license decoded at launch. Used by PopoverView's footer
     /// (tier badge) and SettingsView's License section. nil until the launch
     /// task in AppDelegate populates it.
     var licenseSummary: LicenseSummary?
-    /// Version of the brewtui-bar CLI on PATH. Populated alongside the license at
+    /// Version of the BrewTUI-Bar CLI on PATH. Populated alongside the license at
     /// launch; shown in SettingsView's About section.
     var brewTUIBarCliVersion: String?
     /// New BrewTUI-Bar version detected by `brew outdated`. Surfaced as a
     /// discrete `↑` indicator in the popover footer when non-nil; clicking
-    /// opens Terminal with `brew upgrade --cask brewtui-bar`. Kept separate
+    /// opens Terminal with `brew upgrade --cask BrewTUI-Bar`. Kept separate
     /// from `outdatedPackages` so the self-cask never inflates the user-facing
     /// outdated count.
     var selfUpdateVersion: String?
     /// Live state of an in-flight `brew upgrade`. PopoverView shows the
-    /// InstallProgressView sheet whenever this is non-nil; the sheet stays
-    /// open after `isFinished` so the user can confirm the outcome before
-    /// dismissing it.
+    /// InstallProgressView sheet whenever this is non-nil. A clean run clears
+    /// it automatically once the queue drains (see `finishQueueRun`); a run
+    /// that failed stays parked so the user can read what happened.
     var installProgress: InstallProgress?
+    /// Reason of the last failed upgrade. Kept apart from `error` on purpose:
+    /// `error` drives a full-page state in PopoverView that hides the package
+    /// list, which is the wrong shape for "one package out of N failed".
+    /// Rendered as a dismissible banner instead.
+    var upgradeFailureNotice: String?
     /// "What's new in Homebrew" modal state. Populated lazily the first time
     /// the user opens the modal (or refreshes it); the modal renders empty
     /// states for loading/error so the user knows what's happening.
@@ -79,6 +99,23 @@ final class AppState {
     private var upgradeQueue: [UpgradeRequest] = []
     private var upgradeWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
     private var upgradeWorker: Task<Void, Never>?
+
+    /// Grace period before a single-package upgrade fires on its own, in
+    /// seconds. Lives here rather than in the view: `OutdatedListView`'s
+    /// `@State` is destroyed every time the popover closes (AppDelegate
+    /// recreates the hosting controller on each show), which used to strand the
+    /// countdown — the upgrade still fired but the Cancel button that could
+    /// stop it no longer existed anywhere, and reopening the popover let the
+    /// user queue the same package a second time.
+    static let upgradeCountdownSeconds = 3
+    /// Seconds left per package id. The view renders from this, so the
+    /// countdown survives the popover closing and reopening.
+    private(set) var countdownRemaining: [String: Int] = [:]
+    private var countdownTasks: [String: Task<Void, Never>] = [:]
+    /// Names of packages already completed in the current queue run, so a
+    /// chained batch can report everything it did once the queue drains
+    /// instead of each modal overwriting the previous result.
+    private var completedInCurrentRun: [String] = []
 
     /// Número de upgrades esperando turno detrás del que se muestra ahora.
     /// Lo consume el modal para indicar "N en cola".
@@ -197,20 +234,40 @@ final class AppState {
             packages: action.packages,
             remaining: action.remainingOutdated
         )
+        postNotice(message)
+        Task { await self.refresh(force: true) }
+    }
+
+    /// Publishes a toast into the popover banner. The fade countdown only runs
+    /// while the popover is visible, so a notice raised with the popover closed
+    /// survives until the user actually opens it.
+    func postNotice(_ message: String) {
         lastActionMessage = message
         lastActionFadeTask?.cancel()
+        lastActionFadeTask = nil
+        if popoverVisible {
+            scheduleLastActionFade()
+        }
+    }
+
+    private func scheduleLastActionFade() {
+        guard lastActionMessage != nil, lastActionFadeTask == nil else { return }
         lastActionFadeTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 30 * 1_000_000_000)
             guard !Task.isCancelled, let self else { return }
             self.lastActionMessage = nil
+            self.lastActionFadeTask = nil
         }
-        Task { await self.refresh(force: true) }
     }
 
     func dismissLastActionMessage() {
         lastActionFadeTask?.cancel()
         lastActionFadeTask = nil
         lastActionMessage = nil
+    }
+
+    func dismissUpgradeFailureNotice() {
+        upgradeFailureNotice = nil
     }
 
     func showServiceDiagnostics(for service: BrewService) async {
@@ -271,11 +328,42 @@ final class AppState {
         return "\(actionLine) \(tailLine)"
     }
 
+    /// Starts (or restarts) the grace-period countdown for `name`. When it
+    /// elapses the upgrade is enqueued. Re-arming the same package resets only
+    /// its own countdown; other packages keep theirs.
+    func startUpgradeCountdown(for name: String) {
+        countdownTasks[name]?.cancel()
+        countdownRemaining[name] = Self.upgradeCountdownSeconds
+        countdownTasks[name] = Task { [weak self] in
+            for second in stride(from: Self.upgradeCountdownSeconds, through: 1, by: -1) {
+                guard let self, !Task.isCancelled else { return }
+                self.countdownRemaining[name] = second
+                try? await Task.sleep(for: .seconds(1))
+            }
+            guard let self, !Task.isCancelled else { return }
+            self.countdownRemaining[name] = nil
+            self.countdownTasks[name] = nil
+            await self.upgrade(package: name)
+        }
+    }
+
+    /// Aborts a pending countdown before it fires. Safe to call for a package
+    /// that has none.
+    func cancelUpgradeCountdown(for name: String) {
+        countdownTasks[name]?.cancel()
+        countdownTasks[name] = nil
+        countdownRemaining[name] = nil
+    }
+
     func upgrade(package name: String) async {
         guard canUpgrade else {
             error = String(localized: "Pro license expired")
             return
         }
+        // A countdown already committed this package; make sure a second entry
+        // point (or a re-armed countdown) cannot enqueue it twice.
+        cancelUpgradeCountdown(for: name)
+        guard !upgradeQueue.contains(where: { $0.seeds == [name] }) else { return }
         // Look up the package's kind so we can pass `--cask`/`--formula`
         // explicitly. Without it `brew upgrade <name>` is ambiguous for
         // certain casks and can silently no-op (exit 0, "Warning: Not
@@ -325,6 +413,7 @@ final class AppState {
     /// solaparse.
     private func startUpgradeWorkerIfNeeded() {
         guard upgradeWorker == nil else { return }
+        completedInCurrentRun = []
         upgradeWorker = Task { @MainActor in
             defer { upgradeWorker = nil }
             while !upgradeQueue.isEmpty {
@@ -336,7 +425,36 @@ final class AppState {
                 )
                 upgradeWaiters.removeValue(forKey: request.id)?.resume()
             }
+            // Queue drained. Chaining replaces the modal's contents in place,
+            // so without this the result of every run but the last would be
+            // lost unless the user happened to be watching. Summarise the
+            // whole batch in the banner, which now waits for the popover.
+            finishQueueRun()
         }
+    }
+
+    /// Closes out a drained queue: reports what got upgraded in the banner and,
+    /// on a clean run, dismisses the modal instead of leaving it parked until
+    /// the user clicks Done. A modal with a failure stays put — that one the
+    /// user needs to read.
+    private func finishQueueRun() {
+        let completed = completedInCurrentRun
+        completedInCurrentRun = []
+
+        let hasFailure = installProgress?.finalError != nil
+        if !hasFailure, !completed.isEmpty {
+            postNotice(upgradeSummaryMessage(for: completed))
+        }
+
+        guard !hasFailure, installProgress?.isFinished == true else { return }
+        installProgress = nil
+    }
+
+    private func upgradeSummaryMessage(for packages: [String]) -> String {
+        if packages.count == 1, let only = packages.first {
+            return String(format: String(localized: "Upgraded %@."), only)
+        }
+        return String(format: String(localized: "Upgraded %lld packages."), Int64(packages.count))
     }
 
     /// Dismisses the install-progress sheet. Allowed only once the run has
@@ -471,6 +589,7 @@ final class AppState {
     ) async {
         isLoading = true
         error = nil
+        upgradeFailureNotice = nil
         installProgress = InstallProgress(mode: mode, seeds: seeds)
 
         // Drive the stream on the main actor — AppState is @MainActor, every
@@ -493,7 +612,14 @@ final class AppState {
             case .failure(let reason):
                 succeeded = false
                 installProgress?.finishFailure(reason)
-                self.error = String(format: String(localized: "Upgrade failed: %@"), reason)
+                // Deliberately NOT `self.error`: PopoverView renders `error` as
+                // a full-page state that replaces the package list, so a single
+                // failed package used to hide the other N still pending. The
+                // modal already carries the reason; the banner repeats it after
+                // the modal closes.
+                self.upgradeFailureNotice = String(
+                    format: String(localized: "Upgrade failed: %@"), reason
+                )
             }
         }
 
@@ -517,18 +643,23 @@ final class AppState {
                     return String(localized: "Homebrew did not perform any upgrade")
                 }()
                 installProgress?.finalError = reason
-                self.error = String(format: String(localized: "Upgrade failed: %@"), reason)
+                self.upgradeFailureNotice = String(
+                    format: String(localized: "Upgrade failed: %@"), reason
+                )
             }
         }
 
-        if succeeded {
-            // Refresh the outdated badge so it reflects the new state.
-            // Skipping the refresh on failure preserves the error message
-            // (refresh wipes `error` on entry) and avoids re-querying brew
-            // when nothing changed.
-            await refresh(force: true)
-        } else {
-            isLoading = false
+        if succeeded, let progress = installProgress {
+            completedInCurrentRun.append(
+                contentsOf: progress.packages
+                    .filter { $0.stage == .done }
+                    .map(\.name)
+            )
         }
+
+        // Refresh in both outcomes. A failed batch can still have upgraded some
+        // packages, so the list has to be re-read either way; the failure text
+        // now lives in `upgradeFailureNotice`, which `refresh` does not clear.
+        await refresh(force: true)
     }
 }

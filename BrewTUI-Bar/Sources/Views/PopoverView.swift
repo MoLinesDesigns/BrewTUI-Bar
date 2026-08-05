@@ -65,6 +65,15 @@ struct PopoverView: View {
                             .padding(.vertical, 6)
                     }
 
+                    // Fallo de upgrade como banner, no como estado a página
+                    // completa: `appState.error` sustituye la lista entera, así
+                    // que un paquete fallido de N escondía los N-1 restantes.
+                    if let failure = appState.upgradeFailureNotice {
+                        upgradeFailureBanner(failure)
+                            .padding(.horizontal, CrystalGlass.Spacing.md)
+                            .padding(.vertical, 6)
+                    }
+
                     // Estado de paquetes al centro, justo bajo el header. Las
                     // vistas vacías (upToDate/loading/error) expanden con
                     // maxHeight: .infinity y empujan el banner de novedades
@@ -287,6 +296,32 @@ struct PopoverView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 4)
         .accessibilityElement(children: .contain)
+    }
+
+    private func upgradeFailureBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: CrystalGlass.Spacing.sm) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased))
+                .accessibilityHidden(true)
+            Text(message)
+                .font(.caption)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 4)
+            Button {
+                appState.dismissUpgradeFailureNotice()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+            }
+            .buttonStyle(.glassIcon)
+            .accessibilityLabel(String(localized: "Dismiss"))
+        }
+        .padding(.horizontal, CrystalGlass.Spacing.md)
+        .padding(.vertical, CrystalGlass.Spacing.sm)
+        .glassPanel(
+            tint: BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased),
+            strokeOpacity: 0.45
+        )
     }
 
     private func lastActionBanner(_ message: String) -> some View {
@@ -732,10 +767,10 @@ struct PopoverView: View {
 
     private func makeLaunchScript() throws -> URL {
         let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("brewtui-bar-launch", isDirectory: true)
+            .appendingPathComponent("BrewTUI-Bar-launch", isDirectory: true)
         try FileManager.default.createDirectory(at: tempURL, withIntermediateDirectories: true, attributes: nil)
 
-        let scriptURL = tempURL.appendingPathComponent("brewtui-bar.command")
+        let scriptURL = tempURL.appendingPathComponent("BrewTUI-Bar.command")
         let script = """
         #!/bin/zsh
         exec brewtui-bar
@@ -756,9 +791,9 @@ struct PopoverView: View {
     private func runSelfUpgrade() {
         do {
             let tempURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("brewtui-bar-upgrade", isDirectory: true)
+                .appendingPathComponent("BrewTUI-Bar-upgrade", isDirectory: true)
             try FileManager.default.createDirectory(at: tempURL, withIntermediateDirectories: true, attributes: nil)
-            let scriptURL = tempURL.appendingPathComponent("brewtui-bar-upgrade.command")
+            let scriptURL = tempURL.appendingPathComponent("BrewTUI-Bar-upgrade.command")
             let script = """
             #!/bin/zsh
             echo "Upgrading BrewTUI-Bar via Homebrew..."

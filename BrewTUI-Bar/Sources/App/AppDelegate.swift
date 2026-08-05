@@ -33,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     // Este monitor lo garantiza sin tocar el subprocess de brew — `performClose`
     // solo oculta la UI; los Tasks viven en AppState y siguen ejecutándose.
     private var clickOutsideMonitor: Any?
+    private var reduceMotionObserver: (any NSObjectProtocol)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !Self.isRunningForPreviews else { return }
@@ -47,15 +48,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         LegacyMigrator.completePendingLoginItemMigration()
 
         launchTask = Task {
-            guard await checkBrewTUIBarInstalled() else {
-                showBrewTUIBarRequired()
-                return
+            // The required-CLI alert is the one case where we terminate, so it
+            // runs before anything is built. `showBrewTUIBarRequired` returns
+            // true when the user asked to retry after installing.
+            while await !checkBrewTUIBarInstalled() {
+                guard showBrewTUIBarRequired() else { return }
             }
 
+            // Build the status item BEFORE the non-blocking alerts below.
+            // Without it the app has no Dock icon (LSUIElement) and no menu bar
+            // presence, so an alert that ends up behind another window leaves
+            // the user with no surface at all to reach it — the app just looks
+            // like it never launched.
+            setupStatusItem()
+            setupPopover()
+
             // Cross-platform version contract: warn (non-blocking) when the
-            // installed BrewTUI-Bar drifts from the brewtui-bar CLI. License decryption
-            // may still work today, but skew has bitten us before (HKDF schema
-            // bump). Continue to license check either way.
+            // installed BrewTUI-Bar drifts from the brewtui-bar CLI. License
+            // decryption may still work today, but skew has bitten us before
+            // (HKDF schema bump). Continue to license check either way.
             let versionStatus = await VersionChecker.check()
             if case let .mismatch(brewTUIBar, brewBar) = versionStatus {
                 showVersionMismatch(brewTUIBar: brewTUIBar, brewBar: brewBar)
@@ -99,17 +110,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             // Built from the same value `checkLicense()` returned so we never
             // re-decode the file.
             appState.licenseSummary = LicenseSummary(from: licenseStatus)
-            // Surface the brewtui-bar CLI version alongside BrewTUI-Bar's in the
+            // Surface the BrewTUI-Bar CLI version alongside BrewTUI-Bar's in the
             // About section. Reused from VersionChecker so we do not spawn
-            // a second `brewtui-bar --version` process at launch.
+            // a second `BrewTUI-Bar --version` process at launch.
             if case let .match(version) = versionStatus {
                 appState.brewTUIBarCliVersion = version
             } else if case let .mismatch(brewTUIBar, _) = versionStatus {
                 appState.brewTUIBarCliVersion = brewTUIBar
             }
 
-            setupStatusItem()
-            setupPopover()
             appState.onRefreshComplete = { [weak self] in
                 self?.updateBadge()
             }
@@ -129,7 +138,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             let machineCount = await SyncMonitor.shared.getKnownMachineCount()
             appState.updateSyncStatus(hasActivity: hasSyncActivity, machineCount: machineCount)
 
-            // Listen for actions performed in the BrewTUI-Bar CLI so the popover
+            // Listen for actions performed in the BrewTUI-Bar so the popover
             // reflects them immediately and shows a friendly status banner.
             LastActionMonitor.shared.start { [weak self] action in
                 guard let self else { return }
@@ -137,10 +146,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
 
             updateBadge()
+            observeReduceMotionChanges()
 
             badgeTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
                 Task { @MainActor in self?.updateBadge() }
             }
+        }
+    }
+
+    /// Repaints the menu bar when the user flips "Reduce Motion" while the app
+    /// is running, so the indicator switches between blinking and the static
+    /// count badge without needing a relaunch.
+    private func observeReduceMotionChanges() {
+        reduceMotionObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.updateBadge() }
         }
     }
 
@@ -154,6 +177,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         scheduler.stop()
         LastActionMonitor.shared.stop()
         removeClickOutsideMonitor()
+        if let reduceMotionObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(reduceMotionObserver)
+            self.reduceMotionObserver = nil
+        }
     }
 
     // MARK: - Login item
@@ -176,10 +203,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
-    // MARK: - brewtui-bar dependency check
+    // MARK: - BrewTUI-Bar dependency check
 
     private func checkBrewTUIBarInstalled() async -> Bool {
         let paths = [
+            "/usr/local/bin/BrewTUI-Bar",
+            "/opt/homebrew/bin/BrewTUI-Bar",
+            "\(NSHomeDirectory())/.npm/bin/BrewTUI-Bar",
             "/usr/local/bin/brewtui-bar",
             "/opt/homebrew/bin/brewtui-bar",
             "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
@@ -193,58 +223,79 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
 
         // Fallback: check via shell PATH (non-blocking via terminationHandler)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brewtui-bar"]
-        process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
+        for commandName in ["BrewTUI-Bar", "brewtui-bar"] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+            process.arguments = [commandName]
+            process.standardOutput = FileHandle.nullDevice
+            process.standardError = FileHandle.nullDevice
 
-        do {
-            let found = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Bool, Error>) in
-                process.terminationHandler = { proc in
-                    cont.resume(returning: proc.terminationStatus == 0)
+            do {
+                let found = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Bool, Error>) in
+                    process.terminationHandler = { proc in
+                        cont.resume(returning: proc.terminationStatus == 0)
+                    }
+                    do {
+                        try process.run()
+                    } catch {
+                        cont.resume(throwing: error)
+                    }
                 }
-                do {
-                    try process.run()
-                } catch {
-                    cont.resume(throwing: error)
-                }
+                if found { return true }
+            } catch {
+                continue
             }
-            return found
-        } catch {
-            return false
         }
+        return false
     }
 
-    private func showBrewTUIBarRequired() {
+    /// Blocking alert shown when the `brewtui-bar` CLI is missing. Returns
+    /// `true` when the user copied the command and wants to retry (the caller
+    /// re-runs the check), `false` when they chose to quit. Copying used to
+    /// terminate as well, which made "Copy Install Command" silently kill the
+    /// app with no way to act on what had just been copied.
+    @discardableResult
+    private func showBrewTUIBarRequired() -> Bool {
         let alert = NSAlert()
-        alert.messageText = String(localized: "BrewTUI-Bar is required")
-        alert.informativeText = String(localized: "BrewTUI-Bar requires BrewTUI-Bar to be installed.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen relaunch BrewTUI-Bar.")
+        alert.messageText = String(localized: "The brewtui-bar CLI is required")
+        alert.informativeText = String(localized: "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry.")
         alert.alertStyle = .critical
-        alert.addButton(withTitle: String(localized: "Copy Install Command"))
+        alert.addButton(withTitle: String(localized: "Copy Command and Retry"))
         alert.addButton(withTitle: String(localized: "Quit"))
 
+        activateForAlert()
         let response = alert.runModal()
 
         if response == .alertFirstButtonReturn {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString("npm install -g brewtui-bar", forType: .string)
+            return true
         }
 
         NSApp.terminate(nil)
+        return false
+    }
+
+    /// Brings the app forward before a modal alert. As an `LSUIElement` agent
+    /// we own no Dock icon and, early in launch, no status item either, so an
+    /// alert raised while another app is frontmost can end up behind it with
+    /// nothing for the user to click on to surface it again.
+    private func activateForAlert() {
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     private func showVersionMismatch(brewTUIBar: String, brewBar: String) {
         let alert = NSAlert()
         alert.messageText = String(localized: "BrewTUI-Bar version mismatch")
         let template = String(
-            localized: "BrewTUI-Bar %@ is out of sync with BrewTUI-Bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force"
+            localized: "BrewTUI-Bar %@ is out of sync with the brewtui-bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force"
         )
         alert.informativeText = String(format: template, brewBar, brewTUIBar)
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Copy Update Command"))
         alert.addButton(withTitle: String(localized: "Continue Anyway"))
 
+        activateForAlert()
         let response = alert.runModal()
         if response == .alertFirstButtonReturn {
             NSPasteboard.general.clearContents()
@@ -260,6 +311,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         )
         alert.alertStyle = .warning
         alert.addButton(withTitle: String(localized: "Continue"))
+        activateForAlert()
         alert.runModal()
     }
 
@@ -295,8 +347,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // reach them. See togglePopover for the rationale.
     }
 
-    private func shouldAnimateOutdatedIndicator() -> Bool {
+    /// Whether outdated packages should be surfaced at all. Independent from
+    /// *how* they are surfaced — see `shouldAnimateOutdatedIndicator`.
+    private func shouldShowOutdatedIndicator() -> Bool {
         appState.outdatedCount > 0 && badgePreferences.showOutdated
+    }
+
+    /// Blinking is the default presentation, but it is suppressed under
+    /// "Reduce Motion". Previously the blink was the *only* channel for
+    /// outdated packages, so a user who wanted it to stop had to turn the
+    /// indicator off entirely and lose the signal. When we don't animate we
+    /// fall back to a static count badge, the same treatment CVE and sync get.
+    private func shouldAnimateOutdatedIndicator() -> Bool {
+        shouldShowOutdatedIndicator() && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
 
     private func syncOutdatedBlink() {
@@ -355,9 +418,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         let cve = appState.criticalCveCount
         let sync = appState.syncActivity
 
-        // Outdated packages are surfaced by blinking the T layer in the icon.
-        // CVE and sync keep compact text badges beside the glyph.
+        // Outdated packages are surfaced by blinking the T layer in the icon,
+        // or — when motion is suppressed — by a static count badge so the
+        // signal survives without animation. CVE and sync keep compact text
+        // badges beside the glyph.
         var parts: [String] = []
+        if shouldShowOutdatedIndicator(), !shouldAnimateOutdatedIndicator() {
+            parts.append("\(appState.outdatedCount)↑")
+        }
         if cve > 0, badgePreferences.showCVE { parts.append("\(cve)⚠") }
         if sync, badgePreferences.showSync { parts.append("⟳") }
 
@@ -404,6 +472,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             popover.contentViewController = controller
 
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            // Arranca la caducidad del banner: mientras el popover está
+            // cerrado el aviso espera en vez de expirar sin que nadie lo vea.
+            appState.popoverVisible = true
             // Defer makeKey() one runloop tick. Calling it synchronously
             // after popover.show() races NSPopover's own window-keying:
             // in some scenarios (reopen after a sheet dismiss, reopen
@@ -436,6 +507,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     nonisolated func popoverDidClose(_ notification: Notification) {
         Task { @MainActor [weak self] in
             self?.removeClickOutsideMonitor()
+            self?.appState.popoverVisible = false
         }
     }
 

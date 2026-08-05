@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-/// Silently refreshes the local license envelope via `brewtui-bar revalidate`.
+/// Silently refreshes the local license envelope via `BrewTUI-Bar revalidate`.
 /// BrewTUI-Bar reads license.json offline; when degradation blocks Pro but
 /// the subscription is still active, this self-heals without user intervention.
 enum LicenseRevalidator {
@@ -10,7 +10,7 @@ enum LicenseRevalidator {
         category: "LicenseRevalidator"
     )
 
-    /// Runs `brewtui-bar revalidate` when a recoverable license exists. Returns
+    /// Runs `BrewTUI-Bar revalidate` when a recoverable license exists. Returns
     /// true when the CLI exits 0 (valid or grace).
     @discardableResult
     static func revalidateIfNeeded() async -> Bool {
@@ -19,7 +19,7 @@ enum LicenseRevalidator {
         }
 
         guard let executable = await locateBrewTUIBar() else {
-            logger.warning("brewtui-bar not found — skipping auto-revalidation")
+            logger.warning("BrewTUI-Bar not found — skipping auto-revalidation")
             return false
         }
 
@@ -47,13 +47,16 @@ enum LicenseRevalidator {
             logger.info("Auto-revalidation failed with exit code \(exitCode, privacy: .public)")
             return false
         } catch {
-            logger.error("Auto-revalidation could not launch brewtui-bar: \(error.localizedDescription, privacy: .public)")
+            logger.error("Auto-revalidation could not launch BrewTUI-Bar: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
 
     private static func locateBrewTUIBar() async -> String? {
         let knownPaths = [
+            "/opt/homebrew/bin/BrewTUI-Bar",
+            "/usr/local/bin/BrewTUI-Bar",
+            "\(NSHomeDirectory())/.npm/bin/BrewTUI-Bar",
             "/opt/homebrew/bin/brewtui-bar",
             "/usr/local/bin/brewtui-bar",
             "\(NSHomeDirectory())/.npm/bin/brewtui-bar",
@@ -62,22 +65,25 @@ enum LicenseRevalidator {
             return path
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
-        process.arguments = ["brewtui-bar"]
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        do {
-            try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
-                process.terminationHandler = { _ in cont.resume() }
-                do { try process.run() } catch { cont.resume(throwing: error) }
+        for commandName in ["BrewTUI-Bar", "brewtui-bar"] {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
+            process.arguments = [commandName]
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = FileHandle.nullDevice
+            do {
+                try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+                    process.terminationHandler = { _ in cont.resume() }
+                    do { try process.run() } catch { cont.resume(throwing: error) }
+                }
+            } catch {
+                continue
             }
-        } catch {
-            return nil
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            if !path.isEmpty { return path }
         }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let path = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return path.isEmpty ? nil : path
+        return nil
     }
 }

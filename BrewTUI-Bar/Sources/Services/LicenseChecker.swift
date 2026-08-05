@@ -245,11 +245,11 @@ struct LicenseChecker {
 
         // v1 (any shape): AES-GCM envelope or unencrypted plaintext. Both are
         // rejected — the symmetric HKDF key was shipped in the public npm
-        // bundle, so any v1 file is forgeable. The TUI's `brewtui-bar revalidate`
+        // bundle, so any v1 file is forgeable. The TUI's `BrewTUI-Bar revalidate`
         // re-issues a v2 signed envelope; users with a genuinely v1 license
         // just need to run it once.
         if file.version == 1 {
-            logger.warning("License file is in legacy v1 format — refusing to authorize. Run `brewtui-bar revalidate` to migrate.")
+            logger.warning("License file is in legacy v1 format — refusing to authorize. Run `BrewTUI-Bar revalidate` to migrate.")
             return .notFound
         }
 

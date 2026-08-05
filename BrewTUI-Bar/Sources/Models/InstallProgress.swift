@@ -120,7 +120,13 @@ struct InstallProgress: Identifiable, Sendable, Equatable {
 
     /// Final terminal flip: mark anything still pending/in-progress as done,
     /// stamp `isFinished`. Called once the brew process exits successfully.
+    ///
+    /// No-op once a terminal state has been recorded. Cancelling calls
+    /// `finishFailure("Cancelled")` while the event stream is still draining,
+    /// so a late `.success` used to overwrite the outcome and leave the modal
+    /// claiming both "Cancelled" and a successful run.
     mutating func finishSuccess() {
+        guard !isFinished else { return }
         for idx in packages.indices where !packages[idx].stage.isTerminal {
             packages[idx].stage = .done
         }
@@ -128,7 +134,10 @@ struct InstallProgress: Identifiable, Sendable, Equatable {
     }
 
     /// Failure terminal flip: any non-terminal item gets `.failed(reason)`.
+    /// Idempotent for the same reason as `finishSuccess` — the first terminal
+    /// outcome wins.
     mutating func finishFailure(_ reason: String) {
+        guard !isFinished else { return }
         for idx in packages.indices where !packages[idx].stage.isTerminal {
             packages[idx].stage = .failed(reason)
         }

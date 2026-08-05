@@ -703,23 +703,6 @@
         }
       }
     },
-    "BrewTUI-Bar CLI" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar CLI"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar CLI"
-          }
-        }
-      }
-    },
     "BrewTUI-Bar is required" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -855,34 +838,6 @@
         }
       }
     },
-    "BrewTUI-Bar %@ is out of sync with BrewTUI-Bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar %1$@ is out of sync with BrewTUI-Bar CLI %2$@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar %1$@ no coincide con BrewTUI-Bar CLI %2$@. Deben coincidir para descifrar la licencia y recibir actualizaciones.\n\nEjecuta en el terminal:\n\n  brewtui-bar install-brewtui-bar --force"
-          }
-        }
-      }
-    },
-    "BrewTUI-Bar is a Pro feature. Activate your license with:\n\n  brewtui-bar activate <your-key>\n\nThen relaunch BrewTUI-Bar." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar es una función Pro. Activa tu licencia con:\n\n  brewtui-bar activate <tu-clave>\n\nLuego reinicia BrewTUI-Bar."
-          }
-        }
-      }
-    },
     "BrewTUI-Bar is part of BrewTUI-Bar Pro" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -896,17 +851,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BrewTUI-Bar forma parte de BrewTUI-Bar Pro"
-          }
-        }
-      }
-    },
-    "BrewTUI-Bar requires BrewTUI-Bar to be installed.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen relaunch BrewTUI-Bar." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar requiere que BrewTUI-Bar esté instalado.\n\nInstálalo con:\n  npm install -g brewtui-bar\n\nLuego reinicia BrewTUI-Bar."
           }
         }
       }
@@ -3072,10 +3016,236 @@
     "Your Pro license has expired or needs revalidation.\n\nRun `brewtui-bar revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode." : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Pro license has expired or needs revalidation.\n\nRun `brewtui-bar revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu licencia Pro ha expirado o necesita revalidación.\n\nEjecuta `brewtui-bar revalidate` en la terminal, o renueva tu suscripción.\n\nLa app continuará en modo básico."
+            "value" : "Tu licencia Pro ha caducado o necesita revalidarse.\n\nEjecuta `brewtui-bar revalidate` en la terminal, o renueva tu suscripción.\n\nLa app seguirá en modo básico."
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar %@ is out of sync with BrewTUI-Bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  BrewTUI-Bar install-BrewTUI-Bar --force" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar %1$@ is out of sync with BrewTUI-Bar CLI %2$@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  BrewTUI-Bar install-BrewTUI-Bar --force"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar %1$@ no coincide con BrewTUI-Bar CLI %2$@. Deben coincidir para descifrar la licencia y recibir actualizaciones.\n\nEjecuta en el terminal:\n\n  BrewTUI-Bar install-BrewTUI-Bar --force"
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar %@ is out of sync with the brewtui-bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar %@ is out of sync with the brewtui-bar CLI %@. They must match for license decryption and updates.\n\nRun this in the terminal:\n\n  brewtui-bar install-brewtui-bar --force"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar %@ no está sincronizada con la CLI brewtui-bar %@. Deben coincidir para descifrar la licencia y para las actualizaciones.\n\nEjecuta esto en la terminal:\n\n  brewtui-bar install-brewtui-bar --force"
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar is a Pro feature. Activate your license with:\n\n  BrewTUI-Bar activate <your-key>\n\nThen relaunch BrewTUI-Bar." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar es una función Pro. Activa tu licencia con:\n\n  BrewTUI-Bar activate <tu-clave>\n\nLuego reinicia BrewTUI-Bar."
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar necesita la herramienta de línea de comandos brewtui-bar.\n\nInstálala con:\n  npm install -g brewtui-bar\n\nDespués pulsa Reintentar."
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar requires BrewTUI-Bar to be installed.\n\nInstall it with:\n  brew install --cask BrewTUI-Bar\n\nThen relaunch BrewTUI-Bar." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar requiere que BrewTUI-Bar esté instalado.\n\nInstálalo con:\n  brew install --cask BrewTUI-Bar\n\nLuego reinicia BrewTUI-Bar."
+          }
+        }
+      }
+    },
+    "Copy Command and Retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Command and Retry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar comando y reintentar"
+          }
+        }
+      }
+    },
+    "Menu bar app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu bar app"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App de la barra de menús"
+          }
+        }
+      }
+    },
+    "Show outdated packages" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show outdated packages"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar paquetes desactualizados"
+          }
+        }
+      }
+    },
+    "The brewtui-bar CLI is required" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The brewtui-bar CLI is required"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita la CLI brewtui-bar"
+          }
+        }
+      }
+    },
+    "Toggle the indicators that appear next to BrewTUI-Bar's menu bar icon. Outdated packages blink the icon, or show a count when Reduce Motion is on." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle the indicators that appear next to BrewTUI-Bar's menu bar icon. Outdated packages blink the icon, or show a count when Reduce Motion is on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa o desactiva los indicadores junto al icono de BrewTUI-Bar en la barra de menús. Los paquetes desactualizados hacen parpadear el icono, o muestran un contador si «Reducir movimiento» está activo."
+          }
+        }
+      }
+    },
+    "Upgraded %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgraded %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se actualizó %@."
+          }
+        }
+      }
+    },
+    "Upgraded %lld packages." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgraded %lld packages."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se actualizaron %lld paquetes."
+          }
+        }
+      }
+    },
+    "Your Pro license has expired or needs revalidation.\n\nRun `BrewTUI-Bar revalidate` in the terminal, or renew your subscription.\n\nThe app will continue in basic mode." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu licencia Pro ha expirado o necesita revalidación.\n\nEjecuta `BrewTUI-Bar revalidate` en la terminal, o renueva tu suscripción.\n\nLa app continuará en modo básico."
+          }
+        }
+      }
+    },
+    "brewtui-bar CLI" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brewtui-bar CLI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLI brewtui-bar"
           }
         }
       }
