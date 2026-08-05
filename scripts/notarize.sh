@@ -90,7 +90,7 @@ update_cask "$CASK_FILE"
 
 cd "$TAP_DIR"
 git add Casks/brewtui-bar.rb
-git commit -m "chore: bump brewtui-bar to ${VERSION} (notarized)
+git commit -m "chore: bump BrewTUI-Bar to ${VERSION} (notarized)
 
 Stapled .app published to MoLinesDesigns/BrewTUI-Bar release v${VERSION}.
 SHA256: ${SHA}"

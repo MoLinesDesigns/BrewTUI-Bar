@@ -4,7 +4,7 @@ Native macOS menu bar companion for BrewTUI-Bar. It watches Homebrew updates, su
 - macOS 14+
 - Xcode with Swift 6 support
 - Tuist
-- Homebrew and `brewtui-bar` installed on the target machine
+- Homebrew and the `brewtui-bar` CLI installed on the target machine (`npm install -g brewtui-bar`)
 ## Development
 ```bash
 npm run generate
