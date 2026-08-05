@@ -3075,23 +3075,6 @@
         }
       }
     },
-    "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BrewTUI-Bar necesita la herramienta de línea de comandos brewtui-bar.\n\nInstálala con:\n  npm install -g brewtui-bar\n\nDespués pulsa Reintentar."
-          }
-        }
-      }
-    },
     "BrewTUI-Bar requires BrewTUI-Bar to be installed.\n\nInstall it with:\n  brew install --cask BrewTUI-Bar\n\nThen relaunch BrewTUI-Bar." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3099,23 +3082,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "BrewTUI-Bar requiere que BrewTUI-Bar esté instalado.\n\nInstálalo con:\n  brew install --cask BrewTUI-Bar\n\nLuego reinicia BrewTUI-Bar."
-          }
-        }
-      }
-    },
-    "Copy Command and Retry" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy Command and Retry"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copiar comando y reintentar"
           }
         }
       }
@@ -3246,6 +3212,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "CLI brewtui-bar"
+          }
+        }
+      }
+    },
+    "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen open BrewTUI-Bar again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen open BrewTUI-Bar again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BrewTUI-Bar necesita la herramienta de línea de comandos brewtui-bar.\n\nInstálala con:\n  npm install -g brewtui-bar\n\nDespués vuelve a abrir BrewTUI-Bar."
+          }
+        }
+      }
+    },
+    "Copy Command and Quit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Command and Quit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar comando y salir"
           }
         }
       }

@@ -49,10 +49,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         launchTask = Task {
             // The required-CLI alert is the one case where we terminate, so it
-            // runs before anything is built. `showBrewTUIBarRequired` returns
-            // true when the user asked to retry after installing.
-            while await !checkBrewTUIBarInstalled() {
-                guard showBrewTUIBarRequired() else { return }
+            // runs before anything is built.
+            guard await checkBrewTUIBarInstalled() else {
+                showBrewTUIBarRequired()
+                return
             }
 
             // Build the status item BEFORE the non-blocking alerts below.
@@ -249,18 +249,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         return false
     }
 
-    /// Blocking alert shown when the `brewtui-bar` CLI is missing. Returns
-    /// `true` when the user copied the command and wants to retry (the caller
-    /// re-runs the check), `false` when they chose to quit. Copying used to
-    /// terminate as well, which made "Copy Install Command" silently kill the
-    /// app with no way to act on what had just been copied.
-    @discardableResult
-    private func showBrewTUIBarRequired() -> Bool {
+    /// Blocking alert shown when the `brewtui-bar` CLI is missing. The app
+    /// cannot run without it, so both buttons quit — but the copy button now
+    /// says so. It used to read "Copy Install Command", which promised a
+    /// harmless action and then terminated anyway.
+    ///
+    /// Deliberately not a retry loop: re-showing the alert until the CLI
+    /// appears traps the user, because `activateForAlert` pulls focus back on
+    /// every iteration and they can never reach a terminal to run the command
+    /// they just copied.
+    private func showBrewTUIBarRequired() {
         let alert = NSAlert()
         alert.messageText = String(localized: "The brewtui-bar CLI is required")
-        alert.informativeText = String(localized: "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen click Retry.")
+        alert.informativeText = String(localized: "BrewTUI-Bar needs the brewtui-bar command line tool.\n\nInstall it with:\n  npm install -g brewtui-bar\n\nThen open BrewTUI-Bar again.")
         alert.alertStyle = .critical
-        alert.addButton(withTitle: String(localized: "Copy Command and Retry"))
+        alert.addButton(withTitle: String(localized: "Copy Command and Quit"))
         alert.addButton(withTitle: String(localized: "Quit"))
 
         activateForAlert()
@@ -269,11 +272,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if response == .alertFirstButtonReturn {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString("npm install -g brewtui-bar", forType: .string)
-            return true
         }
 
         NSApp.terminate(nil)
-        return false
     }
 
     /// Brings the app forward before a modal alert. As an `LSUIElement` agent

@@ -116,6 +116,9 @@ final class AppState {
     /// chained batch can report everything it did once the queue drains
     /// instead of each modal overwriting the previous result.
     private var completedInCurrentRun: [String] = []
+    /// Seeds of the request the worker is running right now. It has already
+    /// been popped off `upgradeQueue`, so dedup checks need this too.
+    private var inFlightSeeds: [String]?
 
     /// Número de upgrades esperando turno detrás del que se muestra ahora.
     /// Lo consume el modal para indicar "N en cola".
@@ -361,9 +364,14 @@ final class AppState {
             return
         }
         // A countdown already committed this package; make sure a second entry
-        // point (or a re-armed countdown) cannot enqueue it twice.
+        // point (or a re-armed countdown) cannot enqueue it twice. The check
+        // has to cover the running request as well as the queued ones: the
+        // worker pops with `removeFirst()`, so the package being upgraded right
+        // now is no longer in `upgradeQueue`.
         cancelUpgradeCountdown(for: name)
-        guard !upgradeQueue.contains(where: { $0.seeds == [name] }) else { return }
+        let alreadyQueued = upgradeQueue.contains { $0.seeds == [name] }
+        let alreadyRunning = inFlightSeeds == [name]
+        guard !alreadyQueued, !alreadyRunning else { return }
         // Look up the package's kind so we can pass `--cask`/`--formula`
         // explicitly. Without it `brew upgrade <name>` is ambiguous for
         // certain casks and can silently no-op (exit 0, "Warning: Not
@@ -418,11 +426,13 @@ final class AppState {
             defer { upgradeWorker = nil }
             while !upgradeQueue.isEmpty {
                 let request = upgradeQueue.removeFirst()
+                inFlightSeeds = request.seeds
                 await runUpgradeStream(
                     mode: request.mode,
                     seeds: request.seeds,
                     arguments: request.arguments
                 )
+                inFlightSeeds = nil
                 upgradeWaiters.removeValue(forKey: request.id)?.resume()
             }
             // Queue drained. Chaining replaces the modal's contents in place,

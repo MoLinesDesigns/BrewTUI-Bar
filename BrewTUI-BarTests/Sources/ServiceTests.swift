@@ -31,8 +31,28 @@ final class StubBrewChecker: BrewChecking, @unchecked Sendable {
         try servicesResult.get()
     }
 
+    /// When true, `upgradePackage` suspends until `releaseUpgrade()` is called.
+    /// Lets a test hold a request "in flight" — the worker has already popped it
+    /// off the queue — which is the only window where the in-flight dedup check
+    /// is the one doing the work.
+    var holdUpgrade = false
+    private(set) var isUpgradeHeld = false
+    private var upgradeGate: CheckedContinuation<Void, Never>?
+
+    func releaseUpgrade() {
+        isUpgradeHeld = false
+        upgradeGate?.resume()
+        upgradeGate = nil
+    }
+
     func upgradePackage(_ name: String) async throws {
         if let upgradePackageError { throw upgradePackageError }
+        if holdUpgrade {
+            await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+                upgradeGate = cont
+                isUpgradeHeld = true
+            }
+        }
         upgradedPackages.append(name)
     }
 
@@ -155,6 +175,36 @@ struct AppStateInjectedTests {
 
         try? await Task.sleep(for: .seconds(1))
         #expect(stub.upgradedPackages.isEmpty)
+    }
+
+    /// The worker pops the request off the queue before running it, so a dedup
+    /// check that only looks at `upgradeQueue` misses the package currently
+    /// being upgraded. Pressing ↑ on it again must not enqueue a second run.
+    @Test("re-requesting the in-flight package does not queue a duplicate")
+    @MainActor func inFlightPackageIsNotDuplicated() async {
+        let stub = StubBrewChecker()
+        stub.holdUpgrade = true
+        let state = AppState(checker: stub)
+        state.canUpgrade = true
+
+        // Park the first request inside the checker: by now the worker has
+        // popped it off `upgradeQueue`, so a dedup check that only looks at the
+        // queue sees nothing.
+        let first = Task { await state.upgrade(package: "wget") }
+        while !stub.isUpgradeHeld { await Task.yield() }
+
+        stub.holdUpgrade = false
+        let second = Task { await state.upgrade(package: "wget") }
+        await Task.yield()
+        await Task.yield()
+
+        // Without the in-flight check this is 1: the duplicate got queued.
+        #expect(state.queuedUpgradeCount == 0)
+
+        stub.releaseUpgrade()
+        await first.value
+        await second.value
+        #expect(stub.upgradedPackages == ["wget"])
     }
 
     /// A notice raised while the popover is closed must wait for the user

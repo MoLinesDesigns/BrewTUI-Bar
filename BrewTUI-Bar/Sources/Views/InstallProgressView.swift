@@ -52,6 +52,14 @@ struct InstallProgressView: View {
             }
             .ignoresSafeArea()
         }
+        // Enter cierra vía el `.defaultAction` de Done. Esc lo consume el botón
+        // Cancel mientras la operación corre, pero ese botón desaparece al
+        // terminar y con él el único `.cancelAction` de la hoja; esto cubre ese
+        // hueco sin quitarle a Done su atajo.
+        .onExitCommand {
+            guard progress.isFinished else { return }
+            onClose()
+        }
         .accessibilityElement(children: .contain)
     }
 
@@ -255,10 +263,6 @@ struct InstallProgressView: View {
 
             Spacer()
 
-            // Esc: mientras corre lo consume el botón Cancel. Cuando termina,
-            // ese botón desaparece y con él el único `.cancelAction` de la
-            // hoja, así que Done asume también ese atajo — de lo contrario el
-            // gesto más instintivo para quitarse el modal no haría nada.
             Button {
                 onClose()
             } label: {
@@ -269,7 +273,7 @@ struct InstallProgressView: View {
             }
             .buttonStyle(progress.isFinished ? .glassPillProminent : .glassPill)
             .disabled(!progress.isFinished)
-            .keyboardShortcut(progress.isFinished ? .cancelAction : .defaultAction)
+            .keyboardShortcut(.defaultAction)
             .accessibilityLabel(progress.isFinished
                 ? String(localized: "Close install progress")
                 : String(localized: "Upgrade still running"))
