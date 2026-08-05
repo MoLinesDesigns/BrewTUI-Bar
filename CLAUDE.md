@@ -25,7 +25,13 @@ xcodebuild test -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar \
   -only-testing:BrewTUI-BarTests/ServiceTests/<testName>
 ```
 
-Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest. CI (`.github/workflows/ci.yml`) installs Tuist 4.39.0, then runs generate → build → test on `macos-latest`.
+Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest.
+
+**There is no working CI.** The GitHub account is locked over a billing issue that will
+not be resolved, so Actions jobs fail without executing a single step. `ci.yml` (Tuist
+4.39.0 → generate → build → test on `macos-latest`) is set to `workflow_dispatch` only,
+to stop every push from producing a failure email. **`npm run build` + `npm test` locally
+is the only verification that means anything** — never defer a check to CI.
 
 ## Versioning & release
 
