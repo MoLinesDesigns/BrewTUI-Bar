@@ -49,21 +49,41 @@ This app ships in lockstep with the **`BrewTUI-Bar` CLI**, a *separate* repo and
 - **Ordering is enforced**: the CLI's `prepublishOnly` runs `scripts/check-brewtui-bar-release.mjs`, which hits the GitHub API and fails unless the `vX.Y.Z` release in `MoLinesDesigns/BrewTUI-Bar` already has both `BrewTUI-Bar.app.zip` and `BrewTUI-Bar.app.zip.sha256` assets. So the binary release must exist **before** publishing the CLI. Emergency bypass: `SKIP_BREWTUIBAR_CHECK=1`.
 - `npm publish` requires a one-time password (the account enforces 2FA) unless you use an **Automation** token (the only token type that bypasses 2FA).
 
-**Never bump one `package.json` by hand.** `npm run version:set X.Y.Z` (from this repo)
-writes the version into *both* repos at once, and `npm run version:check` fails if they
-have drifted. `release.sh` runs that check before archiving, and the CLI's prepublish
-guard runs it too — so a mismatch surfaces in seconds instead of after a ~10 min
-notarisation. The CLI checkout is found via `$BREWTUI_CLI_PATH` (default
-`/Volumes/SSD/Projects/BrewTUI-Bar`); with no local checkout, `check` reads the other
-`package.json` from GitHub.
+**Never bump a version by hand.** Six places carry it — both `package.json`s, npm, the
+GitHub release, and the tap's *cask* (the app) and *formula* (the CLI). `scripts/version-sync.mjs`
+owns all six:
+
+| Command | What it does |
+| --- | --- |
+| `npm run version:set X.Y.Z` | writes X.Y.Z into both `package.json` files |
+| `npm run version:check` | app vs CLI, non-zero on drift; tap drift is a *warning* |
+| `npm run version:check -- --tap` | same, but stale tap is an error too |
+| `npm run version:status` | reports all six, non-zero if any disagree |
+| `npm run version:sync-tap` | points cask + formula at the current version, with the sha256 of the **published** artefacts (downloads them and hashes them) |
+
+`release.sh` runs `check` before archiving and the CLI's prepublish guard runs it too, so
+a mismatch surfaces in seconds instead of after a ~10 min notarisation. Tap drift is only
+a warning there because the tap is legitimately updated *last*, after notarising.
+
+**The formula is the easy one to forget** — 5.0.1 shipped with the cask bumped and the
+formula still on 5.0.0, and since the cask declares `depends_on formula: "brewtui-bar"`
+that would have installed the 5.0.1 app against the 5.0.0 CLI, making `VersionChecker`
+nag on every launch. `version:sync-tap` exists so that step is never manual again.
+
+Paths are overridable with `$BREWTUI_CLI_PATH` and `$BREWTUI_TAP_PATH`; with no local CLI
+checkout, `check` reads the other `package.json` from GitHub.
 
 Full release sequence for version `X.Y.Z`:
 1. Both: `npm run version:set X.Y.Z`, then commit, `git tag vX.Y.Z` and push `main` + tag
    in each repo.
 2. App: `NOTARY_PROFILE=brewbar-notary ./scripts/release.sh` → notarized zip + SHA256.
 3. App: `gh release create vX.Y.Z -R MoLinesDesigns/BrewTUI-Bar --target main` uploading `build/BrewTUI-Bar.app.zip` and `build/BrewTUI-Bar.app.zip.sha256`.
-4. Cask: bump `version` + `sha256` in the tap, commit, push.
-5. CLI: bump `package.json` → X.Y.Z (`npm version X.Y.Z --no-git-tag-version`), commit, push `main`, then `npm publish --access public --otp=<code>` (its prepublish guard now passes because step 3 exists).
+4. CLI: `npm publish --access public --otp=<code>` (its prepublish guard now passes:
+   step 1 aligned the versions and step 3 created the release with its assets).
+5. Tap: `npm run version:sync-tap`, then `brew style` both files, commit and push.
+   **This comes after step 4, not before** — `sync-tap` hashes the artefacts that are
+   actually published, and the formula's tarball does not exist until npm has it.
+6. `npm run version:status` — all six should report X.Y.Z.
 
 ## Signing config (in `Project.swift`)
 
