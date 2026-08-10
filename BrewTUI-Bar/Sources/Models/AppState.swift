@@ -61,6 +61,10 @@ final class AppState {
     /// list, which is the wrong shape for "one package out of N failed".
     /// Rendered as a dismissible banner instead.
     var upgradeFailureNotice: String?
+    /// The last failure was `sudo` asking for a password we cannot provide from
+    /// a menubar process. Drives the "Run in Terminal" affordance on the failure
+    /// banner: retrying in-app would fail identically every time.
+    var upgradeNeedsTerminal = false
     /// "What's new in Homebrew" modal state. Populated lazily the first time
     /// the user opens the modal (or refreshes it); the modal renders empty
     /// states for loading/error so the user knows what's happening.
@@ -271,6 +275,7 @@ final class AppState {
 
     func dismissUpgradeFailureNotice() {
         upgradeFailureNotice = nil
+        upgradeNeedsTerminal = false
     }
 
     func showServiceDiagnostics(for service: BrewService) async {
@@ -422,6 +427,12 @@ final class AppState {
     private func startUpgradeWorkerIfNeeded() {
         guard upgradeWorker == nil else { return }
         completedInCurrentRun = []
+        // Cleared per queue run, not per request: chained requests each used to
+        // wipe the previous one's failure, so a sudo-blocked cask upgraded as
+        // part of "Upgrade All" lost both its banner and the Terminal button
+        // the moment the next queued request started.
+        upgradeFailureNotice = nil
+        upgradeNeedsTerminal = false
         upgradeWorker = Task { @MainActor in
             defer { upgradeWorker = nil }
             while !upgradeQueue.isEmpty {
@@ -599,7 +610,6 @@ final class AppState {
     ) async {
         isLoading = true
         error = nil
-        upgradeFailureNotice = nil
         installProgress = InstallProgress(mode: mode, seeds: seeds)
 
         // Drive the stream on the main actor — AppState is @MainActor, every
@@ -608,6 +618,11 @@ final class AppState {
         // test MockChecker inherits the protocol's fallback (which routes
         // through `upgradePackage`/`upgradeAll`).
         var succeeded = true
+        // Composed after the loop, never inside it: mid-stream we do not yet
+        // know how many packages made it through, and the banner has to say
+        // "3 upgraded, 1 failed" rather than a flat "upgrade failed" when brew
+        // kept going past a broken cask (which `cask/upgrade.rb` does).
+        var failureReason: String?
         let events = checker.streamUpgrade(packages: arguments)
         for await event in events {
             switch event {
@@ -617,19 +632,14 @@ final class AppState {
                 installProgress?.mark(name, stage: stage)
             case .logLine:
                 break
+            case .adminPasswordRequired:
+                upgradeNeedsTerminal = true
             case .success:
                 installProgress?.finishSuccess()
             case .failure(let reason):
                 succeeded = false
+                failureReason = reason
                 installProgress?.finishFailure(reason)
-                // Deliberately NOT `self.error`: PopoverView renders `error` as
-                // a full-page state that replaces the package list, so a single
-                // failed package used to hide the other N still pending. The
-                // modal already carries the reason; the banner repeats it after
-                // the modal closes.
-                self.upgradeFailureNotice = String(
-                    format: String(localized: "Upgrade failed: %@"), reason
-                )
             }
         }
 
@@ -653,18 +663,33 @@ final class AppState {
                     return String(localized: "Homebrew did not perform any upgrade")
                 }()
                 installProgress?.finalError = reason
-                self.upgradeFailureNotice = String(
-                    format: String(localized: "Upgrade failed: %@"), reason
-                )
+                failureReason = reason
             }
         }
 
-        if succeeded, let progress = installProgress {
-            completedInCurrentRun.append(
-                contentsOf: progress.packages
-                    .filter { $0.stage == .done }
-                    .map(\.name)
-            )
+        // Record what actually landed regardless of the overall verdict. brew
+        // continues past a failing cask, so a run that exits non-zero can still
+        // have upgraded most of the batch; keeping this inside `if succeeded`
+        // threw that away and the queue summary under-reported the run.
+        let upgraded = installProgress?.packages.filter { $0.stage == .done }.map(\.name) ?? []
+        completedInCurrentRun.append(contentsOf: upgraded)
+
+        // Deliberately NOT `self.error`: PopoverView renders `error` as a
+        // full-page state that replaces the package list, so a single failed
+        // package used to hide the other N still pending. The modal already
+        // carries the reason; the banner repeats it after the modal closes.
+        if let failureReason {
+            // "Upgraded 1 of 2" rather than a "%lld upgraded, %lld failed"
+            // pair: the count is 1 in the common case (a single bad cask in a
+            // batch) and an "x of y" frame reads correctly at every number in
+            // both locales without needing plural variations on two arguments.
+            let total = installProgress?.packages.count ?? 0
+            self.upgradeFailureNotice = upgraded.isEmpty
+                ? String(format: String(localized: "Upgrade failed: %@"), failureReason)
+                : String(
+                    format: String(localized: "Upgraded %lld of %lld — %@"),
+                    Int64(upgraded.count), Int64(total), failureReason
+                )
         }
 
         // Refresh in both outcomes. A failed batch can still have upgraded some

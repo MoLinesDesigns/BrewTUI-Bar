@@ -13,6 +13,10 @@ enum BrewUpgradeEvent: Sendable {
     case packageStage(name: String, stage: InstallStage)
     /// Raw log line (kept for debug / future "show details" disclosure).
     case logLine(String)
+    /// brew aborted because it needed `sudo` and had no way to ask for the
+    /// password. Emitted once, right before the terminal `.failure`, so the
+    /// popover can offer the Terminal handoff instead of a dead end.
+    case adminPasswordRequired
     /// Process exited with status 0.
     case success
     /// Process exited non-zero or failed to launch. Includes a localized reason.
@@ -26,10 +30,24 @@ private final class StreamBox: @unchecked Sendable {
     private let lock = NSLock()
     private var buffer = ""
     private var finished = false
+    private var sudoBlocked = false
     private let continuation: AsyncStream<BrewUpgradeEvent>.Continuation
 
     init(_ continuation: AsyncStream<BrewUpgradeEvent>.Continuation) {
         self.continuation = continuation
+    }
+
+    /// Latched, not counted: brew prints the `sudo:` block twice (once inline,
+    /// once again inside the `Error: … Here's the output:` echo), and either
+    /// occurrence means the same thing.
+    func markSudoBlocked() {
+        lock.lock(); defer { lock.unlock() }
+        sudoBlocked = true
+    }
+
+    var isSudoBlocked: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return sudoBlocked
     }
 
     func emit(_ event: BrewUpgradeEvent) {
@@ -137,6 +155,11 @@ enum BrewUpgradeStream {
                 }
                 if proc.terminationStatus == 0 {
                     box.finish(with: .success)
+                } else if box.isSudoBlocked {
+                    box.emit(.adminPasswordRequired)
+                    box.finish(with: .failure(String(
+                        localized: "Homebrew needs an administrator password for this package and cannot ask for it from the menubar. Run the upgrade in Terminal."
+                    )))
                 } else {
                     let reason = String(
                         format: String(localized: "brew exited with code %lld"),
@@ -203,6 +226,28 @@ enum BrewUpgradeStream {
                 let reason = String(localized: "Homebrew skipped the upgrade — try `brew reinstall` for this package")
                 box.emit(.packageStage(name: resolved, stage: .failed(reason)))
             }
+            return
+        }
+
+        // Casks whose artifact is a `.pkg` (gstreamer, wireshark, mactex…) remove
+        // the previous version with `sudo` before staging the new one. Spawned
+        // from the menubar there is no controlling terminal and no askpass
+        // helper, so sudo bails out, brew purges the download and the package
+        // stays outdated run after run. Latch it here: without this the only
+        // thing the user ever sees is "brew exited with code 1".
+        if stripped.hasPrefix("sudo:"), isSudoPasswordFailure(stripped) {
+            box.markSudoBlocked()
+            return
+        }
+
+        // `Error: <token>: Failure while executing; …` — brew names the package
+        // it gave up on. Tag that row as failed so the modal stops rendering it
+        // as "Installing…" until the process exits.
+        if let name = failedPackageName(fromErrorLine: stripped) {
+            let reason = box.isSudoBlocked
+                ? String(localized: "Needs an administrator password — run it in Terminal")
+                : String(localized: "Homebrew could not complete this upgrade")
+            box.emit(.packageStage(name: name, stage: .failed(reason)))
             return
         }
 
@@ -283,6 +328,32 @@ enum BrewUpgradeStream {
             }
         }
         return trimmed
+    }
+
+    /// Extracts the package from `Error: <token>: Failure while executing; …`.
+    /// Returns nil for every other `Error:` line brew emits (`Error: Multiple
+    /// casks failed…`, `Error: No available formula…`) so we never tag a row
+    /// with a name that is really a sentence fragment.
+    static func failedPackageName(fromErrorLine line: String) -> String? {
+        guard line.hasPrefix("Error: "), line.contains("Failure while executing") else { return nil }
+        let afterError = line.dropFirst("Error: ".count)
+        guard let colon = afterError.firstIndex(of: ":") else { return nil }
+        let token = String(afterError[..<colon])
+        // A token with whitespace is prose, not a package name.
+        guard !token.contains(" ") else { return nil }
+        return packageName(from: token)
+    }
+
+    /// True for the `sudo:` diagnostics that mean "I needed a password and had
+    /// no way to ask for it". Matched on the stable English wording sudo(8)
+    /// emits regardless of the user's locale — sudo does not localise these.
+    static func isSudoPasswordFailure(_ line: String) -> Bool {
+        let lower = line.lowercased()
+        guard lower.hasPrefix("sudo:") else { return false }
+        return lower.contains("a password is required")
+            || lower.contains("a terminal is required")
+            || lower.contains("no tty present")
+            || lower.contains("askpass")
     }
 
     /// Cheap ANSI strip — brew uses ESC[…m sequences.

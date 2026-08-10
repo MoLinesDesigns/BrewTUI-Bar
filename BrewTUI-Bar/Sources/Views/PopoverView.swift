@@ -299,22 +299,36 @@ struct PopoverView: View {
     }
 
     private func upgradeFailureBanner(_ message: String) -> some View {
-        HStack(alignment: .top, spacing: CrystalGlass.Spacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased))
-                .accessibilityHidden(true)
-            Text(message)
-                .font(.caption)
-                .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 4)
-            Button {
-                appState.dismissUpgradeFailureNotice()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 10, weight: .semibold))
+        VStack(alignment: .leading, spacing: CrystalGlass.Spacing.sm) {
+            HStack(alignment: .top, spacing: CrystalGlass.Spacing.sm) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased))
+                    .accessibilityHidden(true)
+                Text(message)
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                Button {
+                    appState.dismissUpgradeFailureNotice()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                .buttonStyle(.glassIcon)
+                .accessibilityLabel(String(localized: "Dismiss"))
             }
-            .buttonStyle(.glassIcon)
-            .accessibilityLabel(String(localized: "Dismiss"))
+
+            // Retrying in-app cannot work: sudo has no terminal to prompt from,
+            // so the only way out is a real shell the user can type into.
+            if appState.upgradeNeedsTerminal {
+                Button {
+                    runUpgradeInTerminal()
+                } label: {
+                    Label(String(localized: "Run in Terminal"), systemImage: "terminal")
+                        .font(.caption)
+                }
+                .buttonStyle(.glassPill)
+            }
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)
@@ -322,6 +336,43 @@ struct PopoverView: View {
             tint: BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased),
             strokeOpacity: 0.45
         )
+    }
+
+    /// Hands the upgrade off to Terminal via the same `.command` script pattern
+    /// as `runSelfUpgrade` — `brew upgrade` there runs under a TTY, so the
+    /// `sudo` prompt casks with a `.pkg` artifact need can actually appear.
+    private func runUpgradeInTerminal() {
+        do {
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("BrewTUI-Bar-terminal-upgrade", isDirectory: true)
+            try FileManager.default.createDirectory(at: tempURL, withIntermediateDirectories: true, attributes: nil)
+            let scriptURL = tempURL.appendingPathComponent("BrewTUI-Bar-terminal-upgrade.command")
+            let script = """
+            #!/bin/zsh
+            echo "Running 'brew upgrade' — some packages need your administrator password."
+            brew upgrade
+            """
+            try script.write(to: scriptURL, atomically: true, encoding: .utf8)
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: scriptURL.path
+            )
+            guard NSWorkspace.shared.open(scriptURL) else {
+                throw NSError(
+                    domain: "BrewTUI-Bar",
+                    code: 3,
+                    userInfo: [NSLocalizedDescriptionKey: String(localized: "Could not launch the upgrade in your terminal app.")]
+                )
+            }
+            appState.dismissUpgradeFailureNotice()
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = String(localized: "Could not open Terminal")
+            alert.informativeText = error.localizedDescription
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: String(localized: "Continue"))
+            alert.runModal()
+        }
     }
 
     private func lastActionBanner(_ message: String) -> some View {

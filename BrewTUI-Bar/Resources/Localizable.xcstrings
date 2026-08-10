@@ -3249,6 +3249,108 @@
           }
         }
       }
+    },
+    "Needs an administrator password — run it in Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Needs an administrator password — run it in Terminal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Necesita contraseña de administrador — ejecútalo en Terminal"
+          }
+        }
+      }
+    },
+    "Homebrew could not complete this upgrade" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew could not complete this upgrade"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew no pudo completar esta actualización"
+          }
+        }
+      }
+    },
+    "Homebrew needs an administrator password for this package and cannot ask for it from the menubar. Run the upgrade in Terminal." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew needs an administrator password for this package and cannot ask for it from the menubar. Run the upgrade in Terminal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew necesita la contraseña de administrador para este paquete y no puede pedirla desde la barra de menús. Ejecuta la actualización en Terminal."
+          }
+        }
+      }
+    },
+    "Run in Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run in Terminal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecutar en Terminal"
+          }
+        }
+      }
+    },
+    "Could not open Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not open Terminal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo abrir Terminal"
+          }
+        }
+      }
+    },
+    "Upgraded %lld of %lld — %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgraded %lld of %lld — %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizados %lld de %lld — %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

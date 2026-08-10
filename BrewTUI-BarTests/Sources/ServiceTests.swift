@@ -67,6 +67,30 @@ final class StubBrewChecker: BrewChecking, @unchecked Sendable {
     }
 }
 
+/// Replays a fixed `BrewUpgradeEvent` sequence. `StubBrewChecker` inherits the
+/// protocol's legacy bridge, which can only express "everything worked" or
+/// "everything failed"; a batch where brew upgrades some casks and dies on
+/// another — what actually happens with a `.pkg` cask that needs `sudo` — has
+/// no representation there.
+final class ScriptedUpgradeChecker: BrewChecking, @unchecked Sendable {
+    var events: [BrewUpgradeEvent] = []
+    var outdatedResult: Result<OutdatedResponse, Error> = .success(OutdatedResponse(formulae: [], casks: []))
+
+    func updateIndex() async {}
+    func checkOutdated() async throws -> OutdatedResponse { try outdatedResult.get() }
+    func checkServices() async throws -> [BrewService] { [] }
+    func upgradePackage(_ name: String) async throws {}
+    func upgradeAll() async throws {}
+
+    func streamUpgrade(packages: [String]) -> AsyncStream<BrewUpgradeEvent> {
+        let scripted = events
+        return AsyncStream { continuation in
+            for event in scripted { continuation.yield(event) }
+            continuation.finish()
+        }
+    }
+}
+
 final class StubSecurityChecker: SecurityChecking, @unchecked Sendable {
     var newAlerts: [CVEAlert] = []
     var cachedAlerts: [CVEAlert] = []
@@ -157,6 +181,60 @@ struct AppStateInjectedTests {
         #expect(state.upgradeFailureNotice != nil)
         #expect(state.error == nil)
         #expect(state.isLoading == false)
+    }
+
+    /// `brew upgrade` keeps going past a cask it cannot upgrade (Cask::Upgrade
+    /// rescues per item and re-raises at the end), so a non-zero exit does not
+    /// mean nothing landed. The banner has to name both halves; reporting a
+    /// flat "upgrade failed" over a run that upgraded 1 of 2 is what made the
+    /// sudo-blocked casks look like the whole run had died.
+    @Test("a partially failed batch reports both the upgraded and the failed count")
+    @MainActor func partialFailureReportsBothCounts() async {
+        let stub = ScriptedUpgradeChecker()
+        stub.events = [
+            .packageDiscovered("wget"),
+            .packageStage(name: "wget", stage: .done),
+            .packageDiscovered("gstreamer-runtime"),
+            .packageStage(name: "gstreamer-runtime", stage: .failed("needs sudo")),
+            .failure("needs sudo"),
+        ]
+        let state = AppState(checker: stub)
+        state.canUpgrade = true
+
+        await state.upgradeAll()
+
+        let notice = state.upgradeFailureNotice
+        #expect(notice != nil)
+        // Localised format is "Upgraded %lld of %lld — %@" — assert on the
+        // counts rather than the sentence so the test survives translation.
+        #expect(notice?.contains("1") == true)
+        #expect(notice?.contains("2") == true)
+        #expect(notice?.contains("needs sudo") == true)
+        #expect(state.error == nil)
+    }
+
+    /// The sudo signal has to survive the whole event loop: it is what turns the
+    /// banner from a dead end into the Terminal handoff.
+    @Test("adminPasswordRequired surfaces the Terminal handoff flag")
+    @MainActor func adminPasswordRequiredSetsTerminalFlag() async {
+        let stub = ScriptedUpgradeChecker()
+        stub.events = [
+            .packageDiscovered("gstreamer-runtime"),
+            .packageStage(name: "gstreamer-runtime", stage: .failed("needs sudo")),
+            .adminPasswordRequired,
+            .failure("needs an administrator password"),
+        ]
+        let state = AppState(checker: stub)
+        state.canUpgrade = true
+
+        await state.upgradeAll()
+
+        #expect(state.upgradeNeedsTerminal == true)
+        #expect(state.upgradeFailureNotice != nil)
+
+        state.dismissUpgradeFailureNotice()
+        #expect(state.upgradeNeedsTerminal == false)
+        #expect(state.upgradeFailureNotice == nil)
     }
 
     /// The countdown lives in AppState precisely so it survives the popover
@@ -373,5 +451,66 @@ struct BrewUpgradeStreamParserTests {
         let raw = "\u{1B}[34m==>\u{1B}[0m Upgrading git 2.43.0 -> 2.45.1"
         let cleaned = BrewUpgradeStream.stripANSI(raw)
         #expect(cleaned == "==> Upgrading git 2.43.0 -> 2.45.1")
+    }
+
+    /// Cask tokens are hyphenated. `packageName` splits on `--` to recover a
+    /// formula name out of a bottle filename, so a single hyphen must survive
+    /// untouched — otherwise every cask row in the modal keys on a truncated
+    /// name and the stage updates land on a row that does not exist.
+    @Test("hyphenated cask tokens survive the `--` split")
+    func hyphenatedCaskNames() {
+        #expect(BrewUpgradeStream.packageName(from: "gstreamer-runtime") == "gstreamer-runtime")
+        #expect(BrewUpgradeStream.packageName(from: "gstreamer-development") == "gstreamer-development")
+        #expect(BrewUpgradeStream.packageName(from: "docker-desktop") == "docker-desktop")
+    }
+}
+
+// MARK: - sudo detection ── VERBATIM FIXTURES FROM A REAL FAILED RUN
+//
+// Casks whose artifact is a `.pkg` remove the previous version with `sudo`.
+// Launched from the menubar there is no controlling terminal, so sudo aborts,
+// brew rolls the upgrade back and the package reappears as outdated forever.
+// These lines are copied byte-for-byte from `brew upgrade --cask
+// gstreamer-runtime` — if sudo or brew rewords them the detection silently
+// degrades back to "brew exited with code 1", so pin them here.
+
+@Suite("BrewUpgradeStream sudo detection")
+struct BrewUpgradeStreamSudoTests {
+    @Test("recognises sudo's no-terminal diagnostics")
+    func recognisesSudoFailures() {
+        #expect(BrewUpgradeStream.isSudoPasswordFailure(
+            "sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper"
+        ))
+        #expect(BrewUpgradeStream.isSudoPasswordFailure("sudo: a password is required"))
+        #expect(BrewUpgradeStream.isSudoPasswordFailure("sudo: no tty present and no askpass program specified"))
+    }
+
+    @Test("does not fire on unrelated output")
+    func ignoresUnrelatedLines() {
+        #expect(!BrewUpgradeStream.isSudoPasswordFailure("==> Upgrading gstreamer-runtime"))
+        #expect(!BrewUpgradeStream.isSudoPasswordFailure("Error: gstreamer-runtime: Failure while executing"))
+        // A package whose name merely contains "sudo" must not trip it.
+        #expect(!BrewUpgradeStream.isSudoPasswordFailure("==> Fetching sudo-rs"))
+        #expect(!BrewUpgradeStream.isSudoPasswordFailure(""))
+    }
+
+    @Test("names the package brew gave up on")
+    func extractsFailedPackage() {
+        // Verbatim from the failed run.
+        let line = "Error: gstreamer-runtime: Failure while executing; " +
+            "`/usr/bin/sudo -u root -E -- /usr/bin/xargs -0 -- /bin/rm --` exited with 1. Here's the output:"
+        #expect(BrewUpgradeStream.failedPackageName(fromErrorLine: line) == "gstreamer-runtime")
+    }
+
+    @Test("other Error: lines are not mistaken for package names")
+    func ignoresOtherErrorLines() {
+        // brew's aggregate error carries no package token.
+        #expect(BrewUpgradeStream.failedPackageName(
+            fromErrorLine: "Error: Multiple casks failed while executing"
+        ) == nil)
+        #expect(BrewUpgradeStream.failedPackageName(
+            fromErrorLine: "Error: No available formula with the name \"foo\""
+        ) == nil)
+        #expect(BrewUpgradeStream.failedPackageName(fromErrorLine: "==> Upgrading git") == nil)
     }
 }
