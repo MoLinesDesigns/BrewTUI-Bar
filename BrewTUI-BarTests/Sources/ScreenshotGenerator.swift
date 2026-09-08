@@ -159,4 +159,54 @@ struct ScreenshotTests {
         )
         try Self.snapshot(view, size: Self.modalSize, to: "\(Self.outputDir)/06-install-progress-failed.png")
     }
+
+    /// The real window's content size, so these snapshots match what ships.
+    private static let detailSize = PackageDetailView.windowSize
+
+    @Test func packageDetailIdle() throws {
+        Self.makeDir()
+        let view = PackageDetailView(
+            package: PreviewData.outdatedPackages[0],
+            appState: PreviewData.makeAppState(),
+            onClose: {}
+        )
+        try Self.snapshot(view, size: Self.detailSize, to: "\(Self.outputDir)/07-package-detail.png")
+    }
+
+    @Test func packageDetailPinned() throws {
+        Self.makeDir()
+        let view = PackageDetailView(
+            package: PreviewData.outdatedPackages[2],
+            appState: PreviewData.makeAppState(),
+            onClose: {}
+        )
+        try Self.snapshot(view, size: Self.detailSize, to: "\(Self.outputDir)/08-package-detail-pinned.png")
+    }
+
+    /// In-flight state: parks a real upgrade inside the stub's gate so the
+    /// window is snapshotted while it owns a live `installProgress`.
+    @Test func packageDetailInstalling() async throws {
+        Self.makeDir()
+        let stub = StubBrewChecker()
+        stub.holdUpgrade = true
+        let state = AppState(checker: stub)
+        state.canUpgrade = true
+        let package = PreviewData.outdatedPackages[0]
+        state.outdatedPackages = [package]
+
+        let run = Task { await state.upgradeFromDetailWindow(package: package.name) }
+        // Await, don't spin a RunLoop: the test body owns the main actor, so
+        // `RunLoop.run(until:)` never lets the upgrade Task make progress and
+        // the snapshot lands on the idle state. Suspending here does.
+        for _ in 0..<100 where !stub.isUpgradeHeld {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(stub.isUpgradeHeld, "el stub no llegó a retener el upgrade")
+
+        let view = PackageDetailView(package: package, appState: state, onClose: {})
+        try Self.snapshot(view, size: Self.detailSize, to: "\(Self.outputDir)/09-package-detail-installing.png")
+
+        stub.releaseUpgrade()
+        run.cancel()
+    }
 }

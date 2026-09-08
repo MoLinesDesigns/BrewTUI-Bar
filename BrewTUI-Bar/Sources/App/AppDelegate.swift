@@ -3,7 +3,7 @@ import ServiceManagement
 import SwiftUI
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
     private static let isRunningForPreviews =
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" ||
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1" ||
@@ -33,6 +33,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     // Este monitor lo garantiza sin tocar el subprocess de brew — `performClose`
     // solo oculta la UI; los Tasks viven en AppState y siguen ejecutándose.
     private var clickOutsideMonitor: Any?
+    /// Centred detail window opened from a row of the outdated list. Retained
+    /// here because nothing else owns it: the app has no window scene and the
+    /// popover is not its parent.
+    private var packageDetailWindow: NSWindow?
     private var reduceMotionObserver: (any NSObjectProtocol)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -122,6 +126,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             appState.onRefreshComplete = { [weak self] in
                 self?.updateBadge()
             }
+            appState.onShowPackageDetail = { [weak self] package in
+                self?.showPackageDetail(for: package)
+            }
             badgePreferences.onChange = { [weak self] in
                 self?.updateBadge()
             }
@@ -171,6 +178,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         launchTask?.cancel()
         launchTask = nil
         appState.onRefreshComplete = nil
+        appState.onShowPackageDetail = nil
+        closePackageDetailWindow()
         badgeTimer?.invalidate()
         badgeTimer = nil
         stopOutdatedBlink()
@@ -495,6 +504,109 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         if popover.isShown {
             popover.performClose(nil)
         }
+    }
+
+    // MARK: - Package detail window
+
+    /// Opens (or re-opens) the centred detail window for `package`.
+    ///
+    /// The package is captured **by value** in the SwiftUI view: the refresh
+    /// that follows a successful upgrade drops it from
+    /// `appState.outdatedPackages`, so a window that looked it up by name would
+    /// blank out at exactly the wrong moment.
+    private func showPackageDetail(for package: OutdatedPackage) {
+        // Always start from a fresh window. The view holds its package as a
+        // `let`, so reusing the existing one would keep showing the previous
+        // package's data — and its `@State` (loaded info, auto-close
+        // countdown) would carry over too.
+        closePackageDetailWindow()
+
+        let controller = NSHostingController(
+            rootView: PackageDetailView(
+                package: package,
+                appState: appState,
+                onClose: { [weak self] in self?.closePackageDetailWindow() }
+            )
+        )
+        let window = NSWindow(contentViewController: controller)
+        window.styleMask = [.titled, .closable, .fullSizeContentView]
+        window.title = package.name
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.isMovableByWindowBackground = true
+        // `fullSizeContentView` + a transparent titlebar draws the traffic
+        // light straight on top of the header icon. The footer carries a
+        // Cerrar/Close button and Esc works, so the standard button just goes.
+        // `.closable` stays in the mask so programmatic closes keep working.
+        window.standardWindowButton(.closeButton)?.isHidden = true
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        // Code-created NSWindows default to releasing themselves on close; with
+        // a strong reference here that turns every close into a dangling
+        // pointer. The delegate below clears the reference instead.
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        // Above the menubar popover, which can still be on screen when the
+        // window opens.
+        window.level = .floating
+        packageDetailWindow = window
+
+        // Size explicitly before centring. A freshly created hosting window is
+        // still 1x0 at this point, and `center()` on that put an empty rect in
+        // the middle so the real content grew out of the corner — measured at
+        // frame=(1279, 1082, 1, 0) in a real run.
+        window.setContentSize(PackageDetailView.windowSize)
+        // Centrar después de la pasada de layout: la content view crece bajo el
+        // titlebar y centrar antes deja la ventana 16 pt alta.
+        controller.view.layoutSubtreeIfNeeded()
+        centerDetailWindow(window)
+        // LSUIElement: the process is never frontmost on its own, so without
+        // this the window opens unfocused or behind whatever app is in front.
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        // The popover would auto-close on focus loss anyway; doing it here
+        // keeps the transition clean. In-flight brew Tasks live in AppState and
+        // are unaffected.
+        closePopover()
+    }
+
+    private func closePackageDetailWindow() {
+        guard let window = packageDetailWindow else { return }
+        // Clear first: `close()` fires windowWillClose synchronously, and the
+        // delegate callback would otherwise re-enter this method.
+        packageDetailWindow = nil
+        window.delegate = nil
+        window.close()
+        appState.releaseDetailWindowProgress()
+    }
+
+    /// True centre of the active screen's visible frame — not `NSWindow.center()`,
+    /// which deliberately biases towards the upper third (measured: it placed a
+    /// 300pt window at y=857 of a 1440pt screen, entirely above the midpoint).
+    /// The window was asked for "in the centre of the Mac".
+    private func centerDetailWindow(_ window: NSWindow) {
+        guard let visible = (window.screen ?? NSScreen.main)?.visibleFrame else { return }
+        let size = window.frame.size
+        window.setFrameOrigin(NSPoint(
+            x: visible.minX + (visible.width - size.width) / 2,
+            y: visible.minY + (visible.height - size.height) / 2
+        ))
+    }
+
+    // MARK: - NSWindowDelegate
+
+    /// Covers the paths that bypass `closePackageDetailWindow()` — the title
+    /// bar's close button and Cmd+W.
+    /// Stays `@MainActor` (inherited from the class) rather than following
+    /// `popoverDidClose`'s `nonisolated` + `Task` shape: `Notification` is not
+    /// `Sendable`, so hopping actors here would mean sending it across an
+    /// isolation boundary — a hard error under `SWIFT_STRICT_CONCURRENCY=complete`.
+    /// `NSWindowDelegate` is `@MainActor` in the SDK, so this satisfies it.
+    func windowWillClose(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow,
+              window === packageDetailWindow else { return }
+        packageDetailWindow = nil
+        appState.releaseDetailWindowProgress()
     }
 
     // MARK: - NSPopoverDelegate

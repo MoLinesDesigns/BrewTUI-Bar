@@ -10,6 +10,7 @@
 		08FEFB317002C3EF40AB6AEA /* LastActionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E207003C040BBC6F8E97BDFF /* LastActionMonitor.swift */; };
 		0B0FE81EE0F031EE6B5DF217 /* LicenseCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */; };
 		0C14525CAB56FB0806E18A99 /* CatalogSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42599B91B519382FA9672776 /* CatalogSearchService.swift */; };
+		114C18143EBE1430008AFAB3 /* PackageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E9DDFA574A8CBEE5886121B /* PackageDetailView.swift */; };
 		12814FC35BCAAFBC3726D91B /* VersionChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9BA6E7F07281787514CC3A4 /* VersionChecker.swift */; };
 		1FC4EBFE430B4221870447F7 /* SyncMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61E1A71C48ACBE24ECAF4746 /* SyncMonitor.swift */; };
 		2101C8E0EF7FA5182FDA5A32 /* LegacyMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24577C5CF85668715B4567CB /* LegacyMigrator.swift */; };
@@ -22,6 +23,7 @@
 		47083A41E4AB595976277B64 /* ServiceDiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */; };
 		4CF49E26130611E7FF55D8F5 /* CrystalGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B3F6ABD3AFDB31A54BB651 /* CrystalGlass.swift */; };
 		4FB44039A253560986CF14C4 /* TuistAssets+BrewTUIBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8F46ECA397FB54D79A17CC /* TuistAssets+BrewTUIBar.swift */; };
+		5245CD00B8F6AF76254F3FD2 /* PackageDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8C5FC5437FEEA2C901D1F7A /* PackageDetailTests.swift */; };
 		5E99EE588662855D7C207894 /* SecurityMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD29AE41DC1866A8A0A60627 /* SecurityMonitor.swift */; };
 		60C78BCD3FBB824483644F67 /* LicenseChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B688B1ECC74B64F18E083BD /* LicenseChecker.swift */; };
 		63A0FCD8C81043394B2727F9 /* SchedulerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3805B7BBA7147A321817673A /* SchedulerService.swift */; };
@@ -38,6 +40,7 @@
 		8E87AA13EE7356729D1FDB58 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F431946D7E578442AD9C958 /* SettingsView.swift */; };
 		A5C9A57ADF2A973B5DC63325 /* NewPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E90884D675A9ED4B566BAD94 /* NewPackage.swift */; };
 		A634569C03613A045FB8CF30 /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */; };
+		AA39588EF48192677B99EC1B /* PackageDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39483638DB60EF7D994FE66B /* PackageDetail.swift */; };
 		AAC329365B2871F0B9DB69DF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F187999A0402910D940F3A74 /* Localizable.xcstrings */; };
 		B43EFD3B5D5822F918CF753F /* SecurityChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */; };
 		B99DC34A3CEB0B46B2E6BF31 /* CrashReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B4A5A605C511696A24DB01B /* CrashReporter.swift */; };
@@ -48,6 +51,7 @@
 		D57854316651EC2199918743 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263A1925A77B19FC962069D1 /* PopoverView.swift */; };
 		D84A510FC20FCBFFF86F1F8A /* ServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 157C6C56628E53AC98E15068 /* ServiceTests.swift */; };
 		D8CF13065CC2A87D25B46E7F /* NotificationSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B23D45056E079218AFF363B /* NotificationSender.swift */; };
+		DDE912AADF2A648836A2A40E /* PackageInfoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 718A3481E1777271A9AA4AC1 /* PackageInfoService.swift */; };
 		E58BA0B8D0B5F1F0B4E107CD /* NewPackagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7B2E9E871E908775C442B5 /* NewPackagesView.swift */; };
 		E95B57CB309600892EE3F60D /* BrewTUI-BarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F4EB01940C6D8792F8821A /* BrewTUI-BarApp.swift */; };
 		EEB268552533BE695556BE9A /* BrewServiceDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04024121F5AB8B2C9D6D297A /* BrewServiceDiagnostics.swift */; };
@@ -105,6 +109,7 @@
 		2652607E1C1FA09F767EDF27 /* BrewTUIBarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrewTUIBarTests.swift; sourceTree = "<group>"; };
 		2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
 		3805B7BBA7147A321817673A /* SchedulerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulerService.swift; sourceTree = "<group>"; };
+		39483638DB60EF7D994FE66B /* PackageDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageDetail.swift; sourceTree = "<group>"; };
 		3C72B3CE62B297331F41AD6B /* LicenseRevalidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseRevalidator.swift; sourceTree = "<group>"; };
 		3DF27DA7DCFEEE8630D3D10E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		42599B91B519382FA9672776 /* CatalogSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogSearchService.swift; sourceTree = "<group>"; };
@@ -113,7 +118,9 @@
 		63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseCheckerTests.swift; sourceTree = "<group>"; };
 		6F8F46ECA397FB54D79A17CC /* TuistAssets+BrewTUIBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+BrewTUIBar.swift"; sourceTree = "<group>"; };
 		7181974B139A78171F894360 /* BrewTUI-Bar-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "BrewTUI-Bar-Info.plist"; sourceTree = "<group>"; };
+		718A3481E1777271A9AA4AC1 /* PackageInfoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageInfoService.swift; sourceTree = "<group>"; };
 		7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiagnosticsView.swift; sourceTree = "<group>"; };
+		7E9DDFA574A8CBEE5886121B /* PackageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageDetailView.swift; sourceTree = "<group>"; };
 		7F431946D7E578442AD9C958 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		93F4EB01940C6D8792F8821A /* BrewTUI-BarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrewTUI-BarApp.swift"; sourceTree = "<group>"; };
 		9B23D45056E079218AFF363B /* NotificationSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSender.swift; sourceTree = "<group>"; };
@@ -133,6 +140,7 @@
 		C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityChecking.swift; sourceTree = "<group>"; };
 		C3F5CF9BDA8E0850BD3F4768 /* CVEAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVEAlert.swift; sourceTree = "<group>"; };
 		C6994AFDF7EAE316D557C82F /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		D8C5FC5437FEEA2C901D1F7A /* PackageDetailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackageDetailTests.swift; sourceTree = "<group>"; };
 		DBD14E475F9B3B2197DBF21B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E160005EFEC134AAD22E8A89 /* BrewTUI_BarTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTUI_BarTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E207003C040BBC6F8E97BDFF /* LastActionMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastActionMonitor.swift; sourceTree = "<group>"; };
@@ -181,6 +189,7 @@
 				3C72B3CE62B297331F41AD6B /* LicenseRevalidator.swift */,
 				9E2E25A232F7E2251DF9DD0E /* NewPackagesService.swift */,
 				9B23D45056E079218AFF363B /* NotificationSender.swift */,
+				718A3481E1777271A9AA4AC1 /* PackageInfoService.swift */,
 				3805B7BBA7147A321817673A /* SchedulerService.swift */,
 				C20633EA5BE5A0ED4201F4F5 /* SecurityChecking.swift */,
 				AD29AE41DC1866A8A0A60627 /* SecurityMonitor.swift */,
@@ -197,6 +206,7 @@
 				0A03DFF6A2096C386C36FAD9 /* LegacyMigratorTests.swift */,
 				63322CEDB30DE411DC4DCA7D /* LicenseCheckerTests.swift */,
 				E8E8B12B1EF29C5410ECF23A /* NewPackagesServiceTests.swift */,
+				D8C5FC5437FEEA2C901D1F7A /* PackageDetailTests.swift */,
 				0144155EBC0335064B5569C9 /* ScreenshotGenerator.swift */,
 				157C6C56628E53AC98E15068 /* ServiceTests.swift */,
 			);
@@ -222,6 +232,7 @@
 				AFA2D6A6DCD8B5D2E2D1130C /* InstallProgress.swift */,
 				E90884D675A9ED4B566BAD94 /* NewPackage.swift */,
 				E59741045F87EBF1FA2C3371 /* OutdatedPackage.swift */,
+				39483638DB60EF7D994FE66B /* PackageDetail.swift */,
 				2B0FA675BE8BF618B28E2EFB /* PreviewData.swift */,
 				B0E0B2DB9186AB41C971059A /* ServiceDiagnostics.swift */,
 			);
@@ -252,6 +263,7 @@
 				0E5DC06394E21BF72F80CA49 /* InstallProgressView.swift */,
 				1A7B2E9E871E908775C442B5 /* NewPackagesView.swift */,
 				F305B2E7FFA7C218B265E599 /* OutdatedListView.swift */,
+				7E9DDFA574A8CBEE5886121B /* PackageDetailView.swift */,
 				263A1925A77B19FC962069D1 /* PopoverView.swift */,
 				7811A11407724945C84C3B43 /* ServiceDiagnosticsView.swift */,
 				7F431946D7E578442AD9C958 /* SettingsView.swift */,
@@ -441,6 +453,7 @@
 				64FA4D2DC4AEED32804D0F47 /* LegacyMigratorTests.swift in Sources */,
 				0B0FE81EE0F031EE6B5DF217 /* LicenseCheckerTests.swift in Sources */,
 				BD184BE92D579DAB2904559B /* NewPackagesServiceTests.swift in Sources */,
+				5245CD00B8F6AF76254F3FD2 /* PackageDetailTests.swift in Sources */,
 				F3B56887D592EBE9A2E51D28 /* ScreenshotGenerator.swift in Sources */,
 				D84A510FC20FCBFFF86F1F8A /* ServiceTests.swift in Sources */,
 			);
@@ -460,6 +473,7 @@
 				83C49904E8134A34B700A38D /* InstallProgress.swift in Sources */,
 				A5C9A57ADF2A973B5DC63325 /* NewPackage.swift in Sources */,
 				75C4A19A32FD9983D16ADFC8 /* OutdatedPackage.swift in Sources */,
+				AA39588EF48192677B99EC1B /* PackageDetail.swift in Sources */,
 				A634569C03613A045FB8CF30 /* PreviewData.swift in Sources */,
 				3EFC14FB58F69A4066634532 /* ServiceDiagnostics.swift in Sources */,
 				818EF64291A268BAB5BF9EF4 /* BrewChecker.swift in Sources */,
@@ -475,6 +489,7 @@
 				8A0042C9F4CACC2E29D85E6F /* LicenseRevalidator.swift in Sources */,
 				CE83F8A05166EAD700CC214D /* NewPackagesService.swift in Sources */,
 				D8CF13065CC2A87D25B46E7F /* NotificationSender.swift in Sources */,
+				DDE912AADF2A648836A2A40E /* PackageInfoService.swift in Sources */,
 				63A0FCD8C81043394B2727F9 /* SchedulerService.swift in Sources */,
 				B43EFD3B5D5822F918CF753F /* SecurityChecking.swift in Sources */,
 				5E99EE588662855D7C207894 /* SecurityMonitor.swift in Sources */,
@@ -484,6 +499,7 @@
 				6A9D38255C5470BFB79CC9DF /* InstallProgressView.swift in Sources */,
 				E58BA0B8D0B5F1F0B4E107CD /* NewPackagesView.swift in Sources */,
 				F530066AD5EB4EC0ED261FCB /* OutdatedListView.swift in Sources */,
+				114C18143EBE1430008AFAB3 /* PackageDetailView.swift in Sources */,
 				D57854316651EC2199918743 /* PopoverView.swift in Sources */,
 				47083A41E4AB595976277B64 /* ServiceDiagnosticsView.swift in Sources */,
 				8E87AA13EE7356729D1FDB58 /* SettingsView.swift in Sources */,

@@ -26,9 +26,13 @@ struct PopoverView: View {
     /// Sheet binding driven by `appState.installProgress`. We never want to
     /// dismiss while a run is still in flight, so the setter ignores `false`
     /// until the progress reports `isFinished`.
+    ///
+    /// Gated on `progressPresentation`: an upgrade launched from the package
+    /// detail window renders its progress there, and without this check the
+    /// popover would pop the same sheet on top of it.
     private var installProgressBinding: Binding<Bool> {
         Binding(
-            get: { appState.installProgress != nil },
+            get: { appState.installProgress != nil && appState.progressPresentation == .sheet },
             set: { isPresented in
                 guard !isPresented else { return }
                 appState.dismissInstallProgress()

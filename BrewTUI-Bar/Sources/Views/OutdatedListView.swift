@@ -69,27 +69,40 @@ struct OutdatedListView: View {
 
     private func packageRow(_ pkg: OutdatedPackage) -> some View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(pkg.name)
-                    .font(.system(.body, design: .monospaced))
-                    .fontWeight(.medium)
-                HStack(spacing: 4) {
-                    Text(pkg.installedVersion)
-                        .foregroundStyle(BrewTUIBarTheme.installedVersion(highContrast: colorSchemeContrast == .increased))
-                    Image(systemName: "arrow.right")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .accessibilityHidden(true)
-                    Text(pkg.currentVersion)
-                        .foregroundStyle(BrewTUIBarTheme.currentVersion(highContrast: colorSchemeContrast == .increased))
+            // El bloque de texto es un Button de pleno derecho, no un
+            // `.onTapGesture` sobre la fila: así abrir la ficha funciona
+            // también con teclado y VoiceOver, y el botón de la flecha
+            // conserva su propia zona de click sin ambigüedad.
+            Button {
+                appState.showPackageDetail(pkg)
+            } label: {
+                HStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(pkg.name)
+                            .font(.system(.body, design: .monospaced))
+                            .fontWeight(.medium)
+                        HStack(spacing: 4) {
+                            Text(pkg.installedVersion)
+                                .foregroundStyle(BrewTUIBarTheme.installedVersion(highContrast: colorSchemeContrast == .increased))
+                            Image(systemName: "arrow.right")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .accessibilityHidden(true)
+                            Text(pkg.currentVersion)
+                                .foregroundStyle(BrewTUIBarTheme.currentVersion(highContrast: colorSchemeContrast == .increased))
+                        }
+                        .font(.caption)
+                    }
+                    Spacer(minLength: 0)
                 }
-                .font(.caption)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             // ACC-002: read each row as a single VoiceOver element so the
             // package, both versions and the pin badge come through together.
             .accessibilityElement(children: .combine)
-
-            Spacer()
+            .accessibilityLabel("\(pkg.name), \(pkg.installedVersion) → \(pkg.currentVersion)")
+            .accessibilityHint(String(localized: "Opens the package details window"))
 
             if pkg.pinned {
                 Image(systemName: "pin.fill")

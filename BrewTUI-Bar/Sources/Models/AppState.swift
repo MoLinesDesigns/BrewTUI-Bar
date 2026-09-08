@@ -15,6 +15,11 @@ final class AppState {
     var servicesError: String?
     var canUpgrade = true
     var onRefreshComplete: (() -> Void)?
+    /// Hook that AppDelegate installs to open the package detail window. Lives
+    /// here — next to `onRefreshComplete` — instead of being threaded through
+    /// PopoverView → OutdatedListView as a closure parameter: the row that
+    /// triggers it is three views deep and already holds `AppState`.
+    var onShowPackageDetail: ((OutdatedPackage) -> Void)?
     var cveAlerts: [CVEAlert] = []
     var cveCheckError: String?
     var syncActivity = false
@@ -56,6 +61,17 @@ final class AppState {
     /// it automatically once the queue drains (see `finishQueueRun`); a run
     /// that failed stays parked so the user can read what happened.
     var installProgress: InstallProgress?
+    /// Who is rendering `installProgress` right now. The popover sheet and the
+    /// package detail window read the same state, so without an owner both
+    /// would present at once — and `finishQueueRun` would clear the progress
+    /// out from under the window at the exact moment it needs to show the
+    /// result and start its auto-close countdown.
+    enum ProgressPresentation: Sendable, Equatable {
+        case sheet
+        case detailWindow
+    }
+
+    private(set) var progressPresentation: ProgressPresentation = .sheet
     /// Reason of the last failed upgrade. Kept apart from `error` on purpose:
     /// `error` drives a full-page state in PopoverView that hides the package
     /// list, which is the wrong shape for "one package out of N failed".
@@ -468,6 +484,10 @@ final class AppState {
         }
 
         guard !hasFailure, installProgress?.isFinished == true else { return }
+        // La ventana de detalle cierra sola tras su cuenta atrás y necesita el
+        // progreso terminado para pintar el resultado mientras tanto. Limpiarlo
+        // aquí la dejaría en blanco justo en el instante del éxito.
+        guard progressPresentation == .sheet else { return }
         installProgress = nil
     }
 
@@ -483,6 +503,7 @@ final class AppState {
     func dismissInstallProgress() {
         guard installProgress?.isFinished == true else { return }
         installProgress = nil
+        progressPresentation = .sheet
     }
 
     /// Aborts the in-flight install and discards everything still queued.
@@ -502,6 +523,38 @@ final class AppState {
         installProgress?.finishFailure(String(localized: "Cancelled"))
         // The worker re-enters after the cancelled stream returns, resumes the
         // current request's waiter and exits (queue is now empty).
+    }
+
+    // MARK: - Package detail window
+
+    /// Asks AppDelegate to open the detail window for `package`. No-op when no
+    /// hook is installed (previews, tests).
+    func showPackageDetail(_ package: OutdatedPackage) {
+        onShowPackageDetail?(package)
+    }
+
+    /// Upgrade launched from the detail window. Claims ownership of
+    /// `installProgress` *before* enqueuing so neither the popover sheet nor
+    /// `finishQueueRun` touches it, and hands ownership straight back if the
+    /// request never made it into the queue (no Pro license, or the package was
+    /// already queued/in flight from somewhere else).
+    func upgradeFromDetailWindow(package name: String) async {
+        progressPresentation = .detailWindow
+        await upgrade(package: name)
+        if installProgress == nil {
+            progressPresentation = .sheet
+        }
+    }
+
+    /// Called when the detail window goes away. Hands a still-running upgrade
+    /// back to the popover sheet so it keeps a surface, and drops a finished
+    /// one the user has already seen.
+    func releaseDetailWindowProgress() {
+        guard progressPresentation == .detailWindow else { return }
+        progressPresentation = .sheet
+        if installProgress?.isFinished == true {
+            installProgress = nil
+        }
     }
 
     // MARK: - What's new in Homebrew
