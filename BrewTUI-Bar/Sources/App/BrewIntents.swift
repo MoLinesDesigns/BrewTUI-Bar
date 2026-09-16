@@ -156,9 +156,8 @@ struct ControlServiceIntent: AppIntent {
         guard let match else {
             return .result(dialog: "No Homebrew service named \(service).")
         }
-        await state.controlService(action.brewAction, service: match)
-        let notice = await state.actionNotice
-        return .result(dialog: IntentDialog(stringLiteral: notice?.message ?? "Done."))
+        let outcome = await state.controlService(action.brewAction, service: match)
+        return .result(dialog: IntentDialog(stringLiteral: outcome.message))
     }
 }
 

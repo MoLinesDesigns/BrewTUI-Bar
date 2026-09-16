@@ -449,10 +449,22 @@ final class AppState {
         }
     }
 
-    func controlService(_ action: BrewServiceAction, service: BrewService) async {
-        guard serviceActionInFlight == nil else { return }
+    /// Returns the notice it published so callers that need the outcome — the
+    /// `ControlServiceIntent`, which has to answer Shortcuts — read *this*
+    /// run's result instead of whatever `actionNotice` happens to hold (a
+    /// notice from an earlier action survives until the user dismisses it).
+    @discardableResult
+    func controlService(_ action: BrewServiceAction, service: BrewService) async -> ActionNotice {
+        guard serviceActionInFlight == nil else {
+            return ActionNotice(
+                message: String(localized: "Another service action is still running."),
+                isError: true
+            )
+        }
         serviceActionInFlight = service.name
         defer { serviceActionInFlight = nil }
+
+        let notice: ActionNotice
         do {
             try await checker.controlService(action, name: service.name)
             let template: String = switch action {
@@ -460,11 +472,15 @@ final class AppState {
             case .stop:    String(localized: "Stopped %@.")
             case .restart: String(localized: "Restarted %@.")
             }
-            postActionNotice(String(format: template, service.name))
+            notice = ActionNotice(message: String(format: template, service.name))
+            actionNotice = notice
         } catch {
-            presentActionFailure(error)
+            appStateLogger.error("Service action failed: \(error.localizedDescription, privacy: .public)")
+            notice = ActionNotice.failure(error)
+            actionNotice = notice
         }
         await refreshServices()
+        return notice
     }
 
     // MARK: - Install / uninstall

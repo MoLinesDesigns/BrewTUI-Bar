@@ -6734,6 +6734,23 @@
           }
         }
       }
+    },
+    "Another service action is still running." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another service action is still running."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía se está ejecutando otra acción sobre un servicio."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
