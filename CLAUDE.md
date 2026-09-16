@@ -27,6 +27,19 @@ xcodebuild test -workspace BrewTUI-Bar.xcworkspace -scheme BrewTUI-Bar \
 
 Tests use **Swift Testing** (`import Testing`, `@Test`/`#expect`), not XCTest.
 
+Driving the real UI from a script (there is no window to target and clicking a
+status item needs accessibility permissions):
+
+```bash
+open -a <built>/BrewTUI-Bar.app --args --show-manager=maintenance   # or --show-popover
+```
+
+`--show-manager[=services|inventory|history|snapshots|profiles|maintenance]` and
+`--show-popover` open that surface right after launch; absent, they do nothing.
+The screenshot suite renders the same views offscreen — opt in with
+`TEST_RUNNER_RUN_SCREENSHOTS=1 xcodebuild test … -only-testing:BrewTUI-BarTests/ScreenshotTests`
+(the env var needs the `TEST_RUNNER_` prefix to reach the test host).
+
 **There is no working CI.** The GitHub account is locked over a billing issue that will
 not be resolved, so Actions jobs fail without executing a single step. `ci.yml` (Tuist
 4.39.0 → generate → build → test on `macos-latest`) is set to `workflow_dispatch` only,

@@ -168,6 +168,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
             updateBadge()
             observeReduceMotionChanges()
+            openLaunchArgumentSurface()
 
             badgeTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in
                 Task { @MainActor in self?.updateBadge() }
@@ -690,6 +691,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.delegate = nil
         window.close()
         appState.releaseDetailWindowProgress()
+    }
+
+    /// QA / screenshot affordance: `BrewTUI-Bar --show-manager[=<section>]` or
+    /// `--show-popover` opens that surface right after launch.
+    ///
+    /// A menu bar agent has no other way to be driven from a script — there is
+    /// no window to target and clicking a status item needs accessibility
+    /// permissions — so verifying the real UI (not an offscreen render) meant
+    /// either this or nothing. Ignored entirely when the arguments are absent.
+    private func openLaunchArgumentSurface() {
+        let arguments = ProcessInfo.processInfo.arguments.dropFirst()
+        for argument in arguments {
+            if argument == "--show-popover" {
+                showPopover()
+                return
+            }
+            guard argument == "--show-manager" || argument.hasPrefix("--show-manager=") else { continue }
+            let rawSection = argument.split(separator: "=", maxSplits: 1).last.map(String.init) ?? ""
+            let section = ManagerState.Section(rawValue: rawSection) ?? .services
+            showManagerWindow(section: section)
+            return
+        }
     }
 
     // MARK: - Notification actions
