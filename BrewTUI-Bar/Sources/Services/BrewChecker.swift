@@ -105,6 +105,33 @@ struct BrewChecker: Sendable {
         _ = try await BrewProcess.run(["upgrade"])
         brewCheckerLogger.info("Successfully upgraded all packages")
     }
+
+    // MARK: - Pinning
+
+    /// `brew pin` / `brew unpin`. Formula-only: Homebrew has no cask pin, which
+    /// is why `IgnoredPackages` exists as the app-local alternative.
+    func setPin(_ pinned: Bool, package name: String) async throws {
+        let verb = pinned ? "pin" : "unpin"
+        brewCheckerLogger.info("Running brew \(verb, privacy: .public) \(name, privacy: .public)")
+        try await BrewProcess.runAction([verb, name], terminalCommand: "brew \(verb) \(name)")
+    }
+
+    // MARK: - Service control
+
+    /// `brew services start|stop|restart <name>`. Services whose plist lives in
+    /// `/Library/LaunchDaemons` need `sudo`; `runAction` turns that into
+    /// `.needsAdminPassword` with the exact command for the Terminal handoff
+    /// instead of a bare exit code.
+    func controlService(_ action: BrewServiceAction, name: String) async throws {
+        brewCheckerLogger.info("brew services \(action.rawValue, privacy: .public) \(name, privacy: .public)")
+        try await BrewProcess.runAction(
+            ["services", action.rawValue, name],
+            terminalCommand: "brew services \(action.rawValue) \(name)",
+            timeout: Self.serviceActionTimeout
+        )
+    }
+
+    private static let serviceActionTimeout: TimeInterval = 90
 }
 
 /// Backwards-compatible alias for code that referenced BrewError directly.

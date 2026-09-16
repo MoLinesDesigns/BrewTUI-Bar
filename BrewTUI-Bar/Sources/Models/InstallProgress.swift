@@ -8,6 +8,8 @@ enum InstallStage: Sendable, Equatable {
     case installing
     case pouring
     case linking
+    /// `brew uninstall` — no fetch/pour phases, one visible step.
+    case removing
     case done
     case failed(String)
 
@@ -19,6 +21,7 @@ enum InstallStage: Sendable, Equatable {
         case .installing: String(localized: "Installing…")
         case .pouring:    String(localized: "Unpacking…")
         case .linking:    String(localized: "Linking…")
+        case .removing:   String(localized: "Removing…")
         case .done:       String(localized: "Done")
         case .failed:     String(localized: "Failed")
         }
@@ -33,6 +36,7 @@ enum InstallStage: Sendable, Equatable {
         case .installing: 0.7
         case .pouring:    0.8
         case .linking:    0.95
+        case .removing:   0.6
         case .done:       1.0
         case .failed:     1.0
         }
@@ -53,6 +57,9 @@ struct InstallProgress: Identifiable, Sendable, Equatable {
     enum Mode: Sendable, Equatable {
         case singlePackage(String)
         case all
+        /// Fresh install started from the catalog/search modal.
+        case install(String)
+        case uninstall(String)
     }
 
     let id: UUID
@@ -105,6 +112,10 @@ struct InstallProgress: Identifiable, Sendable, Equatable {
             let count = max(packages.count, 1)
             let template = String(localized: "Upgrading %lld packages")
             return String(format: template, Int64(count))
+        case .install(let name):
+            return String(format: String(localized: "Installing %@"), name)
+        case .uninstall(let name):
+            return String(format: String(localized: "Removing %@"), name)
         }
     }
 

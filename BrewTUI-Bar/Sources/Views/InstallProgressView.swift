@@ -209,6 +209,10 @@ struct InstallProgressView: View {
         case .linking:
             Image(systemName: "link.circle")
                 .foregroundStyle(CrystalGlass.glassCyan)
+        case .removing:
+            Image(systemName: "trash")
+                .foregroundStyle(CrystalGlass.warmAccent)
+                .symbolEffect(.pulse, options: reduceMotion ? .nonRepeating : .repeating)
         case .done:
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(colorSchemeContrast == .increased ? Color(red: 0, green: 0.6, blue: 0) : .green)

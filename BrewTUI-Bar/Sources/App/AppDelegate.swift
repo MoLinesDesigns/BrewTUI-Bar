@@ -1,9 +1,10 @@
 import AppKit
 import ServiceManagement
 import SwiftUI
+@preconcurrency import UserNotifications
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSWindowDelegate, UNUserNotificationCenterDelegate {
     private static let isRunningForPreviews =
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" ||
         ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1" ||
@@ -37,6 +38,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     /// here because nothing else owns it: the app has no window scene and the
     /// popover is not its parent.
     private var packageDetailWindow: NSWindow?
+    /// Manager window (services, inventory, history, snapshots, profiles,
+    /// maintenance). Its `ManagerState` outlives the window on purpose: closing
+    /// and reopening should not re-walk the Cellar and re-read every snapshot.
+    private var managerWindow: NSWindow?
+    private var managerState: ManagerState?
     private var reduceMotionObserver: (any NSObjectProtocol)?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -66,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             // like it never launched.
             setupStatusItem()
             setupPopover()
+            setupNotificationActions()
 
             // Cross-platform version contract: warn (non-blocking) when the
             // installed BrewTUI-Bar drifts from the brewtui-bar CLI. License
@@ -129,6 +136,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             appState.onShowPackageDetail = { [weak self] package in
                 self?.showPackageDetail(for: package)
             }
+            appState.onShowManager = { [weak self] section in
+                self?.showManagerWindow(section: section)
+            }
+            // Publish the live store to App Intents. Must happen before the
+            // first refresh so a shortcut that launched the app cold does not
+            // time out waiting for it.
+            IntentBridge.register(appState)
             badgePreferences.onChange = { [weak self] in
                 self?.updateBadge()
             }
@@ -179,7 +193,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         launchTask = nil
         appState.onRefreshComplete = nil
         appState.onShowPackageDetail = nil
+        appState.onShowManager = nil
         closePackageDetailWindow()
+        closeManagerWindow()
         badgeTimer?.invalidate()
         badgeTimer = nil
         stopOutdatedBlink()
@@ -336,8 +352,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             button.image?.accessibilityDescription = String(localized: "BrewTUI-Bar")
             button.imagePosition = .imageLeft
             button.title = ""
-            button.action = #selector(togglePopover)
+            button.action = #selector(statusItemClicked)
             button.target = self
+            // Right-click opens the quick menu instead of the popover. Without
+            // this the button only reports left clicks and the secondary menu
+            // would never fire.
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
     }
 
@@ -455,6 +475,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         updateStatusItemIcon()
     }
 
+    @objc private func statusItemClicked() {
+        guard let button = statusItem.button else { return }
+        let isRightClick = NSApp.currentEvent.map { event in
+            event.type == .rightMouseUp || event.modifierFlags.contains(.control)
+        } ?? false
+        if isRightClick {
+            showQuickMenu(from: button)
+        } else {
+            togglePopover()
+        }
+    }
+
     @objc private func togglePopover() {
         guard let button = statusItem.button else { return }
 
@@ -471,32 +503,112 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             // which always gets a clean event routing path. The cost is
             // resetting `@State` (showSettings / showNewPackages), which
             // is desirable: those sheets shouldn't survive a popover close.
-            let controller = NSHostingController(
-                rootView: PopoverView(
-                    appState: appState,
-                    scheduler: scheduler,
-                    badgePreferences: badgePreferences
-                )
-            )
-            hostingController = controller
-            popover.contentViewController = controller
-
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            // Arranca la caducidad del banner: mientras el popover está
-            // cerrado el aviso espera en vez de expirar sin que nadie lo vea.
-            appState.popoverVisible = true
-            // Defer makeKey() one runloop tick. Calling it synchronously
-            // after popover.show() races NSPopover's own window-keying:
-            // in some scenarios (reopen after a sheet dismiss, reopen
-            // long after a previous show) the synchronous call silently
-            // no-ops and the popover stays non-key, which kills mouse
-            // event delivery to SwiftUI controls inside it.
-            DispatchQueue.main.async { [weak self] in
-                guard let self, self.popover.isShown else { return }
-                self.popover.contentViewController?.view.window?.makeKey()
-            }
-            installClickOutsideMonitor()
+            presentPopover(from: button)
         }
+    }
+
+    /// Builds a fresh hosting controller and shows the popover. Split out of
+    /// `togglePopover` so the notification actions and the quick menu can open
+    /// it without going through a click.
+    private func presentPopover(from button: NSStatusBarButton) {
+        let controller = NSHostingController(
+            rootView: PopoverView(
+                appState: appState,
+                scheduler: scheduler,
+                badgePreferences: badgePreferences
+            )
+        )
+        hostingController = controller
+        popover.contentViewController = controller
+
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        // Arranca la caducidad del banner: mientras el popover está
+        // cerrado el aviso espera en vez de expirar sin que nadie lo vea.
+        appState.popoverVisible = true
+        // Defer makeKey() one runloop tick. Calling it synchronously
+        // after popover.show() races NSPopover's own window-keying:
+        // in some scenarios (reopen after a sheet dismiss, reopen
+        // long after a previous show) the synchronous call silently
+        // no-ops and the popover stays non-key, which kills mouse
+        // event delivery to SwiftUI controls inside it.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.popover.isShown else { return }
+            self.popover.contentViewController?.view.window?.makeKey()
+        }
+        installClickOutsideMonitor()
+    }
+
+    // MARK: - Quick menu
+
+    /// Right-click menu on the status item: the actions people repeat, without
+    /// opening the popover at all. This is the "platform surface" a Notification
+    /// Centre widget would have provided, minus the sandboxed extension, the
+    /// App Group and the Developer ID profile churn it would have cost.
+    private func showQuickMenu(from button: NSStatusBarButton) {
+        closePopover()
+        let menu = NSMenu()
+
+        let outdated = appState.outdatedCount
+        let statusTitle = outdated == 0
+            ? String(localized: "Everything is up to date")
+            : String(format: String(localized: "%lld updates available"), Int64(outdated))
+        let statusLine = NSMenuItem(title: statusTitle, action: nil, keyEquivalent: "")
+        statusLine.isEnabled = false
+        menu.addItem(statusLine)
+        menu.addItem(.separator())
+
+        let open = NSMenuItem(title: String(localized: "Open BrewTUI-Bar"), action: #selector(menuOpenPopover), keyEquivalent: "")
+        open.target = self
+        menu.addItem(open)
+
+        let refresh = NSMenuItem(title: String(localized: "Check for updates"), action: #selector(menuRefresh), keyEquivalent: "r")
+        refresh.target = self
+        refresh.isEnabled = !appState.isLoading
+        menu.addItem(refresh)
+
+        if appState.canUpgrade, outdated > 0 {
+            let upgrade = NSMenuItem(title: String(localized: "Upgrade All"), action: #selector(menuUpgradeAll), keyEquivalent: "")
+            upgrade.target = self
+            menu.addItem(upgrade)
+        }
+
+        menu.addItem(.separator())
+        for section in ManagerState.Section.allCases {
+            let item = NSMenuItem(title: section.title, action: #selector(menuOpenManager(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = section.rawValue
+            item.image = NSImage(systemSymbolName: section.systemImage, accessibilityDescription: nil)
+            menu.addItem(item)
+        }
+
+        menu.addItem(.separator())
+        let quit = NSMenuItem(title: String(localized: "Quit"), action: #selector(menuQuit), keyEquivalent: "q")
+        quit.target = self
+        menu.addItem(quit)
+
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+    }
+
+    @objc private func menuOpenPopover() {
+        showPopover()
+    }
+
+    @objc private func menuRefresh() {
+        Task { await appState.refresh(force: true) }
+    }
+
+    @objc private func menuUpgradeAll() {
+        Task { await appState.upgradeAll() }
+    }
+
+    @objc private func menuOpenManager(_ sender: NSMenuItem) {
+        let section = (sender.representedObject as? String)
+            .flatMap(ManagerState.Section.init(rawValue:)) ?? .services
+        showManagerWindow(section: section)
+    }
+
+    @objc private func menuQuit() {
+        NSApp.terminate(nil)
     }
 
     private func closePopover() {
@@ -559,7 +671,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         // Centrar después de la pasada de layout: la content view crece bajo el
         // titlebar y centrar antes deja la ventana 16 pt alta.
         controller.view.layoutSubtreeIfNeeded()
-        centerDetailWindow(window)
+        centerWindow(window)
         // LSUIElement: the process is never frontmost on its own, so without
         // this the window opens unfocused or behind whatever app is in front.
         NSApp.activate(ignoringOtherApps: true)
@@ -580,11 +692,120 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         appState.releaseDetailWindowProgress()
     }
 
+    // MARK: - Notification actions
+
+    /// Registers the notification categories and takes delivery of taps.
+    /// Both halves are needed: the categories draw the buttons, the delegate
+    /// is what makes them do anything.
+    private func setupNotificationActions() {
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        NotificationAction.registerCategories(on: center)
+    }
+
+    @MainActor
+    private func handleNotificationAction(_ identifier: String) {
+        switch identifier {
+        case NotificationAction.upgradeAll:
+            Task { await appState.upgradeAll() }
+        case NotificationAction.open, UNNotificationDefaultActionIdentifier:
+            showPopover()
+        default:
+            break
+        }
+    }
+
+    /// `Notification`-free entry point used by the notification actions and the
+    /// status item menu: shows the popover if it is not already up.
+    private func showPopover() {
+        guard let button = statusItem?.button, popover != nil, !popover.isShown else { return }
+        NSApp.activate(ignoringOtherApps: true)
+        presentPopover(from: button)
+    }
+
+    // MARK: - UNUserNotificationCenterDelegate
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        // `UNNotificationResponse` is not Sendable — read the identifier here
+        // and hop with a plain String instead of the whole response.
+        let identifier = response.actionIdentifier
+        Task { @MainActor [weak self] in
+            self?.handleNotificationAction(identifier)
+        }
+        completionHandler()
+    }
+
+    /// LSUIElement agents are rarely frontmost, but when they are (right after
+    /// a Terminal handoff, say) macOS would otherwise swallow the banner.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
+    }
+
+    // MARK: - Manager window
+
+    /// Opens (or re-focuses) the manager window on `section`.
+    ///
+    /// Unlike the package detail window this one is *reused*: it is a real
+    /// utility window the user resizes and keeps around, and its state holds
+    /// data that costs seconds to rebuild.
+    private func showManagerWindow(section: ManagerState.Section) {
+        let state = managerState ?? ManagerState(appState: appState)
+        managerState = state
+        state.selection = section
+
+        if let window = managerWindow {
+            NSApp.activate(ignoringOtherApps: true)
+            window.makeKeyAndOrderFront(nil)
+            closePopover()
+            return
+        }
+
+        let controller = NSHostingController(
+            rootView: ManagerWindowView(
+                appState: appState,
+                manager: state,
+                onClose: { [weak self] in self?.closeManagerWindow() }
+            )
+        )
+        let window = NSWindow(contentViewController: controller)
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
+        window.title = String(localized: "BrewTUI-Bar")
+        window.titlebarAppearsTransparent = true
+        window.isReleasedWhenClosed = false
+        window.delegate = self
+        window.setContentSize(ManagerWindowView.windowSize)
+        window.contentMinSize = ManagerWindowView.minimumSize
+        controller.view.layoutSubtreeIfNeeded()
+        centerWindow(window)
+        managerWindow = window
+
+        // LSUIElement: without an explicit activate the window opens behind
+        // whatever app is frontmost, exactly like the detail window.
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        closePopover()
+    }
+
+    private func closeManagerWindow() {
+        guard let window = managerWindow else { return }
+        managerWindow = nil
+        window.delegate = nil
+        window.close()
+    }
+
     /// True centre of the active screen's visible frame — not `NSWindow.center()`,
     /// which deliberately biases towards the upper third (measured: it placed a
     /// 300pt window at y=857 of a 1440pt screen, entirely above the midpoint).
     /// The window was asked for "in the centre of the Mac".
-    private func centerDetailWindow(_ window: NSWindow) {
+    private func centerWindow(_ window: NSWindow) {
         guard let visible = (window.screen ?? NSScreen.main)?.visibleFrame else { return }
         let size = window.frame.size
         window.setFrameOrigin(NSPoint(
@@ -603,10 +824,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     /// isolation boundary — a hard error under `SWIFT_STRICT_CONCURRENCY=complete`.
     /// `NSWindowDelegate` is `@MainActor` in the SDK, so this satisfies it.
     func windowWillClose(_ notification: Notification) {
-        guard let window = notification.object as? NSWindow,
-              window === packageDetailWindow else { return }
-        packageDetailWindow = nil
-        appState.releaseDetailWindowProgress()
+        guard let window = notification.object as? NSWindow else { return }
+        if window === packageDetailWindow {
+            packageDetailWindow = nil
+            appState.releaseDetailWindowProgress()
+        } else if window === managerWindow {
+            // The state survives: reopening should not re-read every snapshot.
+            managerWindow = nil
+        }
     }
 
     // MARK: - NSPopoverDelegate

@@ -8,6 +8,52 @@ private let notifLogger = Logger(subsystem: "com.molinesdesigns.brewtuibar", cat
 // stubbed in tests and re-used from any caller (security daemon, sync poller).
 // All identifiers carry a per-call timestamp so macOS does not silently drop
 // follow-up notifications with the same id (UX-001).
+/// Identifiers shared by the sender (which stamps them on the payload) and
+/// AppDelegate (which acts on them when the user clicks). Kept in one place so
+/// a rename cannot silently break the button — a wrong identifier produces a
+/// notification whose actions do nothing at all.
+enum NotificationAction {
+    static let outdatedCategory = "brewtui-bar.outdated"
+    static let cveCategory = "brewtui-bar.cve"
+    static let syncCategory = "brewtui-bar.sync"
+    static let upgradeAll = "brewtui-bar.action.upgrade-all"
+    static let open = "brewtui-bar.action.open"
+
+    /// Registers the categories so macOS renders the buttons. Must run before
+    /// the first notification is posted; re-registering is harmless.
+    static func registerCategories(on center: UNUserNotificationCenter = .current()) {
+        let upgradeAllAction = UNNotificationAction(
+            identifier: upgradeAll,
+            title: String(localized: "Upgrade all"),
+            options: []
+        )
+        let openAction = UNNotificationAction(
+            identifier: open,
+            title: String(localized: "Open BrewTUI-Bar"),
+            options: [.foreground]
+        )
+        let outdated = UNNotificationCategory(
+            identifier: outdatedCategory,
+            actions: [upgradeAllAction, openAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        let cve = UNNotificationCategory(
+            identifier: cveCategory,
+            actions: [openAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        let sync = UNNotificationCategory(
+            identifier: syncCategory,
+            actions: [openAction],
+            intentIdentifiers: [],
+            options: []
+        )
+        center.setNotificationCategories([outdated, cve, sync])
+    }
+}
+
 protocol Notifying: Sendable {
     func sendOutdatedNotification(count: Int)
     func sendSyncNotification(machineCount: Int)
@@ -27,6 +73,10 @@ struct NotificationSender: Notifying {
         content.title = String(localized: "Homebrew Updates")
         content.body = String(format: String(localized: "%lld packages can be updated."), Int64(count))
         content.sound = .default
+        // Without a category the banner is a dead end: the user has to find the
+        // menu bar icon, open the popover and click again to do the one thing
+        // the notification is about.
+        content.categoryIdentifier = NotificationAction.outdatedCategory
         post(content, idPrefix: "brewtui-bar-outdated")
     }
 
@@ -39,6 +89,7 @@ struct NotificationSender: Notifying {
             Int64(machineCount)
         )
         content.sound = .default
+        content.categoryIdentifier = NotificationAction.syncCategory
         post(content, idPrefix: "brewtui-bar-sync")
     }
 
@@ -51,6 +102,7 @@ struct NotificationSender: Notifying {
 
         let content = UNMutableNotificationContent()
         content.sound = .default
+        content.categoryIdentifier = NotificationAction.cveCategory
         if hasCriticalOrHigh, let worst = sorted.first {
             content.title = String(localized: "Security Alert — BrewTUI-Bar")
             content.body = String(

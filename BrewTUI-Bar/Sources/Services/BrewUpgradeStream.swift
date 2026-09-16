@@ -101,6 +101,16 @@ enum BrewUpgradeStream {
     /// or `.failure`; the consumer should always await the final event before
     /// considering the run complete.
     static func run(packages: [String]) -> AsyncStream<BrewUpgradeEvent> {
+        run(arguments: ["upgrade"] + packages)
+    }
+
+    /// Generalised entry point: runs `brew <arguments>` and parses the same
+    /// markers. `install` and `uninstall` print the identical `==>` vocabulary,
+    /// so the only thing that changes is the verb list the caller passes in.
+    /// Note that `install`/`uninstall` never emit `==> Upgrading`, which is the
+    /// parser's discovery signal — those callers must seed the progress rows
+    /// themselves (see `AppState.runPackageAction`).
+    static func run(arguments: [String]) -> AsyncStream<BrewUpgradeEvent> {
         AsyncStream { continuation in
             let box = StreamBox(continuation)
 
@@ -115,7 +125,7 @@ enum BrewUpgradeStream {
 
             process.executableURL = URL(fileURLWithPath: BrewExecutable.path)
             // `brew upgrade` with no positional args = upgrade everything.
-            process.arguments = ["upgrade"] + packages
+            process.arguments = arguments
             process.standardOutput = stdoutPipe
             process.standardError = stderrPipe
             // brew's progress output is line-buffered when stdout is not a tty;
@@ -270,6 +280,15 @@ enum BrewUpgradeStream {
             guard let name = packageName(from: pkgCandidate) else { return }
             box.emit(.packageDiscovered(name))
             box.emit(.packageStage(name: name, stage: .installing))
+        case "uninstalling", "purging":
+            // `brew uninstall` prints `==> Uninstalling Cask foo` for casks —
+            // skip the "Cask"/"Formula" noun and key on the real name.
+            let candidate = (pkgCandidate.lowercased() == "cask" || pkgCandidate.lowercased() == "formula")
+                ? String(after.split(separator: " ").dropFirst(2).first ?? "")
+                : pkgCandidate
+            guard let name = packageName(from: candidate) else { return }
+            box.emit(.packageDiscovered(name))
+            box.emit(.packageStage(name: name, stage: .removing))
         case "fetching", "downloading":
             guard let name = packageName(from: pkgCandidate) else { return }
             box.emit(.packageStage(name: name, stage: .fetching))

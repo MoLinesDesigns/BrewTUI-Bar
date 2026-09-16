@@ -78,16 +78,26 @@ struct PopoverView: View {
                             .padding(.vertical, 6)
                     }
 
+                    // Pin, ignore, service control and maintenance report here.
+                    // Separate from the upgrade banner above so a failed
+                    // `brew services start` cannot wipe an upgrade failure the
+                    // user has not read yet.
+                    if let notice = appState.actionNotice {
+                        actionNoticeBanner(notice)
+                            .padding(.horizontal, CrystalGlass.Spacing.md)
+                            .padding(.vertical, 6)
+                    }
+
                     // Estado de paquetes al centro, justo bajo el header. Las
                     // vistas vacías (upToDate/loading/error) expanden con
                     // maxHeight: .infinity y empujan el banner de novedades
                     // hasta el pie. La lista de outdated trae su propio
                     // ScrollView que también ocupa el espacio disponible.
-                    if appState.isLoading && appState.outdatedPackages.isEmpty {
+                    if appState.isLoading && appState.visibleOutdatedPackages.isEmpty {
                         loadingView
                     } else if let error = appState.error {
                         errorView(error)
-                    } else if appState.outdatedPackages.isEmpty {
+                    } else if appState.visibleOutdatedPackages.isEmpty {
                         upToDateView
                     } else {
                         OutdatedListView(appState: appState)
@@ -163,7 +173,16 @@ struct PopoverView: View {
                 searchResultsQuery: appState.catalogSearchQuery,
                 onSearch: { appState.searchCatalog($0) },
                 onClose: { showNewPackages = false },
-                onRefresh: { appState.loadNewPackagesIfNeeded(force: true) }
+                onRefresh: { appState.loadNewPackagesIfNeeded(force: true) },
+                // Installing needs Pro, same gate as upgrading. Passing nil
+                // hides the affordance instead of showing a button that only
+                // ever produces a "license expired" notice.
+                onInstall: appState.canUpgrade
+                    ? { pkg in
+                        showNewPackages = false
+                        Task { await appState.install(package: pkg.name, kind: pkg.kind == .cask ? .cask : .formula) }
+                    }
+                    : nil
             )
         }
         .sheet(item: serviceDiagnosticsBinding, onDismiss: restorePopoverKey) { diagnostics in
@@ -377,6 +396,59 @@ struct PopoverView: View {
             alert.addButton(withTitle: String(localized: "Continue"))
             alert.runModal()
         }
+    }
+
+    /// Result of a non-upgrade action. Offers the Terminal handoff when the
+    /// failure was `sudo` — retrying in-app would fail identically.
+    private func actionNoticeBanner(_ notice: ActionNotice) -> some View {
+        VStack(alignment: .leading, spacing: CrystalGlass.Spacing.sm) {
+            HStack(alignment: .top, spacing: CrystalGlass.Spacing.sm) {
+                Image(systemName: notice.isError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                    .foregroundStyle(
+                        notice.isError
+                            ? BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased)
+                            : Color.green
+                    )
+                    .accessibilityHidden(true)
+                Text(notice.message)
+                    .font(.caption)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                Button {
+                    appState.dismissActionNotice()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                }
+                .buttonStyle(.glassIcon)
+                .accessibilityLabel(String(localized: "Dismiss"))
+            }
+
+            if let command = notice.terminalCommand {
+                Button {
+                    do {
+                        try TerminalHandoff.run(
+                            command: command,
+                            label: "action",
+                            announcement: String(localized: "This needs your administrator password.")
+                        )
+                        appState.dismissActionNotice()
+                    } catch {
+                        TerminalHandoff.presentFailure(error)
+                    }
+                } label: {
+                    Label(String(localized: "Run in Terminal"), systemImage: "terminal")
+                        .font(.caption)
+                }
+                .buttonStyle(.glassPill)
+            }
+        }
+        .padding(.horizontal, CrystalGlass.Spacing.md)
+        .padding(.vertical, CrystalGlass.Spacing.sm)
+        .glassPanel(
+            tint: notice.isError ? BrewTUIBarTheme.critical(highContrast: colorSchemeContrast == .increased) : .clear,
+            strokeOpacity: 0.4
+        )
     }
 
     private func lastActionBanner(_ message: String) -> some View {
@@ -593,11 +665,20 @@ struct PopoverView: View {
 
             Spacer()
 
-            if let last = appState.lastChecked, !appState.outdatedPackages.isEmpty {
+            if let last = appState.lastChecked, !appState.visibleOutdatedPackages.isEmpty {
                 Text(last.formatted(.relative(presentation: .named)))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
+
+            Button {
+                appState.showManager(.services)
+            } label: {
+                Image(systemName: "square.grid.2x2")
+            }
+            .buttonStyle(.glassIcon)
+            .help(String(localized: "Services, installed packages, history, maintenance"))
+            .accessibilityLabel(String(localized: "Open the manager window"))
 
             Button {
                 showSettings = true

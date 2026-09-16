@@ -22,6 +22,24 @@ extension BrewChecking {
         try await BrewServiceDiagnostics.run(serviceName: serviceName)
     }
 
+    /// Defaults for the mutating verbs so test stubs only implement what they
+    /// exercise. They fail loudly rather than silently succeeding — a stub that
+    /// is asked to pin without overriding this has a test bug, not a no-op.
+    func setPin(_ pinned: Bool, package name: String) async throws {
+        throw BrewProcessError.commandFailed(String(localized: "This action is not available here."))
+    }
+
+    func controlService(_ action: BrewServiceAction, name: String) async throws {
+        throw BrewProcessError.commandFailed(String(localized: "This action is not available here."))
+    }
+
+    func streamBrew(arguments: [String]) -> AsyncStream<BrewUpgradeEvent> {
+        AsyncStream { continuation in
+            continuation.yield(.failure(String(localized: "This action is not available here.")))
+            continuation.finish()
+        }
+    }
+
     /// Default fallback that bridges non-streaming mocks (tests) to the
     /// AppState stream consumer. Yields a single `packageDiscovered` +
     /// `packageStage(.installing)` per known package, awaits the legacy call,
@@ -64,5 +82,11 @@ extension BrewChecker: BrewChecking {
     /// Production override: drive the real stream that parses brew's stdout.
     func streamUpgrade(packages: [String]) -> AsyncStream<BrewUpgradeEvent> {
         BrewUpgradeStream.run(packages: packages)
+    }
+
+    /// Same parser, arbitrary verb — `install` / `uninstall` reuse every stage
+    /// marker `upgrade` emits.
+    func streamBrew(arguments: [String]) -> AsyncStream<BrewUpgradeEvent> {
+        BrewUpgradeStream.run(arguments: arguments)
     }
 }

@@ -1,11 +1,13 @@
 import SwiftUI
+import AppKit
 
 /// Glass sheet listing formulae/casks recently added to Homebrew's core taps,
 /// plus a search field that queries the *entire* Homebrew catalog (core + any
-/// third-party taps). Discoverability surface for "what's new" — clicking a row
-/// copies the `brew install <name>` command to the pasteboard so the user can
-/// paste it straight into their shell (BrewTUI-Bar deliberately stays out of
-/// the install path; that's BrewTUI-Bar's job).
+/// third-party taps). Clicking a row copies the `brew install <name>` command;
+/// the arrow next to it installs the package from here, through the same
+/// streaming progress modal upgrades use. (Copy-only was the original
+/// behaviour, kept as the row's primary action so existing muscle memory still
+/// works on a machine without Pro.)
 ///
 /// Two modes driven by the search field:
 ///  - **Novelties** (query empty or 1 char): the recently-added feed, optionally
@@ -29,6 +31,9 @@ struct NewPackagesView: View {
     let onSearch: (String) -> Void
     let onClose: () -> Void
     let onRefresh: () -> Void
+    /// Installs the package in-app. Nil in previews and whenever installing is
+    /// not available, which also hides the button.
+    var onInstall: ((NewPackage) -> Void)?
 
     @State private var selectedKind: NewPackage.Kind = .formula
     @State private var copiedID: String?
@@ -592,6 +597,7 @@ struct NewPackagesView: View {
     private func row(for pkg: NewPackage) -> some View {
         let isCopied = copiedID == pkg.id
 
+        HStack(spacing: 6) {
         Button {
             copy(pkg)
         } label: {
@@ -651,6 +657,42 @@ struct NewPackagesView: View {
         .accessibilityLabel("\(pkg.name). \(pkg.desc ?? "")")
         .accessibilityHint(String(localized: "Double tap to copy install command"))
         .help(pkg.installCommand)
+
+            // Sibling of the row button, not nested inside its label: a button
+            // inside another button's label never receives clicks on macOS.
+            if let onInstall {
+                Button {
+                    onInstall(pkg)
+                } label: {
+                    Image(systemName: "arrow.down.circle")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .buttonStyle(.glassIcon)
+                .help(String(format: String(localized: "Install %@"), pkg.name))
+                .accessibilityLabel(String(format: String(localized: "Install %@"), pkg.name))
+            }
+        }
+        .contextMenu {
+            if let onInstall {
+                Button {
+                    onInstall(pkg)
+                } label: {
+                    Label(String(format: String(localized: "Install %@"), pkg.name), systemImage: "arrow.down.circle")
+                }
+            }
+            Button {
+                copy(pkg)
+            } label: {
+                Label(String(localized: "Copy install command"), systemImage: "doc.on.doc")
+            }
+            if let homepage = pkg.homepage {
+                Button {
+                    NSWorkspace.shared.open(homepage)
+                } label: {
+                    Label(String(localized: "Open homepage"), systemImage: "safari")
+                }
+            }
+        }
     }
 
     private func kindGlyph(for kind: NewPackage.Kind) -> some View {

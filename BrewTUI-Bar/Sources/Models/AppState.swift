@@ -20,6 +20,22 @@ final class AppState {
     /// PopoverView → OutdatedListView as a closure parameter: the row that
     /// triggers it is three views deep and already holds `AppState`.
     var onShowPackageDetail: ((OutdatedPackage) -> Void)?
+    /// Hook AppDelegate installs to open the manager window. Same shape and
+    /// reasoning as `onShowPackageDetail`: the window is owned by AppKit, and
+    /// the popover footer is three views away from it.
+    var onShowManager: ((ManagerState.Section) -> Void)?
+    /// App-local "stop nagging me about this" list. Owned here (not in
+    /// AppDelegate like BadgePreferences) because `upgradeAll` and the badge
+    /// count both have to honour it — a view-level store would have let the
+    /// badge keep counting packages the user had already silenced.
+    let ignoredPackages: IgnoredPackages
+    /// Result of a one-shot action that is not an upgrade (pin, service
+    /// control, cleanup…). Carries an optional Terminal command for the sudo
+    /// cases, mirroring `upgradeNeedsTerminal` without overloading it.
+    var actionNotice: ActionNotice?
+    /// Name of the service whose start/stop/restart is currently running, so
+    /// the row can show a spinner and refuse a second click.
+    var serviceActionInFlight: String?
     var cveAlerts: [CVEAlert] = []
     var cveCheckError: String?
     var syncActivity = false
@@ -115,6 +131,10 @@ final class AppState {
         let mode: InstallProgress.Mode
         let seeds: [String]
         let arguments: [String]
+        /// `false` → `arguments` are the packages of a `brew upgrade` run
+        /// (the historical shape). `true` → `arguments` are the full brew
+        /// command line (`install --cask foo`), streamed through `streamBrew`.
+        var usesRawCommand: Bool = false
     }
     private var upgradeQueue: [UpgradeRequest] = []
     private var upgradeWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
@@ -160,12 +180,41 @@ final class AppState {
 
     private let checker: any BrewChecking
 
-    init(checker: any BrewChecking = BrewChecker()) {
+    init(
+        checker: any BrewChecking = BrewChecker(),
+        ignoredPackages: IgnoredPackages = IgnoredPackages()
+    ) {
         self.checker = checker
+        self.ignoredPackages = ignoredPackages
     }
 
-    var outdatedCount: Int { outdatedPackages.count }
+    /// What the user actually sees: everything brew reported minus the
+    /// packages they chose to silence. Every count and list in the UI reads
+    /// this, not `outdatedPackages`.
+    var visibleOutdatedPackages: [OutdatedPackage] {
+        outdatedPackages.filter { !ignoredPackages.isIgnored($0) }
+    }
+
+    var ignoredOutdatedPackages: [OutdatedPackage] {
+        outdatedPackages.filter { ignoredPackages.isIgnored($0) }
+    }
+
+    var outdatedCount: Int { visibleOutdatedPackages.count }
+    var ignoredCount: Int { ignoredOutdatedPackages.count }
     var errorServices: [BrewService] { services.filter(\.hasError) }
+    /// Services sorted for the manager window: errors first, then running,
+    /// then everything else alphabetically.
+    var sortedServices: [BrewService] {
+        services.sorted { lhs, rhs in
+            func rank(_ service: BrewService) -> Int {
+                if service.hasError { return 0 }
+                if service.isRunning { return 1 }
+                return 2
+            }
+            if rank(lhs) != rank(rhs) { return rank(lhs) < rank(rhs) }
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+    }
     var criticalCveCount: Int { cveAlerts.filter { $0.severity == .critical || $0.severity == .high }.count }
 
     var lastSchedulerError: (message: String, date: String)? {
@@ -316,6 +365,141 @@ final class AppState {
         serviceDiagnostics = nil
     }
 
+    // MARK: - Action notices
+
+    func postActionNotice(_ message: String) {
+        actionNotice = ActionNotice(message: message)
+    }
+
+    func presentActionFailure(_ error: Error) {
+        appStateLogger.error("Action failed: \(error.localizedDescription, privacy: .public)")
+        actionNotice = ActionNotice.failure(error)
+    }
+
+    func dismissActionNotice() {
+        actionNotice = nil
+    }
+
+    // MARK: - Pin / ignore
+
+    /// `brew pin` / `brew unpin`. Formula-only — Homebrew has no cask pin, so
+    /// the row offers the local ignore list for casks instead of failing.
+    func setPin(_ pinned: Bool, package: OutdatedPackage) async {
+        guard package.kind == .formula else {
+            actionNotice = ActionNotice(
+                message: String(localized: "Homebrew can only pin formulae. Use “Ignore” for casks."),
+                isError: true
+            )
+            return
+        }
+        do {
+            try await checker.setPin(pinned, package: package.name)
+            postActionNotice(
+                pinned
+                    ? String(format: String(localized: "Pinned %@."), package.name)
+                    : String(format: String(localized: "Unpinned %@."), package.name)
+            )
+            await refresh(force: true)
+        } catch {
+            presentActionFailure(error)
+        }
+    }
+
+    /// Hides this exact version. A newer one brings the package back on its own.
+    func skipVersion(_ package: OutdatedPackage) {
+        ignoredPackages.skipVersion(package)
+        postActionNotice(
+            String(format: String(localized: "Skipping %1$@ %2$@."), package.name, package.currentVersion)
+        )
+        // The badge is driven by `outdatedCount`, which now excludes this
+        // package — repaint it without waiting for the next scheduled refresh.
+        onRefreshComplete?()
+    }
+
+    func ignoreAlways(_ package: OutdatedPackage) {
+        ignoredPackages.ignoreAlways(package.name)
+        postActionNotice(String(format: String(localized: "Ignoring %@ from now on."), package.name))
+        onRefreshComplete?()
+    }
+
+    func stopIgnoring(_ name: String) {
+        ignoredPackages.clear(name)
+        postActionNotice(String(format: String(localized: "%@ is back in the list."), name))
+        onRefreshComplete?()
+    }
+
+    func stopIgnoringAll() {
+        ignoredPackages.clearAll()
+        postActionNotice(String(localized: "Ignore list cleared."))
+        onRefreshComplete?()
+    }
+
+    // MARK: - Service control
+
+    /// Re-reads `brew services list` only. The full `refresh()` runs
+    /// `brew update` first, which takes tens of seconds — far too slow as
+    /// feedback for a button the user just pressed.
+    func refreshServices() async {
+        do {
+            services = try await checker.checkServices()
+            servicesError = nil
+        } catch {
+            appStateLogger.error("Services refresh failed: \(error.localizedDescription, privacy: .public)")
+            servicesError = error.localizedDescription
+        }
+    }
+
+    func controlService(_ action: BrewServiceAction, service: BrewService) async {
+        guard serviceActionInFlight == nil else { return }
+        serviceActionInFlight = service.name
+        defer { serviceActionInFlight = nil }
+        do {
+            try await checker.controlService(action, name: service.name)
+            let template: String = switch action {
+            case .start:   String(localized: "Started %@.")
+            case .stop:    String(localized: "Stopped %@.")
+            case .restart: String(localized: "Restarted %@.")
+            }
+            postActionNotice(String(format: template, service.name))
+        } catch {
+            presentActionFailure(error)
+        }
+        await refreshServices()
+    }
+
+    // MARK: - Install / uninstall
+
+    /// `brew install`. Routed through the same queue and progress modal as
+    /// upgrades: rows are seeded up front because `brew install` never prints
+    /// the `==> Upgrading` line the stream parser uses to discover packages.
+    func install(package name: String, kind: PackageKind) async {
+        guard canUpgrade else {
+            actionNotice = ActionNotice(message: String(localized: "Pro license expired"), isError: true)
+            return
+        }
+        let flag = kind == .cask ? "--cask" : "--formula"
+        await enqueueUpgrade(UpgradeRequest(
+            mode: .install(name),
+            seeds: [name],
+            arguments: ["install", flag, name],
+            usesRawCommand: true
+        ))
+    }
+
+    func uninstall(package name: String, kind: PackageKind) async {
+        guard canUpgrade else {
+            actionNotice = ActionNotice(message: String(localized: "Pro license expired"), isError: true)
+            return
+        }
+        let flag = kind == .cask ? "--cask" : "--formula"
+        await enqueueUpgrade(UpgradeRequest(
+            mode: .uninstall(name),
+            seeds: [name],
+            arguments: ["uninstall", flag, name],
+            usesRawCommand: true
+        ))
+    }
+
     private func formatLastActionMessage(action: String, packages: [String], remaining: Int) -> String {
         let isUpgrade = action == "upgrade"
         let pkgLabel: String
@@ -414,10 +598,29 @@ final class AppState {
         // modal can render its rows immediately. The stream then refines the
         // list as `==> Upgrading X` lines arrive (brew may skip pinned or
         // already-current packages between our last refresh and now).
-        let seeds = outdatedPackages
+        // Pinned *and* locally ignored packages are excluded. Missing the
+        // second filter would make "Upgrade All" resurrect every package the
+        // user had just silenced, which is the whole point of the feature.
+        let seeds = visibleOutdatedPackages
             .filter { !$0.pinned }
             .map(\.name)
-        await enqueueUpgrade(UpgradeRequest(mode: .all, seeds: seeds, arguments: []))
+        // No seeds means one of two very different things. If we know of no
+        // outdated package at all, a plain `brew upgrade` is still the right
+        // call — our snapshot may simply be stale. If we know of several and
+        // every one is pinned or ignored, running it would upgrade exactly
+        // what the user asked us to leave alone.
+        if seeds.isEmpty, !outdatedPackages.isEmpty {
+            postNotice(String(localized: "Nothing to upgrade — every pending package is pinned or ignored."))
+            return
+        }
+        // `brew upgrade` with no arguments upgrades *everything*, ignore list
+        // included — filtering the seeds would only have fixed the modal's row
+        // list while brew went ahead and upgraded the package anyway. So the
+        // names go on the command line as soon as anything is being silenced,
+        // and only then: passing them always would lose brew's own ordering
+        // and its handling of packages that appeared since the last refresh.
+        let arguments = ignoredOutdatedPackages.isEmpty ? [] : seeds
+        await enqueueUpgrade(UpgradeRequest(mode: .all, seeds: seeds, arguments: arguments))
     }
 
     /// Encola una petición de upgrade y suspende hasta que ESA petición concreta
@@ -457,7 +660,8 @@ final class AppState {
                 await runUpgradeStream(
                     mode: request.mode,
                     seeds: request.seeds,
-                    arguments: request.arguments
+                    arguments: request.arguments,
+                    usesRawCommand: request.usesRawCommand
                 )
                 inFlightSeeds = nil
                 upgradeWaiters.removeValue(forKey: request.id)?.resume()
@@ -531,6 +735,11 @@ final class AppState {
     /// hook is installed (previews, tests).
     func showPackageDetail(_ package: OutdatedPackage) {
         onShowPackageDetail?(package)
+    }
+
+    /// Opens the manager window on `section`. No-op without a hook (previews).
+    func showManager(_ section: ManagerState.Section = .services) {
+        onShowManager?(section)
     }
 
     /// Upgrade launched from the detail window. Claims ownership of
@@ -659,7 +868,8 @@ final class AppState {
     private func runUpgradeStream(
         mode: InstallProgress.Mode,
         seeds: [String],
-        arguments: [String]
+        arguments: [String],
+        usesRawCommand: Bool = false
     ) async {
         isLoading = true
         error = nil
@@ -676,7 +886,9 @@ final class AppState {
         // "3 upgraded, 1 failed" rather than a flat "upgrade failed" when brew
         // kept going past a broken cask (which `cask/upgrade.rb` does).
         var failureReason: String?
-        let events = checker.streamUpgrade(packages: arguments)
+        let events = usesRawCommand
+            ? checker.streamBrew(arguments: arguments)
+            : checker.streamUpgrade(packages: arguments)
         for await event in events {
             switch event {
             case .packageDiscovered(let name):
@@ -725,7 +937,22 @@ final class AppState {
         // have upgraded most of the batch; keeping this inside `if succeeded`
         // threw that away and the queue summary under-reported the run.
         let upgraded = installProgress?.packages.filter { $0.stage == .done }.map(\.name) ?? []
-        completedInCurrentRun.append(contentsOf: upgraded)
+        switch mode {
+        case .install(let name), .uninstall(let name):
+            // Not an upgrade: keep it out of `completedInCurrentRun` so the
+            // queue summary does not claim "Upgraded foo" for a fresh install,
+            // and say what actually happened right here instead.
+            if succeeded {
+                let template = if case .install = mode {
+                    String(localized: "Installed %@.")
+                } else {
+                    String(localized: "Removed %@.")
+                }
+                postNotice(String(format: template, name))
+            }
+        case .singlePackage, .all:
+            completedInCurrentRun.append(contentsOf: upgraded)
+        }
 
         // Deliberately NOT `self.error`: PopoverView renders `error` as a
         // full-page state that replaces the package list, so a single failed

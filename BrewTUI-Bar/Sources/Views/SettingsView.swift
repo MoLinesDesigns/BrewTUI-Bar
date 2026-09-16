@@ -44,6 +44,7 @@ struct SettingsView: View {
                     generalSection
                     notificationsSection
                     menuBarSection
+                    ignoredSection
                     licenseSection
                     advancedSection
                 }
@@ -191,6 +192,47 @@ struct SettingsView: View {
             Text("Toggle the indicators that appear next to BrewTUI-Bar's menu bar icon. Outdated packages blink the icon, or show a count when Reduce Motion is on.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    /// The ignore list is invisible by design in the popover (that is the
+    /// point), so this is the one place a user can see what they silenced and
+    /// undo it package by package.
+    @ViewBuilder
+    private var ignoredSection: some View {
+        let names = appState.ignoredPackages.names.sorted()
+        Section(String(localized: "Ignored packages")) {
+            if names.isEmpty {
+                Text("Packages you skip or always ignore from the update list appear here.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(names, id: \.self) { name in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(name)
+                                .font(.system(.body, design: .monospaced))
+                            Text(appState.ignoredPackages.label(for: name))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button {
+                            appState.stopIgnoring(name)
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                        }
+                        .buttonStyle(.borderless)
+                        .help(String(localized: "Show this package again"))
+                        .accessibilityLabel(String(format: String(localized: "Stop ignoring %@"), name))
+                    }
+                }
+                Button(role: .destructive) {
+                    appState.stopIgnoringAll()
+                } label: {
+                    Label(String(localized: "Clear the ignore list"), systemImage: "trash")
+                }
+            }
         }
     }
 

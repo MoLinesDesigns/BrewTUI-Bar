@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct OutdatedListView: View {
     let appState: AppState
@@ -57,14 +58,44 @@ struct OutdatedListView: View {
 
             ScrollView {
                 LazyVStack(spacing: 4) {
-                    ForEach(appState.outdatedPackages) { pkg in
+                    ForEach(appState.visibleOutdatedPackages) { pkg in
                         packageRow(pkg)
+                    }
+                    if appState.ignoredCount > 0 {
+                        ignoredFooter
                     }
                 }
                 .padding(.horizontal, CrystalGlass.Spacing.sm)
                 .padding(.vertical, CrystalGlass.Spacing.sm)
             }
         }
+    }
+
+    /// Silenced packages are hidden, not deleted — without this line the user
+    /// has no way to tell "nothing to update" apart from "I muted four things
+    /// last month", and no way back.
+    private var ignoredFooter: some View {
+        HStack(spacing: CrystalGlass.Spacing.sm) {
+            Image(systemName: "bell.slash")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
+            Text(String(format: String(localized: "%lld ignored"), Int64(appState.ignoredCount)))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+            Spacer()
+            Button {
+                appState.stopIgnoringAll()
+            } label: {
+                Text(String(localized: "Show all"))
+                    .font(.caption2)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(CrystalGlass.glassCyan)
+            .accessibilityLabel(String(localized: "Stop ignoring every package"))
+        }
+        .padding(.horizontal, CrystalGlass.Spacing.md)
+        .padding(.vertical, CrystalGlass.Spacing.xs)
     }
 
     private func packageRow(_ pkg: OutdatedPackage) -> some View {
@@ -159,6 +190,61 @@ struct OutdatedListView: View {
         )
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.2), value: appState.countdownRemaining[pkg.name])
+        .contextMenu { rowMenu(pkg) }
+    }
+
+    /// Right-click actions for a row. Pin is formula-only (Homebrew has no cask
+    /// pin at all), so casks get the app-local ignore list in its place — both
+    /// are offered to formulae because they mean different things: pinning also
+    /// stops `brew upgrade` in the terminal, ignoring only quiets this app.
+    @ViewBuilder
+    private func rowMenu(_ pkg: OutdatedPackage) -> some View {
+        Button {
+            appState.showPackageDetail(pkg)
+        } label: {
+            Label(String(localized: "Show details"), systemImage: "info.circle")
+        }
+
+        Divider()
+
+        if pkg.kind == .formula {
+            Button {
+                Task { await appState.setPin(!pkg.pinned, package: pkg) }
+            } label: {
+                Label(
+                    pkg.pinned ? String(localized: "Unpin in Homebrew") : String(localized: "Pin in Homebrew"),
+                    systemImage: pkg.pinned ? "pin.slash" : "pin"
+                )
+            }
+        }
+
+        Button {
+            appState.skipVersion(pkg)
+        } label: {
+            Label(
+                String(format: String(localized: "Skip version %@"), pkg.currentVersion),
+                systemImage: "bell.slash"
+            )
+        }
+
+        Button {
+            appState.ignoreAlways(pkg)
+        } label: {
+            Label(String(localized: "Always ignore this package"), systemImage: "eye.slash")
+        }
+
+        Divider()
+
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(upgradeCommand(for: pkg), forType: .string)
+        } label: {
+            Label(String(localized: "Copy upgrade command"), systemImage: "doc.on.doc")
+        }
+    }
+
+    private func upgradeCommand(for pkg: OutdatedPackage) -> String {
+        pkg.kind == .cask ? "brew upgrade --cask \(pkg.name)" : "brew upgrade \(pkg.name)"
     }
 }
 

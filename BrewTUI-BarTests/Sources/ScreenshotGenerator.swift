@@ -125,6 +125,102 @@ struct ScreenshotTests {
         try Self.snapshot(view, size: Self.popoverSize, to: "\(Self.outputDir)/03-popover-free-funnel.png")
     }
 
+    // MARK: - Manager window
+    //
+    // These render against the *real* `~/.brewtui-bar` and a real `brew list`,
+    // so they double as a smoke test for the readers: a decoding regression or
+    // a layout that collapses shows up as an empty panel in the PNG.
+
+    private static let managerSize = CGSize(width: 860, height: 600)
+
+    @MainActor
+    private static func makeManagerPair() -> (AppState, ManagerState) {
+        let stub = StubBrewChecker()
+        stub.servicesResult = .success([
+            BrewService(name: "postgresql@16", status: "started", user: "molines", file: nil, exitCode: 0),
+            BrewService(name: "redis", status: "none", user: nil, file: nil, exitCode: nil),
+            BrewService(name: "nginx", status: "error", user: "root", file: nil, exitCode: 1),
+        ])
+        let state = AppState(
+            checker: stub,
+            ignoredPackages: IgnoredPackages(defaults: UserDefaults(suiteName: "brewtui-bar.screenshots")!)
+        )
+        state.canUpgrade = true
+        return (state, ManagerState(appState: state))
+    }
+
+    @Test func managerServices() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await state.refreshServices()
+        manager.selection = .services
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/10-manager-services.png"
+        )
+    }
+
+    @Test func managerInventory() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await manager.loadInventory()
+        manager.selection = .inventory
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/11-manager-inventory.png"
+        )
+    }
+
+    @Test func managerHistory() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await manager.loadHistory()
+        manager.selection = .history
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/12-manager-history.png"
+        )
+    }
+
+    @Test func managerSnapshots() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await manager.loadSnapshots()
+        manager.selection = .snapshots
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/13-manager-snapshots.png"
+        )
+    }
+
+    @Test func managerProfiles() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await manager.loadProfiles()
+        manager.selection = .profiles
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/14-manager-profiles.png"
+        )
+    }
+
+    @Test func managerMaintenance() async throws {
+        Self.makeDir()
+        let (state, manager) = Self.makeManagerPair()
+        await manager.previewMaintenance()
+        manager.selection = .maintenance
+        try Self.snapshot(
+            ManagerWindowView(appState: state, manager: manager, onClose: {}),
+            size: Self.managerSize,
+            to: "\(Self.outputDir)/15-manager-maintenance.png"
+        )
+    }
+
     @Test func installProgressMidRun() throws {
         Self.makeDir()
         var prog = InstallProgress(mode: .all, seeds: ["git", "node", "wget", "ffmpeg"])
