@@ -9,6 +9,40 @@ private let inventoryLogger = Logger(subsystem: "com.molinesdesigns.brewtuibar",
 /// matching, but nothing surfaced that list to the user: the app could tell you
 /// what was *outdated* and nothing about what you actually had installed.
 enum InventoryService {
+    /// Read only package/version directories, never the contents of installed packages.
+    struct InstallationSnapshot: Equatable, Sendable {
+        let formulae: Set<String>
+        let casks: Set<String>
+
+        func contains(_ name: String, kind: PackageKind) -> Bool {
+            let token = name.split(separator: "/").last.map(String.init) ?? name
+            return (kind == .formula ? formulae : casks).contains(token)
+        }
+    }
+
+    static func installationSnapshot(cellar: URL, caskroom: URL) throws -> InstallationSnapshot {
+        func directories(at root: URL) throws -> [URL] {
+            do {
+                return try FileManager.default.contentsOfDirectory(
+                    at: root, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
+                ).filter { try $0.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true }
+            } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
+                return []
+            }
+        }
+        func names(at root: URL) throws -> Set<String> {
+            var names: Set<String> = []
+            for package in try directories(at: root) {
+                // Empty racks and a cask's leftover .metadata are not installations.
+                if try !directories(at: package).isEmpty {
+                    names.insert(package.lastPathComponent)
+                }
+            }
+            return names
+        }
+        return try InstallationSnapshot(formulae: names(at: cellar), casks: names(at: caskroom))
+    }
+
     /// `brew list` on a large machine is fast (it reads the Cellar directory)
     /// but not instant; give it more room than the default.
     private static let listTimeout: TimeInterval = 90

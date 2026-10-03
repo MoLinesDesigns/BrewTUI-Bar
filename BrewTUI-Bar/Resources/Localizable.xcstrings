@@ -1,6 +1,23 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "%@ is no longer installed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is no longer installed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ya no está instalado."
+          }
+        }
+      }
+    },
     "Removes all installed versions of this formula. Homebrew will refuse if other packages depend on it. Personal data outside Homebrew is kept." : {
       "extractionState" : "manual",
       "localizations" : {

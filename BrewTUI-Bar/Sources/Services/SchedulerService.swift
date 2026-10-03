@@ -57,6 +57,7 @@ final class SchedulerService {
     // cancel them rather than leaving them to run after the scheduler is
     // dismissed.
     private var permissionSyncTask: Task<Void, Never>?
+    private var installationWatchTask: Task<Void, Never>?
     /// Prevents overlapping scheduler ticks when `brew update` + CVE checks
     /// outlive the configured interval (e.g. 30 minutes).
     private var checkInFlight = false
@@ -101,6 +102,7 @@ final class SchedulerService {
         schedulerLogger.info("Starting scheduler with interval: \(self.interval.rawValue)s")
         self.state = state
         restartTimer()
+        startInstallationWatch(state: state)
         // Sync toggle with actual system permission on each launch
         permissionSyncTask?.cancel()
         permissionSyncTask = Task { [weak self] in
@@ -114,6 +116,46 @@ final class SchedulerService {
         timer = nil
         permissionSyncTask?.cancel()
         permissionSyncTask = nil
+        installationWatchTask?.cancel()
+        installationWatchTask = nil
+    }
+
+    private func startInstallationWatch(state: AppState) {
+        installationWatchTask?.cancel()
+        installationWatchTask = Task { [weak state] in
+            var roots: (cellar: URL?, caskroom: URL?) = (nil, nil)
+            var candidate: InventoryService.InstallationSnapshot?
+            while !Task.isCancelled {
+                if roots.cellar == nil || roots.caskroom == nil {
+                    roots = await InventoryService.roots()
+                }
+                if let state, !state.isLoading, state.installProgress?.isFinished != false,
+                   let cellar = roots.cellar, let caskroom = roots.caskroom {
+                    do {
+                        let snapshot = try await Task.detached(priority: .utility) {
+                            try InventoryService.installationSnapshot(cellar: cellar, caskroom: caskroom)
+                        }.value
+                        guard !Task.isCancelled else { return }
+                        guard !state.isLoading, state.installProgress?.isFinished != false else {
+                            candidate = nil
+                            try await Task.sleep(for: .seconds(3))
+                            continue
+                        }
+                        // Two equal reads avoid publishing an intermediate uninstall/upgrade state.
+                        if candidate == snapshot {
+                            state.reconcileInstallations(snapshot)
+                        }
+                        candidate = snapshot
+                    } catch {
+                        // Unreadable storage is not evidence that every package was removed.
+                        candidate = nil
+                    }
+                } else {
+                    candidate = nil
+                }
+                do { try await Task.sleep(for: .seconds(3)) } catch { return }
+            }
+        }
     }
 
     /// Query the OS for the actual notification authorization status.

@@ -569,3 +569,102 @@ struct OutdatedUninstallTests {
         #expect(state.actionNotice?.isError == true)
     }
 }
+
+@Suite("External Homebrew removal")
+@MainActor
+struct ExternalRemovalTests {
+    @Test("Removing the last formula or cask reconciles the badge, inventory and stale actions", arguments: [PackageKind.formula, .cask])
+    func removal(kind: PackageKind) async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let cellar = root.appendingPathComponent("Cellar")
+        let caskroom = root.appendingPathComponent("Caskroom")
+        let rack = (kind == .formula ? cellar : caskroom).appendingPathComponent("example")
+        try FileManager.default.createDirectory(at: rack.appendingPathComponent("1.0"), withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let checker = StubBrewChecker()
+        let state = AppState(checker: checker)
+        let package = OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2", kind: kind)
+        state.outdatedPackages = [package]
+        let installed = InstalledPackage(name: "example", versions: ["1"], kind: kind, isLeaf: true, sizeBytes: nil)
+        let manager = ManagerState(appState: state, inventoryLoader: { InventoryService.Result(packages: [installed], warning: nil) })
+        await manager.loadInventory()
+        state.reconcileInstallations(try InventoryService.installationSnapshot(cellar: cellar, caskroom: caskroom))
+        #expect(state.outdatedCount == 1)
+        #expect(manager.inventory.count == 1)
+        var badgeRefreshes = 0
+        state.onRefreshComplete = { badgeRefreshes += 1 }
+
+        // Simulate Homebrew's on-disk removal, without touching the real installation.
+        try FileManager.default.removeItem(at: rack)
+        let removed = try InventoryService.installationSnapshot(cellar: cellar, caskroom: caskroom)
+        state.reconcileInstallations(removed)
+        state.reconcileInstallations(removed)
+        #expect(state.outdatedCount == 0)
+        #expect(manager.inventory.isEmpty)
+        #expect(!state.isPackageInstalled(package.name, kind: kind))
+        #expect(badgeRefreshes == 1)
+
+        await state.upgradeFromDetailWindow(package: package.name, kind: kind)
+        await state.uninstall(package: package.name, kind: kind, completely: true)
+        #expect(checker.upgradedPackages.isEmpty)
+        #expect(checker.rawCommands.isEmpty)
+        #expect(state.installProgress == nil)
+        #expect(state.actionNotice != nil)
+        #expect(state.progressPresentation == .sheet)
+
+        // The next observation must also correct a late refresh, even if the
+        // directory snapshot is unchanged since the last observation.
+        checker.outdatedResult = .success(OutdatedResponse(formulae: kind == .formula ? [package] : [], casks: kind == .cask ? [package] : []))
+        await state.refresh(force: true)
+        state.reconcileInstallations(removed)
+        await manager.loadInventory()
+        #expect(state.outdatedPackages.isEmpty)
+        #expect(manager.inventory.isEmpty)
+    }
+
+    @Test("A cask removal does not remove a formula with the same token")
+    func sameName() async {
+        let checker = StubBrewChecker()
+        let state = AppState(checker: checker)
+        state.outdatedPackages = [OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2")]
+        state.reconcileInstallations(.init(formulae: ["example"], casks: []))
+        #expect(state.outdatedCount == 1)
+        #expect(state.isPackageInstalled("owner/tap/example", kind: .formula))
+        #expect(!state.isPackageInstalled("owner/tap/example", kind: .cask))
+        await state.upgradeFromDetailWindow(package: "example", kind: .cask)
+        #expect(checker.upgradedPackages.isEmpty)
+    }
+
+    @Test("A queued update is skipped if its package disappears before execution")
+    func queuedRemoval() async {
+        let checker = StubBrewChecker()
+        checker.holdUpgrade = true
+        let state = AppState(checker: checker)
+        let first = Task { await state.upgrade(package: "first") }
+        while !checker.isUpgradeHeld { await Task.yield() }
+        let second = Task { await state.upgrade(package: "second") }
+        while state.queuedUpgradeCount == 0 { await Task.yield() }
+        state.reconcileInstallations(.init(formulae: ["first"], casks: []))
+        checker.holdUpgrade = false
+        checker.releaseUpgrade()
+        await first.value
+        await second.value
+        #expect(checker.upgradedPackages == ["first"])
+        #expect(state.queuedUpgradeCount == 0)
+    }
+
+    @Test("A failed brew command after external removal remains a recoverable error")
+    func removalBetweenReadAndCommand() async {
+        let checker = StubBrewChecker()
+        checker.upgradePackageError = BrewProcessError.commandFailed("example is not installed")
+        let state = AppState(checker: checker)
+        state.outdatedPackages = [OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2")]
+        await state.upgrade(package: "example")
+        #expect(state.outdatedPackages.isEmpty)
+        #expect(state.upgradeFailureNotice != nil)
+        #expect(!state.isLoading)
+        state.dismissInstallProgress()
+        #expect(state.installProgress == nil)
+    }
+}

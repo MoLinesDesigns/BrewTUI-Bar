@@ -62,7 +62,10 @@ final class ManagerState {
     var selection: Section = .services
 
     // MARK: Inventory
-    private(set) var inventory: [InstalledPackage] = []
+    private var loadedInventory: [InstalledPackage] = []
+    var inventory: [InstalledPackage] {
+        loadedInventory.filter { appState.isPackageInstalled($0.name, kind: $0.kind) }
+    }
     var inventoryLoading = false
     var inventoryError: String?
     /// One listing failed while the other worked (untrusted tap, mostly).
@@ -104,9 +107,14 @@ final class ManagerState {
     var maintenanceError: String?
 
     private let appState: AppState
+    private let inventoryLoader: @Sendable () async throws -> InventoryService.Result
 
-    init(appState: AppState) {
+    init(
+        appState: AppState,
+        inventoryLoader: @escaping @Sendable () async throws -> InventoryService.Result = { try await InventoryService.load() }
+    ) {
         self.appState = appState
+        self.inventoryLoader = inventoryLoader
     }
 
     var isPro: Bool { appState.canUpgrade }
@@ -174,8 +182,8 @@ final class ManagerState {
         inventoryError = nil
         defer { inventoryLoading = false }
         do {
-            let result = try await InventoryService.load()
-            inventory = result.packages
+            let result = try await inventoryLoader()
+            loadedInventory = result.packages
             inventoryWarning = result.warning
             sizesComputed = false
         } catch {
@@ -208,7 +216,7 @@ final class ManagerState {
             return result
         }.value
 
-        inventory = inventory.map { package in
+        loadedInventory = inventory.map { package in
             var copy = package
             copy.sizeBytes = sizes[package.id]
             return copy

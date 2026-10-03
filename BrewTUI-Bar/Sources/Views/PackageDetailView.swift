@@ -58,6 +58,7 @@ struct PackageDetailView: View {
 
     private var canInstall: Bool {
         appState.canUpgrade && !package.pinned && !isInstalling && !succeeded
+            && appState.isPackageInstalled(package.name, kind: package.kind)
     }
 
     /// What is rendered while `brew info` is still running: everything the
@@ -232,6 +233,9 @@ struct PackageDetailView: View {
     /// beats auto-updates beats pinning — they are rendered one at a time so
     /// the card does not turn into a wall of warnings.
     private var statusNotice: (icon: String, text: String, color: Color)? {
+        if !appState.isPackageInstalled(package.name, kind: package.kind) {
+            return ("trash", String(format: String(localized: "%@ is no longer installed."), package.name), .secondary)
+        }
         if shownDetail.disabled {
             return ("xmark.octagon.fill",
                     shownDetail.deprecationReason.map {
@@ -514,7 +518,7 @@ struct PackageDetailView: View {
             // accidental sobre una ventana recién enfocada no debe lanzar un
             // `brew upgrade` irreversible.
             Button {
-                Task { await appState.upgradeFromDetailWindow(package: package.name) }
+                Task { await appState.upgradeFromDetailWindow(package: package.name, kind: package.kind) }
             } label: {
                 HStack(spacing: 6) {
                     if isInstalling {

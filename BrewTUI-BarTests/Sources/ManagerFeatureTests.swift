@@ -437,3 +437,32 @@ struct BrewCommandResultTests {
         #expect(result.failureReason.contains("3"))
     }
 }
+
+@Suite("Installation directory snapshots")
+struct InstallationSnapshotTests {
+    @Test("Empty racks and leftover cask metadata are not installed packages")
+    func leftoverDirectories() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let cellar = root.appendingPathComponent("Cellar")
+        let caskroom = root.appendingPathComponent("Caskroom")
+        defer { try? FileManager.default.removeItem(at: root) }
+        for relative in ["Cellar/empty", "Cellar/active/1.0", "Cellar/active/2.0", "Caskroom/removed/.metadata", "Caskroom/active/1.0"] {
+            try FileManager.default.createDirectory(at: root.appendingPathComponent(relative), withIntermediateDirectories: true)
+        }
+        let snapshot = try InventoryService.installationSnapshot(cellar: cellar, caskroom: caskroom)
+        #expect(snapshot.formulae == ["active"])
+        #expect(snapshot.casks == ["active"])
+        try FileManager.default.removeItem(at: cellar.appendingPathComponent("active/1.0"))
+        #expect(try InventoryService.installationSnapshot(cellar: cellar, caskroom: caskroom) == snapshot)
+    }
+
+    @Test("Read failures are thrown rather than reported as an empty installation")
+    func readFailure() throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data().write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        #expect(throws: (any Error).self) {
+            try InventoryService.installationSnapshot(cellar: file, caskroom: file)
+        }
+    }
+}

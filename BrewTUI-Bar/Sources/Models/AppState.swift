@@ -13,6 +13,21 @@ final class AppState {
     var isLoading = false
     var error: String?
     var servicesError: String?
+    private(set) var installationSnapshot: InventoryService.InstallationSnapshot?
+
+    func isPackageInstalled(_ name: String, kind: PackageKind) -> Bool {
+        installationSnapshot?.contains(name, kind: kind) ?? true
+    }
+
+    func reconcileInstallations(_ snapshot: InventoryService.InstallationSnapshot) {
+        let changed = snapshot != installationSnapshot
+        let previousCount = outdatedPackages.count
+        installationSnapshot = snapshot
+        outdatedPackages.removeAll { !snapshot.contains($0.name, kind: $0.kind) }
+        if changed || previousCount != outdatedPackages.count {
+            onRefreshComplete?()
+        }
+    }
     var canUpgrade = true
     var onRefreshComplete: (() -> Void)?
     /// Hook that AppDelegate installs to open the package detail window. Lives
@@ -545,7 +560,7 @@ final class AppState {
         return "\(actionLine) \(tailLine)"
     }
 
-    func upgrade(package name: String) async {
+    func upgrade(package name: String, kind requestedKind: PackageKind? = nil) async {
         guard canUpgrade else {
             error = String(localized: "Pro license expired")
             return
@@ -563,7 +578,7 @@ final class AppState {
         // certain casks and can silently no-op (exit 0, "Warning: Not
         // upgrading X, the latest version is already installed"), leaving
         // the modal showing "Done" over a package that's still outdated.
-        let kind = outdatedPackages.first(where: { $0.name == name })?.kind ?? .formula
+        let kind = requestedKind ?? outdatedPackages.first(where: { $0.name == name })?.kind ?? .formula
         let typeFlag = kind == .cask ? "--cask" : "--formula"
         await enqueueUpgrade(
             UpgradeRequest(mode: .singlePackage(name), seeds: [name], arguments: [typeFlag, name])
@@ -728,9 +743,9 @@ final class AppState {
     /// `finishQueueRun` touches it, and hands ownership straight back if the
     /// request never made it into the queue (no Pro license, or the package was
     /// already queued/in flight from somewhere else).
-    func upgradeFromDetailWindow(package name: String) async {
+    func upgradeFromDetailWindow(package name: String, kind: PackageKind? = nil) async {
         progressPresentation = .detailWindow
-        await upgrade(package: name)
+        await upgrade(package: name, kind: kind)
         if installProgress == nil {
             progressPresentation = .sheet
         }
@@ -852,6 +867,16 @@ final class AppState {
         arguments: [String],
         usesRawCommand: Bool = false
     ) async {
+        switch mode {
+        case .singlePackage(let name), .uninstall(let name):
+            let kind: PackageKind = arguments.contains("--cask") ? .cask : .formula
+            guard isPackageInstalled(name, kind: kind) else {
+                actionNotice = ActionNotice(message: String(format: String(localized: "%@ is no longer installed."), name))
+                return
+            }
+        case .all, .install:
+            break
+        }
         isLoading = true
         error = nil
         installProgress = InstallProgress(mode: mode, seeds: seeds)

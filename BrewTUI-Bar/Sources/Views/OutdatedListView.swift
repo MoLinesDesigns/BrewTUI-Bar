@@ -164,7 +164,7 @@ struct OutdatedListView: View {
             // Note: Task in button action — .task modifier not applicable here
             if appState.canUpgrade {
                 Button {
-                    Task { await appState.upgrade(package: pkg.name) }
+                    Task { await appState.upgrade(package: pkg.name, kind: pkg.kind) }
                 } label: {
                     Image(systemName: "arrow.up")
                         .font(.system(size: 11, weight: .semibold))

@@ -306,3 +306,22 @@ struct ScreenshotTests {
         run.cancel()
     }
 }
+
+extension ScreenshotTests {
+    @Test func popoverAfterExternalRemoval() throws {
+        Self.makeDir()
+        let state = PreviewData.makeAppState()
+        state.reconcileInstallations(.init(formulae: [], casks: []))
+        let view = PopoverView(appState: state, scheduler: PreviewData.makeScheduler(), badgePreferences: BadgePreferences())
+        try Self.snapshot(view, size: Self.popoverSize, to: "\(Self.outputDir)/external-removal-empty.png")
+    }
+
+    @Test func packageDetailAfterExternalRemoval() throws {
+        Self.makeDir()
+        let state = PreviewData.makeAppState()
+        let package = PreviewData.outdatedPackages[0]
+        state.reconcileInstallations(.init(formulae: [], casks: []))
+        let view = PackageDetailView(package: package, appState: state, onClose: {})
+        try Self.snapshot(view, size: PackageDetailView.windowSize, to: "\(Self.outputDir)/external-removal-detail.png")
+    }
+}
