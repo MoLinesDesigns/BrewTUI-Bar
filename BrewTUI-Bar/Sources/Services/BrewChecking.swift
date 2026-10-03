@@ -15,6 +15,7 @@ protocol BrewChecking: Sendable {
     /// `upgradePackage` / `upgradeAll` methods and emits synthetic events so
     /// `AppState`'s progress state machine still ticks through the modal.
     func streamUpgrade(packages: [String]) -> AsyncStream<BrewUpgradeEvent>
+    func streamBrew(arguments: [String]) -> AsyncStream<BrewUpgradeEvent>
 }
 
 extension BrewChecking {

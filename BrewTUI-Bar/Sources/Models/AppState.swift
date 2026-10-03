@@ -502,16 +502,22 @@ final class AppState {
         ))
     }
 
-    func uninstall(package name: String, kind: PackageKind) async {
+    func uninstall(package name: String, kind: PackageKind, completely: Bool = false) async {
         guard canUpgrade else {
             actionNotice = ActionNotice(message: String(localized: "Pro license expired"), isError: true)
             return
         }
+        cancelUpgradeCountdown(for: name)
         let flag = kind == .cask ? "--cask" : "--formula"
+        var arguments = ["uninstall", flag]
+        if completely {
+            arguments.append(kind == .cask ? "--zap" : "--force")
+        }
+        arguments.append(name)
         await enqueueUpgrade(UpgradeRequest(
             mode: .uninstall(name),
             seeds: [name],
-            arguments: ["uninstall", flag, name],
+            arguments: arguments,
             usesRawCommand: true
         ))
     }
@@ -902,6 +908,7 @@ final class AppState {
         // "3 upgraded, 1 failed" rather than a flat "upgrade failed" when brew
         // kept going past a broken cask (which `cask/upgrade.rb` does).
         var failureReason: String?
+        var actionNeedsTerminal = false
         let events = usesRawCommand
             ? checker.streamBrew(arguments: arguments)
             : checker.streamUpgrade(packages: arguments)
@@ -914,7 +921,11 @@ final class AppState {
             case .logLine:
                 break
             case .adminPasswordRequired:
-                upgradeNeedsTerminal = true
+                if usesRawCommand {
+                    actionNeedsTerminal = true
+                } else {
+                    upgradeNeedsTerminal = true
+                }
             case .success:
                 installProgress?.finishSuccess()
             case .failure(let reason):
@@ -974,7 +985,17 @@ final class AppState {
         // full-page state that replaces the package list, so a single failed
         // package used to hide the other N still pending. The modal already
         // carries the reason; the banner repeats it after the modal closes.
-        if let failureReason {
+        if let failureReason, usesRawCommand {
+            // A failed removal must never offer `brew upgrade` as its retry.
+            let command = ([BrewExecutable.path] + arguments)
+                .map { "'" + $0.replacingOccurrences(of: "'", with: "'\\''") + "'" }
+                .joined(separator: " ")
+            actionNotice = ActionNotice(
+                message: failureReason,
+                isError: true,
+                terminalCommand: actionNeedsTerminal ? command : nil
+            )
+        } else if let failureReason {
             // "Upgraded 1 of 2" rather than a "%lld upgraded, %lld failed"
             // pair: the count is 1 in the common case (a single bad cask in a
             // batch) and an "x of y" frame reads correctly at every number in

@@ -1,6 +1,57 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "Removes all installed versions of this formula. Homebrew will refuse if other packages depend on it. Personal data outside Homebrew is kept." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removes all installed versions of this formula. Homebrew will refuse if other packages depend on it. Personal data outside Homebrew is kept."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina todas las versiones instaladas de esta fórmula. Homebrew impedirá el borrado si otros paquetes dependen de ella. Se conservan los datos personales fuera de Homebrew."
+          }
+        }
+      }
+    },
+    "Removes the app and the data and preferences identified by Homebrew. Shared files may affect other apps. This cannot be undone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Removes the app and the data and preferences identified by Homebrew. Shared files may affect other apps. This cannot be undone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elimina la app y los datos y preferencias identificados por Homebrew. Los archivos compartidos pueden afectar a otras apps. Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
+    "Remove completely" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove completely"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar por completo"
+          }
+        }
+      }
+    },
     "%1$lld results in %2$@" : {
       "extractionState" : "manual",
       "localizations" : {

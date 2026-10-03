@@ -4,6 +4,7 @@ import AppKit
 struct OutdatedListView: View {
     let appState: AppState
     @State private var showUpgradeAllConfirm = false
+    @State private var pendingUninstall: OutdatedPackage?
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
@@ -67,6 +68,30 @@ struct OutdatedListView: View {
                 }
                 .padding(.horizontal, CrystalGlass.Spacing.sm)
                 .padding(.vertical, CrystalGlass.Spacing.sm)
+            }
+        }
+        .confirmationDialog(
+            pendingUninstall.map { String(format: String(localized: "Remove %@?"), $0.name) } ?? "",
+            isPresented: Binding(
+                get: { pendingUninstall != nil },
+                set: { if !$0 { pendingUninstall = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(String(localized: "Remove completely"), role: .destructive) {
+                if let package = pendingUninstall {
+                    Task {
+                        await appState.uninstall(package: package.name, kind: package.kind, completely: true)
+                    }
+                }
+                pendingUninstall = nil
+            }
+            Button(String(localized: "Cancel"), role: .cancel) { pendingUninstall = nil }
+        } message: {
+            if pendingUninstall?.kind == .cask {
+                Text(String(localized: "Removes the app and the data and preferences identified by Homebrew. Shared files may affect other apps. This cannot be undone."))
+            } else {
+                Text(String(localized: "Removes all installed versions of this formula. Homebrew will refuse if other packages depend on it. Personal data outside Homebrew is kept."))
             }
         }
     }
@@ -180,6 +205,18 @@ struct OutdatedListView: View {
                     .foregroundStyle(.secondary)
                     .accessibilityLabel(String(localized: "Upgrade not available — Pro license required"))
             }
+
+            Button(role: .destructive) {
+                appState.cancelUpgradeCountdown(for: pkg.name)
+                pendingUninstall = pkg
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .buttonStyle(.glassIcon)
+            .disabled(!appState.canUpgrade || appState.isLoading || appState.installProgress?.isFinished == false)
+            .help(String(localized: "Remove completely"))
+            .accessibilityLabel(String(format: String(localized: "Uninstall %@"), pkg.name))
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)

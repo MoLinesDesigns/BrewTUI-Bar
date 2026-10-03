@@ -18,6 +18,16 @@ final class StubBrewChecker: BrewChecking, @unchecked Sendable {
     var upgradeAllError: Error?
     var diagnosticsOutput = "diagnostics output"
     var diagnosticsRequests: [String] = []
+    var rawCommands: [[String]] = []
+    var rawEvents: [BrewUpgradeEvent] = [.success]
+
+    func streamBrew(arguments: [String]) -> AsyncStream<BrewUpgradeEvent> {
+        rawCommands.append(arguments)
+        return AsyncStream { continuation in
+            for event in rawEvents { continuation.yield(event) }
+            continuation.finish()
+        }
+    }
 
     func updateIndex() async {
         updateIndexCalls += 1
@@ -512,5 +522,70 @@ struct BrewUpgradeStreamSudoTests {
             fromErrorLine: "Error: No available formula with the name \"foo\""
         ) == nil)
         #expect(BrewUpgradeStream.failedPackageName(fromErrorLine: "==> Upgrading git") == nil)
+    }
+}
+
+@Suite("Uninstall from updates")
+@MainActor
+struct OutdatedUninstallTests {
+    @Test("Complete removal uses the correct kind and cancels auto-upgrade", arguments: [PackageKind.formula, .cask])
+    func completeRemoval(kind: PackageKind) async {
+        let checker = StubBrewChecker()
+        let state = AppState(checker: checker)
+        state.outdatedPackages = [OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2", kind: kind)]
+        state.startUpgradeCountdown(for: "example")
+
+        await state.uninstall(package: "example", kind: kind, completely: true)
+
+        #expect(checker.rawCommands == [["uninstall", kind == .cask ? "--cask" : "--formula", kind == .cask ? "--zap" : "--force", "example"]])
+        #expect(state.countdownRemaining["example"] == nil)
+        #expect(checker.upgradedPackages.isEmpty)
+        #expect(state.outdatedPackages.isEmpty)
+        #expect(state.lastActionMessage != nil)
+        #expect(state.actionNotice == nil)
+    }
+
+    @Test("Existing inventory removal keeps its original scope")
+    func standardRemoval() async {
+        let checker = StubBrewChecker()
+        let state = AppState(checker: checker)
+        await state.uninstall(package: "example", kind: .cask)
+        #expect(checker.rawCommands == [["uninstall", "--cask", "example"]])
+    }
+
+    @Test("Refused removal keeps the package and reports Homebrew's reason")
+    func refusedRemoval() async {
+        let checker = StubBrewChecker()
+        let package = OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2")
+        checker.outdatedResult = .success(OutdatedResponse(formulae: [package], casks: []))
+        checker.rawEvents = [.failure("Required by another package")]
+        let state = AppState(checker: checker)
+        await state.uninstall(package: package.name, kind: package.kind, completely: true)
+        #expect(state.outdatedPackages.map(\.name) == ["example"])
+        #expect(state.actionNotice?.isError == true)
+        #expect(state.actionNotice?.message == "Required by another package")
+        #expect(state.lastActionMessage == nil)
+        #expect(state.installProgress?.finalError != nil)
+    }
+
+    @Test("Admin handoff retries removal, including its cleanup flag")
+    func adminHandoff() async {
+        let checker = StubBrewChecker()
+        checker.rawEvents = [.adminPasswordRequired, .failure("Needs sudo")]
+        let state = AppState(checker: checker)
+        await state.uninstall(package: "example", kind: .cask, completely: true)
+        #expect(state.actionNotice?.terminalCommand?.contains("'uninstall' '--cask' '--zap' 'example'") == true)
+        #expect(!state.upgradeNeedsTerminal)
+        #expect(state.upgradeFailureNotice == nil)
+    }
+
+    @Test("Removal respects the existing license gate")
+    func expiredLicense() async {
+        let checker = StubBrewChecker()
+        let state = AppState(checker: checker)
+        state.canUpgrade = false
+        await state.uninstall(package: "example", kind: .formula, completely: true)
+        #expect(checker.rawCommands.isEmpty)
+        #expect(state.actionNotice?.isError == true)
     }
 }
