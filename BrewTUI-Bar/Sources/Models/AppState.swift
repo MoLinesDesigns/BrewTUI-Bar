@@ -121,9 +121,9 @@ final class AppState {
     var serviceDiagnostics: ServiceDiagnostics?
 
     /// Cola serial de upgrades. Cada petición (paquete suelto o upgrade-all) se
-    /// encola y la procesa un único worker en orden, de modo que las cuentas
-    /// atrás que vencen mientras otro upgrade está corriendo se ejecutan
-    /// después en vez de descartarse. `installProgress` muestra siempre la
+    /// encola y la procesa un único worker en orden, de modo que las peticiones
+    /// recibidas mientras otro upgrade está corriendo se ejecutan después
+    /// en vez de descartarse. `installProgress` muestra siempre la
     /// petición en curso; al terminar una, el worker arranca la siguiente
     /// reemplazando el contenido del modal.
     private struct UpgradeRequest {
@@ -140,18 +140,6 @@ final class AppState {
     private var upgradeWaiters: [UUID: CheckedContinuation<Void, Never>] = [:]
     private var upgradeWorker: Task<Void, Never>?
 
-    /// Grace period before a single-package upgrade fires on its own, in
-    /// seconds. Lives here rather than in the view: `OutdatedListView`'s
-    /// `@State` is destroyed every time the popover closes (AppDelegate
-    /// recreates the hosting controller on each show), which used to strand the
-    /// countdown — the upgrade still fired but the Cancel button that could
-    /// stop it no longer existed anywhere, and reopening the popover let the
-    /// user queue the same package a second time.
-    static let upgradeCountdownSeconds = 3
-    /// Seconds left per package id. The view renders from this, so the
-    /// countdown survives the popover closing and reopening.
-    private(set) var countdownRemaining: [String: Int] = [:]
-    private var countdownTasks: [String: Task<Void, Never>] = [:]
     /// Names of packages already completed in the current queue run, so a
     /// chained batch can report everything it did once the queue drains
     /// instead of each modal overwriting the previous result.
@@ -507,7 +495,6 @@ final class AppState {
             actionNotice = ActionNotice(message: String(localized: "Pro license expired"), isError: true)
             return
         }
-        cancelUpgradeCountdown(for: name)
         let flag = kind == .cask ? "--cask" : "--formula"
         var arguments = ["uninstall", flag]
         if completely {
@@ -558,44 +545,16 @@ final class AppState {
         return "\(actionLine) \(tailLine)"
     }
 
-    /// Starts (or restarts) the grace-period countdown for `name`. When it
-    /// elapses the upgrade is enqueued. Re-arming the same package resets only
-    /// its own countdown; other packages keep theirs.
-    func startUpgradeCountdown(for name: String) {
-        countdownTasks[name]?.cancel()
-        countdownRemaining[name] = Self.upgradeCountdownSeconds
-        countdownTasks[name] = Task { [weak self] in
-            for second in stride(from: Self.upgradeCountdownSeconds, through: 1, by: -1) {
-                guard let self, !Task.isCancelled else { return }
-                self.countdownRemaining[name] = second
-                try? await Task.sleep(for: .seconds(1))
-            }
-            guard let self, !Task.isCancelled else { return }
-            self.countdownRemaining[name] = nil
-            self.countdownTasks[name] = nil
-            await self.upgrade(package: name)
-        }
-    }
-
-    /// Aborts a pending countdown before it fires. Safe to call for a package
-    /// that has none.
-    func cancelUpgradeCountdown(for name: String) {
-        countdownTasks[name]?.cancel()
-        countdownTasks[name] = nil
-        countdownRemaining[name] = nil
-    }
-
     func upgrade(package name: String) async {
         guard canUpgrade else {
             error = String(localized: "Pro license expired")
             return
         }
-        // A countdown already committed this package; make sure a second entry
-        // point (or a re-armed countdown) cannot enqueue it twice. The check
+        // Repeated clicks or another entry point must not enqueue the same
+        // package twice. The check
         // has to cover the running request as well as the queued ones: the
         // worker pops with `removeFirst()`, so the package being upgraded right
         // now is no longer in `upgradeQueue`.
-        cancelUpgradeCountdown(for: name)
         let alreadyQueued = upgradeQueue.contains { $0.seeds == [name] }
         let alreadyRunning = inFlightSeeds == [name]
         guard !alreadyQueued, !alreadyRunning else { return }

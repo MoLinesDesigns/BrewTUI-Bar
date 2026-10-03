@@ -8,12 +8,6 @@ struct OutdatedListView: View {
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
-    // La cuenta atrás vive en AppState, no en `@State`. AppDelegate recrea el
-    // NSHostingController en cada apertura del popover, así que un `@State`
-    // aquí se destruía con la vista: el upgrade seguía disparándose pero el
-    // botón para cancelarlo desaparecía, y reabrir el popover permitía encolar
-    // el mismo paquete otra vez.
-
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -169,36 +163,17 @@ struct OutdatedListView: View {
 
             // Note: Task in button action — .task modifier not applicable here
             if appState.canUpgrade {
-                if let remaining = appState.countdownRemaining[pkg.name] {
-                    // Cuenta atrás en curso: pulsar cancela y aborta el upgrade.
-                    Button {
-                        appState.cancelUpgradeCountdown(for: pkg.name)
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("\(remaining)")
-                                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                                .monospacedDigit()
-                            Image(systemName: "xmark")
-                                .font(.system(size: 9, weight: .semibold))
-                        }
-                    }
-                    .buttonStyle(.glassPill)
-                    .accessibilityLabel(
-                        String(format: String(localized: "Cancel upgrade of %@ (%lld seconds left)", comment: "Accessibility label for cancelling the auto-upgrade countdown of a package"), pkg.name, Int64(remaining))
-                    )
-                } else {
-                    Button {
-                        appState.startUpgradeCountdown(for: pkg.name)
-                    } label: {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 11, weight: .semibold))
-                    }
-                    .buttonStyle(.glassIcon)
-                    .disabled(appState.isLoading || pkg.pinned)
-                    .accessibilityLabel(
-                        String(format: String(localized: "Upgrade %@", comment: "Accessibility label for upgrading a single package"), pkg.name)
-                    )
+                Button {
+                    Task { await appState.upgrade(package: pkg.name) }
+                } label: {
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 11, weight: .semibold))
                 }
+                .buttonStyle(.glassIcon)
+                .disabled(appState.isLoading || pkg.pinned)
+                .accessibilityLabel(
+                    String(format: String(localized: "Upgrade %@", comment: "Accessibility label for upgrading a single package"), pkg.name)
+                )
             } else {
                 Image(systemName: "lock.fill")
                     .font(.caption)
@@ -207,7 +182,6 @@ struct OutdatedListView: View {
             }
 
             Button(role: .destructive) {
-                appState.cancelUpgradeCountdown(for: pkg.name)
                 pendingUninstall = pkg
             } label: {
                 Image(systemName: "trash")
@@ -226,7 +200,6 @@ struct OutdatedListView: View {
             ambientGlow: 0.04
         )
         .contentShape(Rectangle())
-        .animation(.easeInOut(duration: 0.2), value: appState.countdownRemaining[pkg.name])
         .contextMenu { rowMenu(pkg) }
     }
 

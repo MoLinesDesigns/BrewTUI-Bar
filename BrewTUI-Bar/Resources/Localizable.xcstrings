@@ -1011,17 +1011,6 @@
         }
       }
     },
-    "Cancel upgrade of %@ (%lld seconds left)" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancelar actualización de %@ (quedan %lld segundos)"
-          }
-        }
-      }
-    },
     "Cancelled" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -247,24 +247,6 @@ struct AppStateInjectedTests {
         #expect(state.upgradeFailureNotice == nil)
     }
 
-    /// The countdown lives in AppState precisely so it survives the popover
-    /// closing; cancelling it must stop the upgrade from ever being enqueued.
-    @Test("cancelling the countdown prevents the upgrade")
-    @MainActor func countdownCancelPreventsUpgrade() async {
-        let stub = StubBrewChecker()
-        let state = AppState(checker: stub)
-        state.canUpgrade = true
-
-        state.startUpgradeCountdown(for: "wget")
-        #expect(state.countdownRemaining["wget"] != nil)
-
-        state.cancelUpgradeCountdown(for: "wget")
-        #expect(state.countdownRemaining["wget"] == nil)
-
-        try? await Task.sleep(for: .seconds(1))
-        #expect(stub.upgradedPackages.isEmpty)
-    }
-
     /// The worker pops the request off the queue before running it, so a dedup
     /// check that only looks at `upgradeQueue` misses the package currently
     /// being upgraded. Pressing ↑ on it again must not enqueue a second run.
@@ -528,17 +510,15 @@ struct BrewUpgradeStreamSudoTests {
 @Suite("Uninstall from updates")
 @MainActor
 struct OutdatedUninstallTests {
-    @Test("Complete removal uses the correct kind and cancels auto-upgrade", arguments: [PackageKind.formula, .cask])
+    @Test("Complete removal uses the correct package kind", arguments: [PackageKind.formula, .cask])
     func completeRemoval(kind: PackageKind) async {
         let checker = StubBrewChecker()
         let state = AppState(checker: checker)
         state.outdatedPackages = [OutdatedPackage(name: "example", installedVersions: ["1"], currentVersion: "2", kind: kind)]
-        state.startUpgradeCountdown(for: "example")
 
         await state.uninstall(package: "example", kind: kind, completely: true)
 
         #expect(checker.rawCommands == [["uninstall", kind == .cask ? "--cask" : "--formula", kind == .cask ? "--zap" : "--force", "example"]])
-        #expect(state.countdownRemaining["example"] == nil)
         #expect(checker.upgradedPackages.isEmpty)
         #expect(state.outdatedPackages.isEmpty)
         #expect(state.lastActionMessage != nil)

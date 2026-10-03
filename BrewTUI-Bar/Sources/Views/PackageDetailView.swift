@@ -6,8 +6,8 @@ import SwiftUI
 ///
 /// Three jobs in one surface:
 ///  1. Extended `brew info` metadata for the package.
-///  2. An Update button that runs the upgrade **immediately** — no grace
-///     countdown, unlike the list row — and streams the live progress here.
+///  2. An Update button that runs the upgrade immediately and streams the
+///     live progress here.
 ///  3. On a clean run, an auto-close countdown so the window gets out of the
 ///     way on its own.
 ///
