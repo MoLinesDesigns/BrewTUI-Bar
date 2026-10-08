@@ -1,6 +1,6 @@
 {
   "name": "brewtui-bar",
-  "version": "5.2.2",
+  "version": "5.2.3",
   "private": true,
   "description": "Native macOS menu bar companion for BrewTUI-Bar.",
   "type": "module",
