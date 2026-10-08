@@ -2,9 +2,7 @@ import SwiftUI
 
 // MARK: - Tokens
 
-/// Crystal Glass design tokens for BrewTUI-Bar. Mirrors the Apple Liquid
-/// Glass language used across MoLines Designs products: `.ultraThinMaterial`
-/// fills, cyan + soft-white gradient borders, deep cyan ambient glow.
+/// Shared spacing, geometry and accent tokens for the Liquid Glass interface.
 enum CrystalGlass {
     enum Spacing {
         static let xs: CGFloat = 4
@@ -41,11 +39,65 @@ enum CrystalGlass {
     }
 }
 
-// MARK: - Glass background view
+// MARK: - Liquid Glass Clear
 
-/// The standard Crystal Glass surface: `.ultraThinMaterial` base with a soft
-/// white/cyan gradient overlay and a hairline gradient stroke. Use this as a
-/// container background instead of `Color.something.opacity(0.x)`.
+/// Keep native glass on the content so interactive effects follow its hit area.
+/// Earlier macOS versions and accessibility settings use the same geometry.
+private struct LiquidGlassClearModifier<S: Shape>: ViewModifier {
+    let shape: S
+    var tint: Color = .clear
+    var interactive = false
+    var strokeOpacity: Double = 0.55
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func body(content: Content) -> some View {
+        if reduceTransparency || contrast == .increased {
+            content
+                .background(Color(nsColor: .windowBackgroundColor), in: shape)
+                .overlay(shape.stroke(.primary.opacity(contrast == .increased ? 0.6 : 0.2), lineWidth: 1))
+        } else if #available(macOS 26.0, *) {
+            content.glassEffect(
+                .clear.tint(tint == .clear ? .clear : tint.opacity(0.12))
+                    .interactive(interactive),
+                in: shape
+            )
+        } else {
+            content
+                .background(.ultraThinMaterial, in: shape)
+                .background(tint.opacity(0.10), in: shape)
+                .overlay(shape.stroke(.white.opacity(strokeOpacity * 0.35), lineWidth: 1))
+        }
+    }
+}
+
+extension View {
+    func liquidGlassClear<S: Shape>(
+        in shape: S,
+        tint: Color = .clear,
+        interactive: Bool = false,
+        strokeOpacity: Double = 0.55
+    ) -> some View {
+        modifier(LiquidGlassClearModifier(
+            shape: shape,
+            tint: tint,
+            interactive: interactive,
+            strokeOpacity: strokeOpacity
+        ))
+    }
+
+    /// Batch adjacent glass surfaces without merging separate controls.
+    @ViewBuilder
+    func liquidGlassContainer() -> some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer(spacing: 0) { self }
+        } else {
+            self
+        }
+    }
+}
+
 struct GlassPanelBackground: View {
     var cornerRadius: CGFloat = CrystalGlass.Radius.panel
     var tint: Color = .clear
@@ -53,81 +105,36 @@ struct GlassPanelBackground: View {
     var fillOpacity: Double = 1.0
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.ultraThinMaterial)
-
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            .white.opacity(0.08 * fillOpacity),
-                            .white.opacity(0.02 * fillOpacity),
-                            CrystalGlass.glassCyan.opacity(0.06 * fillOpacity),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            if tint != .clear {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(tint.opacity(0.10))
-            }
-
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [
-                            CrystalGlass.glassCyan.opacity(0.55 * strokeOpacity),
-                            .white.opacity(0.35 * strokeOpacity),
-                            CrystalGlass.glassCyan.opacity(0.45 * strokeOpacity),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: CrystalGlass.Stroke.hairline
-                )
-        }
+        Color.clear
+            .liquidGlassClear(
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
+                tint: tint,
+                strokeOpacity: strokeOpacity
+            )
+            .allowsHitTesting(false)
     }
 }
 
 extension View {
-    /// Applies the standard Crystal Glass panel background. Use this on any
-    /// elevated surface (cards, banners, modals, footers) so the entire app
-    /// reads as one cohesive glass system.
     func glassPanel(
         cornerRadius: CGFloat = CrystalGlass.Radius.panel,
         tint: Color = .clear,
         strokeOpacity: Double = 0.55,
         ambientGlow: Double = 0.12
     ) -> some View {
-        self
-            .background(
-                GlassPanelBackground(
-                    cornerRadius: cornerRadius,
-                    tint: tint,
-                    strokeOpacity: strokeOpacity
-                )
-            )
-            .shadow(
-                color: CrystalGlass.ambientShadow(intensity: ambientGlow),
-                radius: 8,
-                y: 4
-            )
+        liquidGlassClear(
+            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
+            tint: tint,
+            strokeOpacity: strokeOpacity
+        )
     }
 }
 
 // MARK: - Pill button style
 
-/// Glass pill button: capsule shape, transparent material, optional warm /
-/// cyan emphasis. Sizes to its content — never stretched full-width unless
-/// the caller adds `.frame(maxWidth: .infinity)`.
 struct GlassPillButtonStyle: ButtonStyle {
     enum Emphasis {
-        /// Neutral glass — borders cyan, text follows foreground style.
         case neutral
-        /// Headline plan / primary CTA. Slightly warmer tint + stronger border.
         case prominent
     }
 
@@ -136,56 +143,28 @@ struct GlassPillButtonStyle: ButtonStyle {
     var verticalPadding: CGFloat = CrystalGlass.Spacing.sm
 
     @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
-        let highContrast = colorSchemeContrast == .increased
-        let pressed = configuration.isPressed
-
         configuration.label
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .background(
-                GlassPanelBackground(
-                    cornerRadius: CrystalGlass.Radius.pill,
-                    tint: emphasis == .prominent
-                        ? CrystalGlass.warmAccent
-                        : .clear,
-                    strokeOpacity: emphasis == .prominent ? 0.85 : 0.55,
-                    fillOpacity: pressed ? 1.4 : 1.0
-                )
+            .liquidGlassClear(
+                in: Capsule(),
+                tint: emphasis == .prominent ? CrystalGlass.warmAccent : .clear,
+                interactive: isEnabled
             )
-            .overlay(
-                // Press feedback: subtle inner glow.
-                RoundedRectangle(cornerRadius: CrystalGlass.Radius.pill, style: .continuous)
-                    .stroke(
-                        CrystalGlass.glassCyan.opacity(pressed ? 0.6 : 0),
-                        lineWidth: 1
-                    )
-            )
-            .shadow(
-                color: CrystalGlass.ambientShadow(
-                    intensity: emphasis == .prominent ? 0.22 : 0.12
-                ),
-                radius: pressed ? 4 : 8,
-                y: pressed ? 1 : 3
-            )
-            .scaleEffect(pressed ? 0.97 : 1.0)
-            .opacity(isEnabled ? 1.0 : 0.55)
-            .animation(.spring(response: 0.35, dampingFraction: 0.75), value: pressed)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1.0)
+            .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1.0) : 0.55)
+            .animation(reduceMotion ? nil : .spring(response: 0.35, dampingFraction: 0.75), value: configuration.isPressed)
             .contentShape(Capsule())
             .accessibilityAddTraits(.isButton)
-            .foregroundStyle(
-                highContrast ? .primary : .primary
-            )
+            .foregroundStyle(.primary)
     }
 }
 
 extension ButtonStyle where Self == GlassPillButtonStyle {
-    /// Neutral glass pill (transparent material, cyan hairline border).
     static var glassPill: GlassPillButtonStyle { GlassPillButtonStyle(emphasis: .neutral) }
-
-    /// Prominent glass pill (warm coral tint + stronger border) for primary CTAs.
     static var glassPillProminent: GlassPillButtonStyle {
         GlassPillButtonStyle(emphasis: .prominent)
     }
@@ -193,60 +172,21 @@ extension ButtonStyle where Self == GlassPillButtonStyle {
 
 // MARK: - Icon button style
 
-/// Circular glass button for toolbar-style controls (refresh, settings, quit,
-/// dismiss). Always 28pt to satisfy AppKit's 28pt min hit area inside popovers.
+/// Keep the existing 28 pt hit area for popover toolbar controls.
 struct GlassIconButtonStyle: ButtonStyle {
     var size: CGFloat = CrystalGlass.Radius.icon
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
-        let pressed = configuration.isPressed
-
         configuration.label
             .font(.system(size: 13, weight: .medium))
             .frame(width: size, height: size)
-            .background(
-                Circle()
-                    .fill(.ultraThinMaterial)
-            )
-            .overlay(
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(0.08),
-                                .white.opacity(0.02),
-                                CrystalGlass.glassCyan.opacity(0.05),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
-            .overlay(
-                Circle()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                CrystalGlass.glassCyan.opacity(pressed ? 0.85 : 0.5),
-                                .white.opacity(0.25),
-                                CrystalGlass.glassCyan.opacity(pressed ? 0.7 : 0.4),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-            )
-            .shadow(
-                color: CrystalGlass.ambientShadow(intensity: pressed ? 0.05 : 0.12),
-                radius: pressed ? 2 : 5,
-                y: pressed ? 1 : 2
-            )
-            .scaleEffect(pressed ? 0.92 : 1.0)
-            .opacity(isEnabled ? 1.0 : 0.45)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: pressed)
+            .liquidGlassClear(in: Circle(), interactive: isEnabled)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.92 : 1.0)
+            .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1.0) : 0.45)
+            .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
             .contentShape(Circle())
     }
 }
@@ -257,53 +197,25 @@ extension ButtonStyle where Self == GlassIconButtonStyle {
 
 // MARK: - Gradient divider
 
-/// Thin gradient line — transparent → cyan → transparent. Replaces plain
-/// `Divider()` when the surface above/below is glass.
+/// A neutral separator leaves color to status and action accents.
 struct GlassDivider: View {
+    @Environment(\.colorSchemeContrast) private var contrast
+
     var body: some View {
-        LinearGradient(
-            colors: [
-                .clear,
-                CrystalGlass.glassCyan.opacity(0.35),
-                .white.opacity(0.18),
-                CrystalGlass.glassCyan.opacity(0.35),
-                .clear,
-            ],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-        .frame(height: 1)
+        Rectangle()
+            .fill(.primary.opacity(contrast == .increased ? 0.5 : 0.12))
+            .frame(height: 1)
+            .accessibilityHidden(true)
     }
 }
 
-// MARK: - Window background (for popover-wide tint)
+// MARK: - Window background
 
-/// A subtle ambient background applied at the popover root. Keeps the overall
-/// surface readable when macOS draws the popover chrome behind it.
+/// Clear native glass replaces the former cyan/coral ambient washes.
 struct CrystalAmbientBackground: View {
     var body: some View {
-        ZStack {
-            // Soft cyan/coral radial wash so the popover doesn't read flat.
-            RadialGradient(
-                colors: [
-                    CrystalGlass.glassCyan.opacity(0.10),
-                    .clear,
-                ],
-                center: .topLeading,
-                startRadius: 10,
-                endRadius: 320
-            )
-            RadialGradient(
-                colors: [
-                    CrystalGlass.warmAccent.opacity(0.06),
-                    .clear,
-                ],
-                center: .bottomTrailing,
-                startRadius: 10,
-                endRadius: 360
-            )
-        }
-        .allowsHitTesting(false)
+        GlassPanelBackground(cornerRadius: 0, strokeOpacity: 0)
+            .allowsHitTesting(false)
     }
 }
 

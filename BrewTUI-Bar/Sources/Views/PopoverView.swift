@@ -128,6 +128,7 @@ struct PopoverView: View {
                 footerView
                 versionFooter
             }
+            .liquidGlassContainer()
         }
         // UI-015: drop the fixed 420 minHeight so users with large Dynamic Type
         // sizes do not get content clipped at the bottom of the popover.
@@ -802,13 +803,8 @@ struct PopoverView: View {
                         .font(.system(.caption2, design: .monospaced))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .fill(.ultraThinMaterial)
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                .strokeBorder(CrystalGlass.glassCyan.opacity(0.4), lineWidth: 0.5)
+                        .liquidGlassClear(
+                            in: RoundedRectangle(cornerRadius: 6, style: .continuous)
                         )
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
@@ -960,12 +956,17 @@ struct PopoverView: View {
 
 // MARK: - Previews
 
-#Preview("Outdated Packages") {
-    PopoverView(
-        appState: PreviewData.makeAppState(),
-        scheduler: PreviewData.makeScheduler(),
-        badgePreferences: BadgePreferences()
-    )
+#Preview("Outdated Packages / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            PopoverView(
+                appState: PreviewData.makeAppState(),
+                scheduler: PreviewData.makeScheduler(),
+                badgePreferences: BadgePreferences()
+            )
+            .preferredColorScheme(scheme)
+        }
+    }
 }
 
 #Preview("Up to Date") {
