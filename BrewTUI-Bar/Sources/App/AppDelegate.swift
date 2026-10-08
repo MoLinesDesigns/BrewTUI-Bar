@@ -46,6 +46,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private var managerState: ManagerState?
     private var reduceMotionObserver: (any NSObjectProtocol)?
 
+    var settingsView: some View {
+        SettingsView(
+            scheduler: scheduler,
+            appState: appState,
+            badgePreferences: badgePreferences,
+            appearancePreferences: appearancePreferences,
+            onClose: { NSApp.keyWindow?.performClose(nil) }
+        )
+        .preferredColorScheme(appearancePreferences.mode == .system ? nil : (appearancePreferences.mode == .dark ? .dark : .light))
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !Self.isRunningForPreviews else { return }
 
@@ -824,6 +835,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         window.appearance = appearancePreferences.mode.appearance
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window.title = String(localized: "BrewTUI-Bar")
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
         window.delegate = self

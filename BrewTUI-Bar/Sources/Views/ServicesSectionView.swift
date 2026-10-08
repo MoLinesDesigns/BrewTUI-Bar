@@ -48,13 +48,13 @@ struct ServicesSectionView: View {
                         .foregroundStyle(service.hasError ? BrewTUIBarTheme.critical(highContrast: false) : .secondary)
                     if let user = service.user, !user.isEmpty {
                         Text(verbatim: "·")
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(CrystalGlass.tertiaryText)
                         Text(user)
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(CrystalGlass.tertiaryText)
                     }
                     if let code = service.exitCode, code != 0 {
                         Text(verbatim: "·")
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(CrystalGlass.tertiaryText)
                         Text(String(format: String(localized: "exit %lld"), Int64(code)))
                             .foregroundStyle(BrewTUIBarTheme.critical(highContrast: false))
                     }

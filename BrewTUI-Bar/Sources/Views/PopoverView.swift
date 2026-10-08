@@ -12,6 +12,7 @@ struct PopoverView: View {
     /// AppDelegate.togglePopover), así que `@State` arranca en false y el
     /// `.onAppear` de upToDateView lo anima a true en cada show.
     @State private var upToDateAppeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
@@ -128,7 +129,6 @@ struct PopoverView: View {
                 footerView
                 versionFooter
             }
-            .liquidGlassContainer()
         }
         // UI-015: drop the fixed 420 minHeight so users with large Dynamic Type
         // sizes do not get content clipped at the bottom of the popover.
@@ -249,19 +249,11 @@ struct PopoverView: View {
 
                 Image(systemName: "chevron.right")
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
                     .accessibilityHidden(true)
             }
-            .padding(.horizontal, CrystalGlass.Spacing.md)
-            .padding(.vertical, CrystalGlass.Spacing.sm + 2)
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .glassPanel(
-            cornerRadius: CrystalGlass.Radius.panel - 6,
-            strokeOpacity: colorSchemeContrast == .increased ? 0.62 : 0.48,
-            ambientGlow: discoveryCount > 0 ? 0.12 : 0.06
-        )
+        .buttonStyle(GlassPillButtonStyle(horizontalPadding: 16, verticalPadding: 10))
         .accessibilityLabel(String(localized: "Open what's new in Homebrew"))
         .accessibilityHint(String(localized: "Shows recently added formulae and casks"))
     }
@@ -293,7 +285,7 @@ struct PopoverView: View {
             Spacer()
             Text(verbatim: "BrewTUI-Bar v\(bundleVersion)")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
             if let newVersion = appState.selfUpdateVersion {
                 Button {
                     runSelfUpgrade()
@@ -302,13 +294,13 @@ struct PopoverView: View {
                         .font(.caption2)
                         .foregroundStyle(BrewTUIBarTheme.accent(highContrast: colorSchemeContrast == .increased))
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(GlassPillButtonStyle(horizontalPadding: 8, verticalPadding: 4))
                 .help(String(format: String(localized: "BrewTUI-Bar %@ is available — click to upgrade"), newVersion))
                 .accessibilityLabel(String(format: String(localized: "Self-update available, version %@"), newVersion))
             }
             Text(verbatim: "·")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
                 .accessibilityHidden(true)
             Text(tierLabel)
                 .font(.caption2)
@@ -563,7 +555,7 @@ struct PopoverView: View {
                 .accessibilityHidden(true)
             Text(message)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .multilineTextAlignment(.center)
             Button {
                 // Sin handle retenido: si el popover se cierra el retry sigue
@@ -588,26 +580,26 @@ struct PopoverView: View {
                 // Entrada con escala elástica + rebote del símbolo. Se reinicia
                 // en cada apertura del popover porque `upToDateAppeared` vuelve
                 // a false con el hostingController recreado.
-                .scaleEffect(upToDateAppeared ? 1 : 0.4)
-                .opacity(upToDateAppeared ? 1 : 0)
-                .symbolEffect(.bounce, value: upToDateAppeared)
+                .scaleEffect(upToDateAppeared || reduceMotion ? 1 : 0.4)
+                .opacity(upToDateAppeared || reduceMotion ? 1 : 0)
+                .symbolEffect(.bounce, value: reduceMotion ? false : upToDateAppeared)
                 .accessibilityHidden(true)
             Text("All packages up to date")
                 .font(.headline)
-                .foregroundStyle(.secondary)
-                .opacity(upToDateAppeared ? 1 : 0)
+                .foregroundStyle(CrystalGlass.secondaryText)
+                .opacity(upToDateAppeared || reduceMotion ? 1 : 0)
             if let last = appState.lastChecked {
                 Text(String(format: String(localized: "Last checked %@"), last.formatted(.relative(presentation: .named))))
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .opacity(upToDateAppeared ? 1 : 0)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
+                    .opacity(upToDateAppeared || reduceMotion ? 1 : 0)
             }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             upToDateAppeared = false
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.55).delay(0.05)) {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.5, dampingFraction: 0.55).delay(0.05)) {
                 upToDateAppeared = true
             }
         }
@@ -640,12 +632,12 @@ struct PopoverView: View {
                         }
                         Image(systemName: "chevron.right")
                             .font(.caption2)
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(CrystalGlass.tertiaryText)
                             .accessibilityHidden(true)
                     }
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(GlassPillButtonStyle(horizontalPadding: 8, verticalPadding: 4))
                 .accessibilityLabel(String(format: String(localized: "Show diagnostics for %@"), svc.name))
             }
         }
@@ -654,48 +646,50 @@ struct PopoverView: View {
     }
 
     private var footerView: some View {
-        HStack(spacing: CrystalGlass.Spacing.sm) {
-            Button {
-                openBrewTUIBar()
-            } label: {
-                Label("Open BrewTUI-Bar", systemImage: "terminal")
-                    .font(.caption)
+        VStack(spacing: 6) {
+            HStack(spacing: 6) {
+                Button {
+                    openBrewTUIBar()
+                } label: {
+                    Label("Open BrewTUI-Bar", systemImage: "terminal")
+                        .font(.caption)
+                }
+                .buttonStyle(GlassPillButtonStyle(horizontalPadding: 10, verticalPadding: 8))
+                .accessibilityLabel(String(localized: "Open BrewTUI-Bar"))
+
+                Spacer()
+
+                Button {
+                    appState.showManager(.services)
+                } label: {
+                    Image(systemName: "square.grid.2x2")
+                }
+                .buttonStyle(.glassIcon)
+                .help(String(localized: "Services, installed packages, history, maintenance"))
+                .accessibilityLabel(String(localized: "Open the manager window"))
+
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gear")
+                }
+                .buttonStyle(.glassIcon)
+                .accessibilityLabel(String(localized: "Settings"))
+
+                Button {
+                    NSApp.terminate(nil)
+                } label: {
+                    Image(systemName: "power")
+                }
+                .buttonStyle(.glassIcon)
+                .accessibilityLabel(String(localized: "Quit"))
             }
-            .buttonStyle(.glassPill)
-            .accessibilityLabel(String(localized: "Open BrewTUI-Bar"))
-
-            Spacer()
-
             if let last = appState.lastChecked, !appState.visibleOutdatedPackages.isEmpty {
                 Text(last.formatted(.relative(presentation: .named)))
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
             }
 
-            Button {
-                appState.showManager(.services)
-            } label: {
-                Image(systemName: "square.grid.2x2")
-            }
-            .buttonStyle(.glassIcon)
-            .help(String(localized: "Services, installed packages, history, maintenance"))
-            .accessibilityLabel(String(localized: "Open the manager window"))
-
-            Button {
-                showSettings = true
-            } label: {
-                Image(systemName: "gear")
-            }
-            .buttonStyle(.glassIcon)
-            .accessibilityLabel(String(localized: "Settings"))
-
-            Button {
-                NSApp.terminate(nil)
-            } label: {
-                Image(systemName: "power")
-            }
-            .buttonStyle(.glassIcon)
-            .accessibilityLabel(String(localized: "Quit"))
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)
@@ -730,7 +724,7 @@ struct PopoverView: View {
                             .fontWeight(legibilityWeight == .bold ? .bold : .semibold)
                         Text(String(localized: "BrewTUI-Bar is part of BrewTUI-Bar Pro"))
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(CrystalGlass.secondaryText)
                     }
                     Spacer()
                 }
@@ -742,7 +736,7 @@ struct PopoverView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(String(localized: "BrewTUI-Bar Pro unlocks:"))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CrystalGlass.secondaryText)
                     proFeatureRow(systemImage: "menubar.rectangle", text: String(localized: "BrewTUI-Bar (this menu bar app)"))
                     proFeatureRow(systemImage: "doc.on.doc", text: String(localized: "Package Profiles"))
                     proFeatureRow(systemImage: "trash.slash", text: String(localized: "Smart Cleanup"))
@@ -763,7 +757,7 @@ struct PopoverView: View {
                             HStack(spacing: 6) {
                                 Text(String(localized: "Monthly"))
                                 Text(verbatim: "·")
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(CrystalGlass.secondaryText)
                                 Text(verbatim: "€5.45")
                                     .fontWeight(.semibold)
                             }
@@ -835,7 +829,7 @@ struct PopoverView: View {
                     .padding(.vertical, 4)
                     .contentShape(Rectangle())
                 }
-                .buttonStyle(.borderless)
+                .buttonStyle(GlassPillButtonStyle(horizontalPadding: 8, verticalPadding: 4))
                 .accessibilityLabel(String(localized: "See all plans on the website"))
             }
             .padding(CrystalGlass.Spacing.md)

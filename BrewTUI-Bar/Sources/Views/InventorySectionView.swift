@@ -72,7 +72,7 @@ struct InventorySectionView: View {
     private var toolbar: some View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
                 .accessibilityHidden(true)
             TextField(String(localized: "Filter packages"), text: $manager.inventoryQuery)
                 .textFieldStyle(.plain)
@@ -82,7 +82,8 @@ struct InventorySectionView: View {
                 Text(String(localized: "Only leaves"))
                     .font(.caption)
             }
-            .toggleStyle(.checkbox)
+            .toggleStyle(.switch)
+            .controlSize(.small)
             .help(String(localized: "Formulae nothing else depends on"))
 
             Spacer()
@@ -90,7 +91,7 @@ struct InventorySectionView: View {
             if let total = manager.inventoryTotalSize {
                 Text(String(format: String(localized: "%@ on disk"), ByteFormat.string(from: total)))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             if manager.sizesLoading {
@@ -107,7 +108,7 @@ struct InventorySectionView: View {
 
             Text(String(format: String(localized: "%lld packages"), Int64(manager.filteredInventory.count)))
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)
@@ -128,7 +129,7 @@ struct InventorySectionView: View {
         HStack(spacing: CrystalGlass.Spacing.md) {
             Image(systemName: package.kind == .cask ? "macwindow" : "terminal")
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
                 .frame(width: 16)
                 .accessibilityHidden(true)
 
@@ -137,14 +138,14 @@ struct InventorySectionView: View {
                     .font(.system(.body, design: .monospaced))
                 HStack(spacing: 6) {
                     Text(package.versions.joined(separator: ", "))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CrystalGlass.secondaryText)
                     if package.hasMultipleVersions {
                         Text(String(localized: "old versions kept"))
                             .foregroundStyle(CrystalGlass.warmAccent)
                     }
                     if package.kind == .formula && !package.isLeaf {
                         Text(String(localized: "dependency"))
-                            .foregroundStyle(.tertiary)
+                            .foregroundStyle(CrystalGlass.tertiaryText)
                     }
                 }
                 .font(.caption)
@@ -155,7 +156,7 @@ struct InventorySectionView: View {
             if let size = package.formattedSize {
                 Text(size)
                     .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             Button {

@@ -18,7 +18,9 @@ struct ServiceDiagnosticsView: View {
         }
         .frame(width: 520)
         .frame(minHeight: 360)
+        .liquidGlassContainer()
         .background(CrystalAmbientBackground())
+        .presentationBackground(.clear)
     }
 
     private var header: some View {
@@ -32,7 +34,7 @@ struct ServiceDiagnosticsView: View {
                     .accessibilityAddTraits(.isHeader)
                 Text(diagnostics.serviceName)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
             Spacer()
             Button {
@@ -98,23 +100,28 @@ struct ServiceDiagnosticsView: View {
     }
 }
 
-#Preview("Service Diagnostics") {
-    ServiceDiagnosticsView(
-        diagnostics: ServiceDiagnostics(
-            serviceName: "colima",
-            output: """
-            $ brew services info colima
-            colima (homebrew.mxcl.colima)
-            Running: false
+#Preview("Service Diagnostics / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            ServiceDiagnosticsView(
+                diagnostics: ServiceDiagnostics(
+                    serviceName: "colima",
+                    output: """
+                    $ brew services info colima
+                    colima (homebrew.mxcl.colima)
+                    Running: false
 
-            $ colima status
-            colima is not running
-            [exit 1]
-            """,
-            isLoading: false
-        ),
-        onClose: {}
-    )
+                    $ colima status
+                    colima is not running
+                    [exit 1]
+                    """,
+                    isLoading: false
+                ),
+                onClose: {}
+            )
+            .environment(\.colorScheme, scheme)
+        }
+    }
 }
 
 #Preview("Service Diagnostics Loading") {

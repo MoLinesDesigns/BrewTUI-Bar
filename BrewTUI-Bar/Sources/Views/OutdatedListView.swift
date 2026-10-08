@@ -14,7 +14,7 @@ struct OutdatedListView: View {
                 Text(String(format: String(localized: "%lld updates available"), Int64(appState.outdatedCount)))
                     .font(.subheadline)
                     .fontWeight(legibilityWeight == .bold ? .bold : .regular)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
                 if appState.canUpgrade {
@@ -62,7 +62,9 @@ struct OutdatedListView: View {
                 }
                 .padding(.horizontal, CrystalGlass.Spacing.sm)
                 .padding(.vertical, CrystalGlass.Spacing.sm)
+                .liquidGlassContainer()
             }
+            .clipped()
         }
         .confirmationDialog(
             pendingUninstall.map { String(format: String(localized: "Remove %@?"), $0.name) } ?? "",
@@ -97,11 +99,11 @@ struct OutdatedListView: View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
             Image(systemName: "bell.slash")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
                 .accessibilityHidden(true)
             Text(String(format: String(localized: "%lld ignored"), Int64(appState.ignoredCount)))
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
             Spacer()
             Button {
                 appState.stopIgnoringAll()
@@ -109,7 +111,7 @@ struct OutdatedListView: View {
                 Text(String(localized: "Show all"))
                     .font(.caption2)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(GlassPillButtonStyle(horizontalPadding: 10, verticalPadding: 4))
             .foregroundStyle(CrystalGlass.glassCyan)
             .accessibilityLabel(String(localized: "Stop ignoring every package"))
         }
@@ -136,7 +138,7 @@ struct OutdatedListView: View {
                                 .foregroundStyle(BrewTUIBarTheme.installedVersion(highContrast: colorSchemeContrast == .increased))
                             Image(systemName: "arrow.right")
                                 .font(.caption2)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(CrystalGlass.secondaryText)
                                 .accessibilityHidden(true)
                             Text(pkg.currentVersion)
                                 .foregroundStyle(BrewTUIBarTheme.currentVersion(highContrast: colorSchemeContrast == .increased))
@@ -147,7 +149,7 @@ struct OutdatedListView: View {
                 }
                 .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(GlassPillButtonStyle(horizontalPadding: 10, verticalPadding: 4))
             // ACC-002: read each row as a single VoiceOver element so the
             // package, both versions and the pin badge come through together.
             .accessibilityElement(children: .combine)
@@ -177,7 +179,7 @@ struct OutdatedListView: View {
             } else {
                 Image(systemName: "lock.fill")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                     .accessibilityLabel(String(localized: "Upgrade not available — Pro license required"))
             }
 

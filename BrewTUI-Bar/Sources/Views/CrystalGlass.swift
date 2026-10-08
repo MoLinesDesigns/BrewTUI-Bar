@@ -19,9 +19,12 @@ enum CrystalGlass {
         static let panel: CGFloat = 18
         /// Pill / capsule buttons.
         static let pill: CGFloat = 22
-        /// Circular icon buttons (set the size, the shape comes from `.circle`).
+        /// Height of compact capsule controls.
         static let icon: CGFloat = 28
     }
+
+    static let secondaryText = Color.primary.opacity(0.82)
+    static let tertiaryText = Color.primary.opacity(0.72)
 
     enum Stroke {
         static let hairline: CGFloat = 1
@@ -152,6 +155,7 @@ struct GlassPillButtonStyle: ButtonStyle {
     }
 
     var emphasis: Emphasis = .neutral
+    var tint: Color = .clear
     var horizontalPadding: CGFloat = CrystalGlass.Spacing.lg
     var verticalPadding: CGFloat = CrystalGlass.Spacing.sm
 
@@ -164,7 +168,7 @@ struct GlassPillButtonStyle: ButtonStyle {
             .padding(.vertical, verticalPadding)
             .liquidGlassClear(
                 in: Capsule(),
-                tint: emphasis == .prominent ? CrystalGlass.warmAccent : .clear,
+                tint: emphasis == .prominent ? CrystalGlass.warmAccent : tint,
                 interactive: isEnabled
             )
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1.0)
@@ -185,7 +189,7 @@ extension ButtonStyle where Self == GlassPillButtonStyle {
 
 // MARK: - Icon button style
 
-/// Keep the existing 28 pt hit area for popover toolbar controls.
+/// Compact capsules keep toolbar actions consistent with text buttons.
 struct GlassIconButtonStyle: ButtonStyle {
     var size: CGFloat = CrystalGlass.Radius.icon
 
@@ -195,12 +199,12 @@ struct GlassIconButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13, weight: .medium))
-            .frame(width: size, height: size)
-            .liquidGlassClear(in: Circle(), interactive: isEnabled)
+            .frame(width: size + 12, height: size)
+            .liquidGlassClear(in: Capsule(), interactive: isEnabled)
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.92 : 1.0)
             .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1.0) : 0.45)
             .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7), value: configuration.isPressed)
-            .contentShape(Circle())
+            .contentShape(Capsule())
     }
 }
 
@@ -226,59 +230,59 @@ struct GlassDivider: View {
 
 /// Clear native glass replaces the former cyan/coral ambient washes.
 struct CrystalAmbientBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
-        GlassPanelBackground(cornerRadius: 0, strokeOpacity: 0)
-            .allowsHitTesting(false)
+        ZStack {
+            // Clear glass needs a dimmed backdrop to keep dark-mode text readable.
+            GlassPanelBackground(cornerRadius: 0, strokeOpacity: 0)
+            Color.black.opacity(colorScheme == .dark ? 0.65 : 0.02)
+        }
+        .background(ClearGlassWindowBackground())
+        .allowsHitTesting(false)
     }
+}
+
+private struct ClearGlassWindowBackground: NSViewRepresentable {
+    final class BackgroundView: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            window?.isOpaque = false
+            window?.backgroundColor = .clear
+        }
+    }
+
+    func makeNSView(context: Context) -> BackgroundView { BackgroundView() }
+    func updateNSView(_ nsView: BackgroundView, context: Context) {}
 }
 
 // MARK: - Previews
 
-#Preview("Pill buttons") {
-    VStack(spacing: 12) {
-        Button("Renew Pro") {}
-            .buttonStyle(.glassPill)
-
-        Button {} label: {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.up.circle.fill")
-                Text("Upgrade All")
+#Preview("Clear glass / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            VStack(spacing: 12) {
+                Button("Renew Pro") {}.buttonStyle(.glassPill)
+                Button("Upgrade All") {}.buttonStyle(.glassPillProminent)
+                Button("Disabled") {}.buttonStyle(.glassPill).disabled(true)
+                HStack {
+                    Button {} label: { Image(systemName: "arrow.clockwise") }
+                    Button {} label: { Image(systemName: "gear") }
+                    Button {} label: { Image(systemName: "power") }
+                }
+                .buttonStyle(.glassIcon)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("3 updates available").font(.headline)
+                    Text("git, node, wget").font(.caption).foregroundStyle(CrystalGlass.secondaryText)
+                }
+                .padding(16)
+                .glassPanel()
             }
+            .padding(24)
+            .frame(width: 300)
+            .liquidGlassContainer()
+            .background(CrystalAmbientBackground())
+            .environment(\.colorScheme, scheme)
         }
-        .buttonStyle(.glassPillProminent)
-
-        Button("Disabled") {}
-            .buttonStyle(.glassPill)
-            .disabled(true)
     }
-    .padding(24)
-    .frame(width: 340)
-}
-
-#Preview("Icon buttons") {
-    HStack(spacing: 12) {
-        Button { } label: { Image(systemName: "arrow.clockwise") }
-            .buttonStyle(.glassIcon)
-        Button { } label: { Image(systemName: "gear") }
-            .buttonStyle(.glassIcon)
-        Button { } label: { Image(systemName: "power") }
-            .buttonStyle(.glassIcon)
-    }
-    .padding(24)
-    .frame(width: 200)
-}
-
-#Preview("Glass panel") {
-    VStack(alignment: .leading, spacing: 8) {
-        Text("3 updates available").font(.headline)
-        Text("git, node, wget").font(.caption).foregroundStyle(.secondary)
-        GlassDivider()
-        Text("Last checked 2 minutes ago")
-            .font(.caption2)
-            .foregroundStyle(.tertiary)
-    }
-    .padding(16)
-    .glassPanel()
-    .padding(24)
-    .frame(width: 340)
 }

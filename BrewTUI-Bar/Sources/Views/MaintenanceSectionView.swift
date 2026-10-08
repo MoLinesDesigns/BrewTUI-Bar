@@ -50,7 +50,7 @@ struct MaintenanceSectionView: View {
                         Int64(report.entries.count)
                     ))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
 
                     // The five biggest entries answer "what is actually taking
                     // the space" without dumping a hundred Cellar paths.
@@ -63,7 +63,7 @@ struct MaintenanceSectionView: View {
                             Spacer()
                             Text(entry.formattedSize)
                                 .font(.caption.monospacedDigit())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(CrystalGlass.secondaryText)
                         }
                     }
                 }
@@ -114,11 +114,11 @@ struct MaintenanceSectionView: View {
                 if candidates.isEmpty {
                     Text(String(localized: "Nothing left behind."))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CrystalGlass.secondaryText)
                 } else {
                     Text(candidates.joined(separator: "  ·  "))
                         .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(CrystalGlass.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
 
                     Button {
@@ -148,7 +148,7 @@ struct MaintenanceSectionView: View {
             } else {
                 Text(String(localized: "Not checked yet."))
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -183,7 +183,7 @@ struct MaintenanceSectionView: View {
             } else {
                 Text(String(localized: "Checks taps, permissions, broken symlinks and outdated configuration."))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

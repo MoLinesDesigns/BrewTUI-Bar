@@ -41,17 +41,9 @@ struct InstallProgressView: View {
         .padding(CrystalGlass.Spacing.lg)
         .frame(width: 360)
         .frame(minHeight: 320, idealHeight: 420, maxHeight: 520)
-        .background {
-            ZStack {
-                Color.clear
-                CrystalAmbientBackground()
-                GlassPanelBackground(
-                    cornerRadius: CrystalGlass.Radius.panel,
-                    strokeOpacity: 0.6
-                )
-            }
-            .ignoresSafeArea()
-        }
+        .background(CrystalAmbientBackground().ignoresSafeArea())
+        .presentationBackground(.clear)
+
         // Enter cierra vía el `.defaultAction` de Done. Esc lo consume el botón
         // Cancel mientras la operación corre, pero ese botón desaparece al
         // terminar y con él el único `.cancelAction` de la hoja; esto cubre ese
@@ -109,7 +101,7 @@ struct InstallProgressView: View {
 
             Text(headerSubtitle)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .accessibilityAddTraits(.updatesFrequently)
         }
     }
@@ -139,7 +131,9 @@ struct InstallProgressView: View {
                 }
             }
             .padding(CrystalGlass.Spacing.sm)
+            .liquidGlassContainer()
         }
+        .clipped()
         .frame(maxHeight: .infinity)
         .glassPanel(cornerRadius: CrystalGlass.Radius.panel - 4, strokeOpacity: 0.35, ambientGlow: 0.05)
     }
@@ -150,7 +144,7 @@ struct InstallProgressView: View {
                 .scaleEffect(0.7)
             Text(String(localized: "Waiting for brew…"))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             Spacer()
         }
         .padding(.vertical, 6)
@@ -171,7 +165,7 @@ struct InstallProgressView: View {
                     .truncationMode(.middle)
                 Text(item.stage.label)
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                 if case .failed(let reason) = item.stage {
                     Text(reason)
                         .font(.caption2)
@@ -184,10 +178,7 @@ struct InstallProgressView: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, CrystalGlass.Spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(.white.opacity(item.stage.isTerminal ? 0.0 : 0.04))
-        )
+        .glassPanel(cornerRadius: 10)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(item.name), \(item.stage.label)")
     }
@@ -197,7 +188,7 @@ struct InstallProgressView: View {
         switch stage {
         case .pending:
             Image(systemName: "circle")
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
         case .fetching:
             Image(systemName: "arrow.down.circle")
                 .foregroundStyle(CrystalGlass.glassCyan)
@@ -233,11 +224,11 @@ struct InstallProgressView: View {
                     Int64(max(progress.packages.count, 1))
                 ))
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                 Spacer()
                 Text(percentLabel)
                     .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             CrystalProgressBar(fraction: progress.overallFraction)
@@ -287,9 +278,7 @@ struct InstallProgressView: View {
 
 // MARK: - Crystal progress bar
 
-/// Cyan glass progress bar. Uses the Apple Liquid Glass language: capsule
-/// track on `.ultraThinMaterial`, capsule fill with a cyan/white gradient
-/// and a subtle ambient glow that grows with the fraction.
+/// Clear glass progress track with an animated cyan capsule fill.
 struct CrystalProgressBar: View {
     var fraction: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -297,27 +286,14 @@ struct CrystalProgressBar: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.ultraThinMaterial)
-                Capsule()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                CrystalGlass.glassCyan.opacity(0.45),
-                                .white.opacity(0.18),
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ),
-                        lineWidth: 1
-                    )
+                Color.clear.liquidGlassClear(in: Capsule())
 
                 Capsule()
                     .fill(
                         LinearGradient(
                             colors: [
                                 CrystalGlass.glassCyan.opacity(0.85),
-                                .white.opacity(0.65),
+                                CrystalGlass.glassCyan.opacity(0.75),
                                 CrystalGlass.glassCyan.opacity(0.9),
                             ],
                             startPoint: .leading,
@@ -339,16 +315,19 @@ struct CrystalProgressBar: View {
 
 // MARK: - Previews
 
-#Preview("In progress") {
+#Preview("In progress / Light and Dark") {
     let prog: InstallProgress = {
         var progress = InstallProgress(mode: .all, seeds: ["git", "node", "wget", "ffmpeg"])
         progress.mark("git", stage: .done)
         progress.mark("node", stage: .fetching)
         return progress
     }()
-    return InstallProgressView(progress: prog) {}
-        .padding()
-        .background(Color(red: 0.05, green: 0.07, blue: 0.10))
+    return HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            InstallProgressView(progress: prog) {}
+                .environment(\.colorScheme, scheme)
+        }
+    }
 }
 
 #Preview("Single package — finished") {
@@ -357,9 +336,12 @@ struct CrystalProgressBar: View {
         progress.finishSuccess()
         return progress
     }()
-    return InstallProgressView(progress: prog) {}
-        .padding()
-        .background(Color(red: 0.05, green: 0.07, blue: 0.10))
+    return HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            InstallProgressView(progress: prog) {}
+                .environment(\.colorScheme, scheme)
+        }
+    }
 }
 
 #Preview("Failed") {
@@ -368,7 +350,10 @@ struct CrystalProgressBar: View {
         progress.finishFailure("brew exited with code 1")
         return progress
     }()
-    return InstallProgressView(progress: prog) {}
-        .padding()
-        .background(Color(red: 0.05, green: 0.07, blue: 0.10))
+    return HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            InstallProgressView(progress: prog) {}
+                .environment(\.colorScheme, scheme)
+        }
+    }
 }

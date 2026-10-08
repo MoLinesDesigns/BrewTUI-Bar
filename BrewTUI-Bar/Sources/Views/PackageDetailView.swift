@@ -89,7 +89,9 @@ struct PackageDetailView: View {
                     }
                 }
                 .padding(.horizontal, 2)
+                .liquidGlassContainer()
             }
+            .clipped()
             footer
         }
         .padding(CrystalGlass.Spacing.lg)
@@ -105,14 +107,8 @@ struct PackageDetailView: View {
         // `fullSizeContentView` extiende la content view bajo el titlebar.
         .frame(width: PackageDetailView.windowSize.width)
         .frame(maxHeight: .infinity)
-        .background {
-            ZStack {
-                Color.clear
-                CrystalAmbientBackground()
-                GlassPanelBackground(cornerRadius: CrystalGlass.Radius.panel, strokeOpacity: 0.6)
-            }
-            .ignoresSafeArea()
-        }
+        .background(CrystalAmbientBackground().ignoresSafeArea())
+        .presentationBackground(.clear)
         .task { await loadDetail() }
         // Arms the auto-close exactly once, when a run this window owns
         // succeeds. Ownership is enough of a gate on its own: only this
@@ -168,7 +164,7 @@ struct PackageDetailView: View {
                     if let title = shownDetail.title, !title.isEmpty, title != package.name {
                         Text(title)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(CrystalGlass.secondaryText)
                             .lineLimit(1)
                     }
                 }
@@ -197,7 +193,7 @@ struct PackageDetailView: View {
 
             Image(systemName: "arrow.right")
                 .font(.body.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .accessibilityHidden(true)
 
             versionColumn(
@@ -218,7 +214,7 @@ struct PackageDetailView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             Text(value)
                 .font(.system(.body, design: .monospaced))
                 .fontWeight(legibilityWeight == .bold ? .bold : .medium)
@@ -277,10 +273,7 @@ struct PackageDetailView: View {
         }
         .padding(CrystalGlass.Spacing.sm)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(notice.color.opacity(0.12))
-        )
+        .glassPanel(cornerRadius: 10, tint: notice.color)
         .accessibilityElement(children: .combine)
     }
 
@@ -291,7 +284,7 @@ struct PackageDetailView: View {
             HStack(spacing: CrystalGlass.Spacing.sm) {
                 Text(String(localized: "Package details"))
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                     .accessibilityAddTraits(.isHeader)
                 if isLoadingDetail {
                     ProgressView().scaleEffect(0.5).frame(width: 14, height: 14)
@@ -307,7 +300,7 @@ struct PackageDetailView: View {
             } else if !isLoadingDetail {
                 Text(String(localized: "No description available"))
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             if let tap = shownDetail.tap, !tap.isEmpty {
@@ -344,7 +337,7 @@ struct PackageDetailView: View {
         HStack(alignment: .firstTextBaseline, spacing: CrystalGlass.Spacing.sm) {
             Text(label)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .frame(width: 92, alignment: .leading)
             Text(value)
                 .font(.caption)
@@ -359,7 +352,7 @@ struct PackageDetailView: View {
         HStack(alignment: .firstTextBaseline, spacing: CrystalGlass.Spacing.sm) {
             Text(String(localized: "Homepage"))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .frame(width: 92, alignment: .leading)
             Button {
                 openURL(url)
@@ -370,7 +363,7 @@ struct PackageDetailView: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
-            .buttonStyle(.link)
+            .buttonStyle(GlassPillButtonStyle(horizontalPadding: 8, verticalPadding: 4))
             .accessibilityLabel(String(format: String(localized: "Open homepage of %@"), package.name))
             Spacer(minLength: 0)
         }
@@ -380,17 +373,14 @@ struct PackageDetailView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(String(localized: "Caveats"))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             Text(caveats.trimmingCharacters(in: .whitespacesAndNewlines))
                 .font(.system(.caption2, design: .monospaced))
                 .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
                 .padding(CrystalGlass.Spacing.sm)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(.white.opacity(0.05))
-                )
+                .glassPanel(cornerRadius: 8)
         }
     }
 
@@ -413,7 +403,7 @@ struct PackageDetailView: View {
                 Spacer(minLength: 0)
                 Text("\(Int((progress.overallFraction * 100).rounded()))%")
                     .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             CrystalProgressBar(fraction: progress.overallFraction)
@@ -432,7 +422,7 @@ struct PackageDetailView: View {
                                 .truncationMode(.middle)
                             Text(item.stage.label)
                                 .font(.caption2)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(CrystalGlass.secondaryText)
                             Spacer(minLength: 0)
                         }
                         .accessibilityElement(children: .combine)
@@ -451,7 +441,7 @@ struct PackageDetailView: View {
                     ))
                     .font(.caption2.monospacedDigit())
                 }
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .accessibilityAddTraits(.updatesFrequently)
             }
         }
@@ -475,7 +465,7 @@ struct PackageDetailView: View {
         case .pending:
             Image(systemName: "circle")
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
         default:
             Image(systemName: "arrow.down.circle")
                 .font(.caption2)
@@ -510,7 +500,7 @@ struct PackageDetailView: View {
             if !appState.canUpgrade {
                 Label(String(localized: "Pro required"), systemImage: "lock.fill")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
             // Sin `.defaultAction`: la fila de la lista da 3 s de gracia para
@@ -565,12 +555,17 @@ struct PackageDetailView: View {
 
 // MARK: - Previews
 
-#Preview("Formula") {
-    PackageDetailView(
-        package: PreviewData.outdatedPackages[0],
-        appState: PreviewData.makeAppState(),
-        onClose: {}
-    )
+#Preview("Formula / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            PackageDetailView(
+                package: PreviewData.outdatedPackages[0],
+                appState: PreviewData.makeAppState(),
+                onClose: {}
+            )
+            .environment(\.colorScheme, scheme)
+        }
+    }
 }
 
 #Preview("Pinned") {

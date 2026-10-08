@@ -48,10 +48,16 @@ struct SnapshotsSectionView: View {
                     .font(.callout)
                 Text(String(format: String(localized: "%lld packages"), Int64(snapshot.packageCount)))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .glassPanel(tint: manager.selectedSnapshotID == snapshot.id ? CrystalGlass.glassCyan : .clear)
+            .listRowBackground(Color.clear)
             .tag(snapshot.id)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
     }
 
     @ViewBuilder
@@ -112,35 +118,39 @@ struct SnapshotsSectionView: View {
 
     private var header: some View {
         HStack(spacing: CrystalGlass.Spacing.sm) {
-            Picker(String(localized: "Compare with"), selection: Binding(
-                get: { manager.diffIsAgainstNow },
-                set: { againstNow in
-                    Task {
-                        if againstNow {
-                            await manager.computeDiff()
-                        } else {
-                            await manager.computeDiffAgainstPrevious()
-                        }
-                    }
-                }
-            )) {
-                Text(String(localized: "This Mac now")).tag(true)
-                Text(String(localized: "Previous snapshot")).tag(false)
+            HStack(spacing: 8) {
+                comparisonButton(String(localized: "This Mac now"), againstNow: true)
+                comparisonButton(String(localized: "Previous snapshot"), againstNow: false)
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .frame(maxWidth: 300)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(String(localized: "Compare with"))
 
             Spacer()
 
             if let diff = manager.snapshotDiff, !diff.isEmpty {
                 Text(String(format: String(localized: "%lld changes"), Int64(diff.totalCount)))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)
+    }
+
+    private func comparisonButton(_ title: String, againstNow: Bool) -> some View {
+        Button(title) {
+            Task {
+                if againstNow { await manager.computeDiff() }
+                else { await manager.computeDiffAgainstPrevious() }
+            }
+        }
+        .font(.caption)
+        .buttonStyle(GlassPillButtonStyle(
+            tint: manager.diffIsAgainstNow == againstNow ? CrystalGlass.glassCyan : .clear,
+            horizontalPadding: 10,
+            verticalPadding: 6
+        ))
+        .accessibilityAddTraits(manager.diffIsAgainstNow == againstNow ? .isSelected : [])
     }
 
     @ViewBuilder

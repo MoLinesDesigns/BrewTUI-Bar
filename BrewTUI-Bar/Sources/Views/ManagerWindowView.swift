@@ -11,7 +11,6 @@ struct ManagerWindowView: View {
     let appState: AppState
     @Bindable var manager: ManagerState
     let onClose: () -> Void
-    @Environment(\.colorScheme) private var colorScheme
 
     static let windowSize = CGSize(width: 860, height: 600)
     static let minimumSize = CGSize(width: 720, height: 460)
@@ -61,7 +60,6 @@ struct ManagerWindowView: View {
         }
         .frame(width: 190, alignment: .leading)
         .frame(maxHeight: .infinity)
-        .background(.black.opacity(colorScheme == .dark ? 0.18 : 0.04))
     }
 
     private func sidebarRow(_ section: ManagerState.Section) -> some View {
@@ -79,23 +77,16 @@ struct ManagerWindowView: View {
                 if section.requiresPro && !manager.isPro {
                     Image(systemName: "lock.fill")
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(CrystalGlass.tertiaryText)
                 }
             }
-            .foregroundStyle(isSelected ? Color.primary : Color.secondary)
-            .padding(.horizontal, CrystalGlass.Spacing.sm)
-            .padding(.vertical, 6)
-            .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(isSelected ? CrystalGlass.glassCyan.opacity(0.18) : .clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(CrystalGlass.glassCyan.opacity(isSelected ? 0.45 : 0), lineWidth: 1)
-            )
-            .contentShape(Rectangle())
+            .foregroundStyle(isSelected ? Color.primary : CrystalGlass.secondaryText)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(GlassPillButtonStyle(
+            tint: isSelected ? CrystalGlass.glassCyan : .clear,
+            horizontalPadding: 10,
+            verticalPadding: 8
+        ))
         .padding(.horizontal, CrystalGlass.Spacing.sm)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
@@ -160,7 +151,7 @@ struct ManagerWindowView: View {
                 .font(.headline)
             Text(String(localized: "Your Homebrew history, snapshots and profiles are already on this Mac — activate Pro to browse them here."))
                 .font(.callout)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 380)
             Button {
@@ -231,15 +222,15 @@ struct SectionPlaceholder: View {
         VStack(spacing: CrystalGlass.Spacing.sm) {
             Image(systemName: systemImage)
                 .font(.system(size: 32))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
                 .accessibilityHidden(true)
             Text(title)
                 .font(.headline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             if let message {
                 Text(message)
                     .font(.callout)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 360)
             }

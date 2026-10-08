@@ -58,13 +58,13 @@ struct ProfilesSectionView: View {
                     if let description = profile.profile.description, !description.isEmpty {
                         Text(description)
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(CrystalGlass.secondaryText)
                     }
                 }
                 Spacer()
                 Text(String(format: String(localized: "%lld packages"), Int64(profile.packageCount)))
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(CrystalGlass.tertiaryText)
             }
 
             HStack(spacing: CrystalGlass.Spacing.sm) {
@@ -114,7 +114,7 @@ struct ProfilesSectionView: View {
                 let names = profile.profile.formulae + profile.profile.casks
                 Text(names.joined(separator: "  ·  "))
                     .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -131,7 +131,7 @@ struct ProfilesSectionView: View {
                 if brewfile.entryCount > 0 {
                     Text(String(format: String(localized: "%lld entries"), Int64(brewfile.entryCount)))
                         .font(.caption)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(CrystalGlass.tertiaryText)
                 }
             }
             if let modified = brewfile.modifiedAt {
@@ -140,7 +140,7 @@ struct ProfilesSectionView: View {
                     modified.formatted(.relative(presentation: .named))
                 ))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             }
             Button {
                 NSWorkspace.shared.activateFileViewerSelecting([brewfile.url])
@@ -162,7 +162,7 @@ struct ProfilesSectionView: View {
                 .font(.headline)
             Text(String(localized: "Writes a Brewfile with every formula, cask and tap installed here."))
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
             Button {
                 exportBrewfile()
             } label: {

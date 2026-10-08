@@ -44,8 +44,6 @@ struct NewPackagesView: View {
 
     @FocusState private var searchFocused: Bool
 
-    @Namespace private var kindPickerNamespace
-
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -180,18 +178,8 @@ struct NewPackagesView: View {
         .padding(CrystalGlass.Spacing.lg)
         .frame(width: 440)
         .frame(minHeight: 440, idealHeight: 560, maxHeight: 640)
-        .background {
-            ZStack {
-                Color.clear
-                CrystalAmbientBackground()
-                GlassPanelBackground(
-                    cornerRadius: CrystalGlass.Radius.panel,
-                    strokeOpacity: highContrast ? 0.78 : 0.68,
-                    fillOpacity: highContrast ? 1.25 : 1.05
-                )
-            }
-            .ignoresSafeArea()
-        }
+        .background(CrystalAmbientBackground().ignoresSafeArea())
+        .presentationBackground(.clear)
         .scaleEffect(panelAppeared || reduceMotion ? 1 : 0.97)
         .opacity(panelAppeared || reduceMotion ? 1 : 0)
         .onAppear {
@@ -299,14 +287,7 @@ struct NewPackagesView: View {
             kindTab(.formula, title: String(localized: "Formulae"), count: count(for: .formula))
             kindTab(.cask, title: String(localized: "Casks"), count: count(for: .cask))
         }
-        .padding(CrystalGlass.Spacing.xs)
-        .background(
-            GlassPanelBackground(
-                cornerRadius: CrystalGlass.Radius.pill,
-                strokeOpacity: highContrast ? 0.72 : 0.58,
-                fillOpacity: 1.1
-            )
-        )
+        .liquidGlassContainer()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(String(localized: "Type"))
     }
@@ -336,38 +317,13 @@ struct NewPackagesView: View {
                     .foregroundStyle(isSelected ? kindAccent(kind) : tertiaryReadable)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, CrystalGlass.Spacing.sm)
-            .padding(.horizontal, CrystalGlass.Spacing.sm)
             .foregroundStyle(isSelected ? .primary : secondaryReadable)
-            .background {
-                if isSelected {
-                    Capsule(style: .continuous)
-                        .fill(.thinMaterial)
-                        .overlay(
-                            Capsule(style: .continuous)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            kindAccent(kind).opacity(0.18),
-                                            .white.opacity(0.10),
-                                            kindAccent(kind).opacity(0.08),
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                        )
-                        .overlay(
-                            Capsule(style: .continuous)
-                                .strokeBorder(kindAccent(kind).opacity(highContrast ? 0.75 : 0.55), lineWidth: 1)
-                        )
-                        .matchedGeometryEffect(id: "kind-tab", in: kindPickerNamespace)
-                        .shadow(color: kindAccent(kind).opacity(0.18), radius: 8, y: 3)
-                }
-            }
-            .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(GlassPillButtonStyle(
+            tint: isSelected ? kindAccent(kind) : .clear,
+            horizontalPadding: 8,
+            verticalPadding: 8
+        ))
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 
@@ -414,24 +370,18 @@ struct NewPackagesView: View {
                     searchQuery = ""
                     searchFocused = true
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: "xmark")
                         .font(.subheadline)
                         .foregroundStyle(tertiaryReadable)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glassIcon)
                 .accessibilityLabel(String(localized: "Clear search"))
                 .transition(.scale.combined(with: .opacity))
             }
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm + 1)
-        .background(
-            GlassPanelBackground(
-                cornerRadius: CrystalGlass.Radius.pill,
-                strokeOpacity: searchFocused ? (highContrast ? 0.85 : 0.72) : (highContrast ? 0.68 : 0.5),
-                fillOpacity: 1.1
-            )
-        )
+        .liquidGlassClear(in: Capsule())
         .overlay(
             Capsule(style: .continuous)
                 .strokeBorder(kindAccent(selectedKind).opacity(searchFocused ? 0.55 : 0), lineWidth: 1)
@@ -467,19 +417,8 @@ struct NewPackagesView: View {
             Text(highlightedName(pkg.name))
                 .font(.system(.caption, design: .monospaced).weight(.medium))
                 .lineLimit(1)
-                .padding(.horizontal, CrystalGlass.Spacing.sm)
-                .padding(.vertical, 5)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(.thinMaterial)
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(kindAccent(pkg.kind).opacity(highContrast ? 0.6 : 0.4), lineWidth: 1)
-                )
-                .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(GlassPillButtonStyle(tint: kindAccent(pkg.kind), horizontalPadding: 8, verticalPadding: 5))
         .accessibilityLabel(String(localized: "Complete with \(pkg.name)"))
     }
 
@@ -530,33 +469,7 @@ struct NewPackagesView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(CrystalGlass.Spacing.sm)
-        .background(
-            GlassPanelBackground(
-                cornerRadius: CrystalGlass.Radius.panel - 4,
-                strokeOpacity: highContrast ? 0.72 : 0.52,
-                fillOpacity: 1.15
-            )
-        )
-        .shadow(
-            color: CrystalGlass.ambientShadow(intensity: highContrast ? 0.24 : 0.16),
-            radius: 12,
-            y: 5
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: CrystalGlass.Radius.panel - 4, style: .continuous)
-                .strokeBorder(
-                    LinearGradient(
-                        colors: [
-                            CrystalGlass.glassCyan.opacity(0.25),
-                            .clear,
-                            CrystalGlass.glassCyan.opacity(0.15),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ),
-                    lineWidth: 1
-                )
-        )
+        .glassPanel(cornerRadius: CrystalGlass.Radius.panel - 4)
         .id(contentStateID)
         .transition(contentTransition)
         .animation(reduceMotion ? nil : .spring(response: 0.48, dampingFraction: 0.86), value: contentStateID)
@@ -590,7 +503,9 @@ struct NewPackagesView: View {
                 }
             }
             .padding(CrystalGlass.Spacing.xs)
+            .liquidGlassContainer()
         }
+        .clipped()
     }
 
     @ViewBuilder
@@ -647,12 +562,12 @@ struct NewPackagesView: View {
 
                 trailingIndicator(for: pkg, isCopied: isCopied)
             }
-            .padding(.vertical, CrystalGlass.Spacing.sm + 2)
-            .padding(.horizontal, CrystalGlass.Spacing.sm + 2)
-            .background(rowBackground(isCopied: isCopied, kind: pkg.kind))
-            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
-        .buttonStyle(NewPackageRowButtonStyle(reduceMotion: reduceMotion))
+        .buttonStyle(GlassPillButtonStyle(
+            tint: isCopied ? kindAccent(pkg.kind) : .clear,
+            horizontalPadding: 20,
+            verticalPadding: 10
+        ))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(pkg.name). \(pkg.desc ?? "")")
         .accessibilityHint(String(localized: "Double tap to copy install command"))
@@ -729,45 +644,6 @@ struct NewPackagesView: View {
             )
     }
 
-    private func rowBackground(isCopied: Bool, kind: NewPackage.Kind) -> some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(.thinMaterial)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(highContrast ? 0.14 : 0.10),
-                                kindAccent(kind).opacity(isCopied ? 0.16 : 0.05),
-                                .white.opacity(0.03),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [
-                                kindAccent(kind).opacity(isCopied ? 0.75 : 0.42),
-                                .white.opacity(0.28),
-                                kindAccent(kind).opacity(0.30),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: isCopied ? 1.25 : 1
-                    )
-            )
-            .shadow(
-                color: kindAccent(kind).opacity(isCopied ? 0.22 : 0.08),
-                radius: isCopied ? 10 : 5,
-                y: isCopied ? 4 : 2
-            )
-    }
-
     @ViewBuilder
     private func trailingIndicator(for pkg: NewPackage, isCopied: Bool) -> some View {
         if isCopied {
@@ -779,7 +655,7 @@ struct NewPackagesView: View {
                             ? Color(red: 0, green: 0.6, blue: 0)
                             : .green
                     )
-                    .symbolEffect(.bounce, value: isCopied)
+                    .symbolEffect(.bounce, value: reduceMotion ? false : isCopied)
                 Text(String(localized: "Copied"))
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(secondaryReadable)
@@ -937,7 +813,7 @@ struct NewPackagesView: View {
                             .font(.caption.weight(.semibold))
                         Text(allCopied
                              ? String(localized: "Copied!")
-                             : String(localized: "Copy all (\(visiblePackages.count))"))
+                             : String(format: String(localized: "Copy all (%lld)"), Int64(visiblePackages.count)))
                             .fontWeight(.semibold)
                     }
                 }
@@ -945,7 +821,7 @@ struct NewPackagesView: View {
                 .foregroundStyle(allCopied ? .green : .primary)
                 .accessibilityLabel(String(localized: "Copy all install commands"))
                 .accessibilityHint(
-                    String(localized: "Copies all \(visiblePackages.count) install commands to the clipboard")
+                    String(format: String(localized: "Copies all %lld install commands to the clipboard"), Int64(visiblePackages.count))
                 )
             }
 
@@ -966,11 +842,11 @@ struct NewPackagesView: View {
     // MARK: - Tokens
 
     private var secondaryReadable: Color {
-        highContrast ? Color.primary.opacity(0.88) : Color.secondary
+        highContrast ? Color.primary.opacity(0.88) : CrystalGlass.secondaryText
     }
 
     private var tertiaryReadable: Color {
-        highContrast ? Color.primary.opacity(0.72) : Color.secondary.opacity(0.82)
+        highContrast ? Color.primary.opacity(0.82) : CrystalGlass.tertiaryText
     }
 
     private func kindAccent(_ kind: NewPackage.Kind) -> Color {
@@ -1024,74 +900,66 @@ struct NewPackagesView: View {
     }
 }
 
-// MARK: - Row press style
-
-private struct NewPackageRowButtonStyle: ButtonStyle {
-    let reduceMotion: Bool
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .brightness(configuration.isPressed ? 0.03 : 0)
-            .animation(reduceMotion ? nil : .spring(response: 0.28, dampingFraction: 0.78), value: configuration.isPressed)
-    }
-}
-
 // MARK: - Previews
 
-#Preview("With data") {
-    NewPackagesView(
-        formulae: [
-            NewPackage(
-                name: "ripgrep-all",
-                kind: .formula,
-                addedAt: Date().addingTimeInterval(-3600),
-                desc: "ripgrep, but also for PDFs, E-Books, Office documents, zip, tar.gz, etc.",
-                homepage: URL(string: "https://example.com")
-            ),
-            NewPackage(
-                name: "zellij",
-                kind: .formula,
-                addedAt: Date().addingTimeInterval(-86_400),
-                desc: "Pluggable terminal workspace, with terminal multiplexer as the base feature",
-                homepage: nil
-            ),
-            NewPackage(
-                name: "uv",
-                kind: .formula,
-                addedAt: Date().addingTimeInterval(-172_800),
-                desc: "Extremely fast Python package installer and resolver",
-                homepage: nil
+#Preview("With data / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            NewPackagesView(
+                formulae: [
+                    NewPackage(
+                        name: "ripgrep-all",
+                        kind: .formula,
+                        addedAt: Date().addingTimeInterval(-3600),
+                        desc: "ripgrep, but also for PDFs, E-Books, Office documents, zip, tar.gz, etc.",
+                        homepage: URL(string: "https://example.com")
+                    ),
+                    NewPackage(
+                        name: "zellij",
+                        kind: .formula,
+                        addedAt: Date().addingTimeInterval(-86_400),
+                        desc: "Pluggable terminal workspace, with terminal multiplexer as the base feature",
+                        homepage: nil
+                    ),
+                    NewPackage(
+                        name: "uv",
+                        kind: .formula,
+                        addedAt: Date().addingTimeInterval(-172_800),
+                        desc: "Extremely fast Python package installer and resolver",
+                        homepage: nil
+                    )
+                ],
+                casks: [
+                    NewPackage(
+                        name: "ghostty",
+                        kind: .cask,
+                        addedAt: Date().addingTimeInterval(-7200),
+                        desc: "Fast, native, feature-rich terminal emulator",
+                        homepage: nil
+                    ),
+                    NewPackage(
+                        name: "microsoft-remote-help",
+                        kind: .cask,
+                        addedAt: Date().addingTimeInterval(-14_400),
+                        desc: "Remote assistance tool for Microsoft 365",
+                        homepage: nil
+                    )
+                ],
+                isLoading: false,
+                error: nil,
+                fetchedAt: Date().addingTimeInterval(-1200),
+                searchResultsFormulae: [],
+                searchResultsCasks: [],
+                isSearchingCatalog: false,
+                searchError: nil,
+                searchResultsQuery: "",
+                onSearch: { _ in },
+                onClose: {},
+                onRefresh: {}
             )
-        ],
-        casks: [
-            NewPackage(
-                name: "ghostty",
-                kind: .cask,
-                addedAt: Date().addingTimeInterval(-7200),
-                desc: "Fast, native, feature-rich terminal emulator",
-                homepage: nil
-            ),
-            NewPackage(
-                name: "microsoft-remote-help",
-                kind: .cask,
-                addedAt: Date().addingTimeInterval(-14_400),
-                desc: "Remote assistance tool for Microsoft 365",
-                homepage: nil
-            )
-        ],
-        isLoading: false,
-        error: nil,
-        fetchedAt: Date().addingTimeInterval(-1200),
-        searchResultsFormulae: [],
-        searchResultsCasks: [],
-        isSearchingCatalog: false,
-        searchError: nil,
-        searchResultsQuery: "",
-        onSearch: { _ in },
-        onClose: {},
-        onRefresh: {}
-    )
+            .environment(\.colorScheme, scheme)
+        }
+    }
 }
 
 #Preview("Loading") {

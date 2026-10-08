@@ -37,7 +37,7 @@ struct HistorySectionView: View {
                                 HStack {
                                     Text(group.day)
                                         .font(.caption.weight(.semibold))
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(CrystalGlass.secondaryText)
                                     Spacer()
                                 }
                                 .padding(.top, CrystalGlass.Spacing.sm)
@@ -99,7 +99,7 @@ struct HistorySectionView: View {
             }
             Text(entry.timestamp.formatted(date: .omitted, time: .shortened))
                 .font(.caption.monospacedDigit())
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(CrystalGlass.tertiaryText)
         }
         .padding(.horizontal, CrystalGlass.Spacing.md)
         .padding(.vertical, CrystalGlass.Spacing.sm)

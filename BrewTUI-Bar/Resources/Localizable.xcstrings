@@ -1,6 +1,40 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "Copy all (%lld)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy all (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar todos (%lld)"
+          }
+        }
+      }
+    },
+    "Copies all %lld install commands to the clipboard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copies all %lld install commands to the clipboard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia los %lld comandos de instalación al portapapeles"
+          }
+        }
+      }
+    },
     "System" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -12,6 +12,7 @@ struct SettingsView: View {
     let appState: AppState
     let badgePreferences: BadgePreferences
     let appearancePreferences: AppearancePreferences
+    private let onClose: (() -> Void)?
 
     @State private var launchAtLogin: Bool
     @State private var loginError: String?
@@ -25,12 +26,14 @@ struct SettingsView: View {
         appState: AppState,
         badgePreferences: BadgePreferences,
         launchAtLogin: Bool? = nil,
-        appearancePreferences: AppearancePreferences = .shared
+        appearancePreferences: AppearancePreferences = .shared,
+        onClose: (() -> Void)? = nil
     ) {
         self.scheduler = scheduler
         self.appState = appState
         self.badgePreferences = badgePreferences
         self.appearancePreferences = appearancePreferences
+        self.onClose = onClose
         let resolvedLaunchAtLogin = launchAtLogin ?? (Self.isRunningForPreviews ? false : SMAppService.mainApp.status == .enabled)
         _launchAtLogin = State(initialValue: resolvedLaunchAtLogin)
     }
@@ -43,7 +46,7 @@ struct SettingsView: View {
                 .accessibilityAddTraits(.isHeader)
 
             ScrollView {
-                Form {
+                VStack(alignment: .leading, spacing: 16) {
                     generalSection
                     notificationsSection
                     menuBarSection
@@ -51,17 +54,28 @@ struct SettingsView: View {
                     licenseSection
                     advancedSection
                 }
-                .formStyle(.grouped)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .buttonStyle(.glassPill)
+                .toggleStyle(.switch)
+                .liquidGlassContainer()
             }
+            .clipped()
 
             HStack {
                 Spacer()
-                Button("Done") { dismiss() }
+                Button("Done") {
+                    if let onClose { onClose() } else { dismiss() }
+                }
+                    .buttonStyle(.glassPillProminent)
                     .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal)
             .padding(.bottom, 12)
         }
+        .padding(.top, 16)
+        .background(CrystalAmbientBackground().ignoresSafeArea())
+        .presentationBackground(.clear)
         .alert(String(localized: "Login Item Error"), isPresented: Binding(
             get: { loginError != nil },
             set: { if !$0 { loginError = nil } }
@@ -127,23 +141,43 @@ struct SettingsView: View {
     // MARK: - Sections
 
     private var generalSection: some View {
-        Section(String(localized: "General")) {
-            Picker(String(localized: "Appearance"), selection: Binding(
-                get: { appearancePreferences.mode },
-                set: { appearancePreferences.mode = $0 }
-            )) {
-                ForEach(AppAppearance.allCases) { mode in
-                    Text(mode.label).tag(mode)
+        settingsSection(String(localized: "General")) {
+            LabeledContent(String(localized: "Appearance")) {
+                Menu {
+                    ForEach(AppAppearance.allCases) { mode in
+                        Button { appearancePreferences.mode = mode } label: {
+                            Label(mode.label, systemImage: appearancePreferences.mode == mode ? "checkmark" : "circle")
+                        }
+                    }
+                } label: {
+                    Label(appearancePreferences.mode.label, systemImage: "chevron.down")
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
                 }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .liquidGlassClear(in: Capsule(), interactive: true)
+                .accessibilityLabel(String(localized: "Appearance"))
+                .accessibilityValue(appearancePreferences.mode.label)
             }
 
-            Picker("Check interval", selection: Binding(
-                get: { scheduler.interval },
-                set: { scheduler.interval = $0 }
-            )) {
-                ForEach(SchedulerService.Interval.allCases, id: \.self) { interval in
-                    Text(interval.label).tag(interval)
+            LabeledContent(String(localized: "Check interval")) {
+                Menu {
+                    ForEach(SchedulerService.Interval.allCases, id: \.self) { interval in
+                        Button { scheduler.interval = interval } label: {
+                            Label(interval.label, systemImage: scheduler.interval == interval ? "checkmark" : "circle")
+                        }
+                    }
+                } label: {
+                    Label(scheduler.interval.label, systemImage: "chevron.down")
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
                 }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .liquidGlassClear(in: Capsule(), interactive: true)
+                .accessibilityLabel(String(localized: "Check interval"))
+                .accessibilityValue(scheduler.interval.label)
             }
 
             Toggle("Launch at login", isOn: $launchAtLogin)
@@ -156,7 +190,7 @@ struct SettingsView: View {
     }
 
     private var notificationsSection: some View {
-        Section(String(localized: "Notifications")) {
+        settingsSection(String(localized: "Notifications")) {
             Toggle("Notifications", isOn: Binding(
                 get: { scheduler.notificationsEnabled },
                 set: { newValue in
@@ -178,7 +212,7 @@ struct SettingsView: View {
     }
 
     private var menuBarSection: some View {
-        Section(String(localized: "Menu Bar Badges")) {
+        settingsSection(String(localized: "Menu Bar Badges")) {
             // Renamed from "Blink icon on updates": the blink is no longer the
             // only presentation. Under Reduce Motion the same preference shows
             // a static count badge instead, so the toggle now controls whether
@@ -203,7 +237,7 @@ struct SettingsView: View {
 
             Text("Toggle the indicators that appear next to BrewTUI-Bar's menu bar icon. Outdated packages blink the icon, or show a count when Reduce Motion is on.")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(CrystalGlass.secondaryText)
         }
     }
 
@@ -213,11 +247,11 @@ struct SettingsView: View {
     @ViewBuilder
     private var ignoredSection: some View {
         let names = appState.ignoredPackages.names.sorted()
-        Section(String(localized: "Ignored packages")) {
+        settingsSection(String(localized: "Ignored packages")) {
             if names.isEmpty {
                 Text("Packages you skip or always ignore from the update list appear here.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             } else {
                 ForEach(names, id: \.self) { name in
                     HStack {
@@ -226,7 +260,7 @@ struct SettingsView: View {
                                 .font(.system(.body, design: .monospaced))
                             Text(appState.ignoredPackages.label(for: name))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(CrystalGlass.secondaryText)
                         }
                         Spacer()
                         Button {
@@ -234,7 +268,7 @@ struct SettingsView: View {
                         } label: {
                             Image(systemName: "arrow.uturn.backward")
                         }
-                        .buttonStyle(.borderless)
+                        .buttonStyle(.glassIcon)
                         .help(String(localized: "Show this package again"))
                         .accessibilityLabel(String(format: String(localized: "Stop ignoring %@"), name))
                     }
@@ -249,7 +283,7 @@ struct SettingsView: View {
     }
 
     private var licenseSection: some View {
-        Section(String(localized: "License")) {
+        settingsSection(String(localized: "License")) {
             if let summary = appState.licenseSummary {
                 LabeledContent(String(localized: "Tier"), value: summary.tierLabel)
                 if let email = summary.email, !email.isEmpty {
@@ -273,10 +307,10 @@ struct SettingsView: View {
             } else {
                 Text("No license loaded")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(CrystalGlass.secondaryText)
             }
 
-            HStack {
+            VStack(alignment: .leading, spacing: 8) {
                 Button {
                     runRevalidate()
                 } label: {
@@ -292,7 +326,7 @@ struct SettingsView: View {
     }
 
     private var advancedSection: some View {
-        Section(String(localized: "Advanced")) {
+        settingsSection(String(localized: "Advanced")) {
             // These two sit next to each other and used to read
             // "BrewTUI-Bar version" / "BrewTUI-Bar CLI", which gave the user no
             // way to tell the menu bar app from the command line tool —
@@ -301,7 +335,7 @@ struct SettingsView: View {
             if let cli = appState.brewTUIBarCliVersion {
                 LabeledContent(String(localized: "brewtui-bar CLI"), value: cli)
             }
-            HStack {
+            VStack(alignment: .leading, spacing: 8) {
                 Button {
                     openDataDirectory()
                 } label: {
@@ -314,6 +348,21 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private func settingsSection<Content: View>(
+        _ title: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .accessibilityAddTraits(.isHeader)
+            content()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .glassPanel()
     }
 
     // MARK: - Actions

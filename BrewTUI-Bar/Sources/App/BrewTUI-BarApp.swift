@@ -6,7 +6,7 @@ struct BrewTUIBarApp: App {
 
     var body: some Scene {
         Settings {
-            EmptyView()
+            appDelegate.settingsView
         }
     }
 }
