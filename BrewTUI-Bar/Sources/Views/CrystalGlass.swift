@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 // MARK: - Tokens
 
@@ -27,11 +28,23 @@ enum CrystalGlass {
     }
 
     /// Cyan accent reused across borders, glows and focus highlights.
-    static let glassCyan = Color(red: 0.30, green: 0.85, blue: 0.95)
+    static let glassCyan = Color(nsColor: NSColor(name: nil) { appearance in
+        if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+            NSColor(red: 0.30, green: 0.85, blue: 0.95, alpha: 1)
+        } else {
+            NSColor(red: 0, green: 0.42, blue: 0.55, alpha: 1)
+        }
+    })
 
     /// Warm coral accent used for outdated counts, upgrade indicators and the
     /// Free funnel CTA. Replaces the legacy purple plan tints.
-    static let warmAccent = Color(red: 1.0, green: 0.57, blue: 0.49)
+    static let warmAccent = Color(nsColor: NSColor(name: nil) { appearance in
+        if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+            NSColor(red: 1.0, green: 0.57, blue: 0.49, alpha: 1)
+        } else {
+            NSColor(red: 0.75, green: 0.29, blue: 0.20, alpha: 1)
+        }
+    })
 
     /// Soft cyan glow for ambient shadows under glass.
     static func ambientShadow(intensity: Double = 0.18) -> Color {

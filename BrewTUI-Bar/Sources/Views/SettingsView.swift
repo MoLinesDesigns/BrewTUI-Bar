@@ -11,6 +11,7 @@ struct SettingsView: View {
     let scheduler: SchedulerService
     let appState: AppState
     let badgePreferences: BadgePreferences
+    let appearancePreferences: AppearancePreferences
 
     @State private var launchAtLogin: Bool
     @State private var loginError: String?
@@ -23,11 +24,13 @@ struct SettingsView: View {
         scheduler: SchedulerService,
         appState: AppState,
         badgePreferences: BadgePreferences,
-        launchAtLogin: Bool? = nil
+        launchAtLogin: Bool? = nil,
+        appearancePreferences: AppearancePreferences = .shared
     ) {
         self.scheduler = scheduler
         self.appState = appState
         self.badgePreferences = badgePreferences
+        self.appearancePreferences = appearancePreferences
         let resolvedLaunchAtLogin = launchAtLogin ?? (Self.isRunningForPreviews ? false : SMAppService.mainApp.status == .enabled)
         _launchAtLogin = State(initialValue: resolvedLaunchAtLogin)
     }
@@ -125,6 +128,15 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         Section(String(localized: "General")) {
+            Picker(String(localized: "Appearance"), selection: Binding(
+                get: { appearancePreferences.mode },
+                set: { appearancePreferences.mode = $0 }
+            )) {
+                ForEach(AppAppearance.allCases) { mode in
+                    Text(mode.label).tag(mode)
+                }
+            }
+
             Picker("Check interval", selection: Binding(
                 get: { scheduler.interval },
                 set: { scheduler.interval = $0 }
@@ -359,13 +371,18 @@ struct SettingsView: View {
 
 // MARK: - Previews
 
-#Preview("Settings") {
-    SettingsView(
-        scheduler: PreviewData.makeScheduler(),
-        appState: PreviewData.makeAppState(),
-        badgePreferences: BadgePreferences(),
-        launchAtLogin: false
-    )
+#Preview("Settings / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            SettingsView(
+                scheduler: PreviewData.makeScheduler(),
+                appState: PreviewData.makeAppState(),
+                badgePreferences: BadgePreferences(),
+                launchAtLogin: false
+            )
+            .preferredColorScheme(scheme)
+        }
+    }
 }
 
 #Preview("Spanish") {

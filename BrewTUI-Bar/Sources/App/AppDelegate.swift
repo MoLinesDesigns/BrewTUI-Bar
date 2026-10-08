@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private var popover: NSPopover!
     private let appState = AppState()
     private let scheduler = SchedulerService()
+    private let appearancePreferences = AppearancePreferences.shared
     // Side-effect: BadgePreferences reads UserDefaults in its init, so the
     // UserDefaults phase of the legacy migrator must run before that read.
     // The Login Item phase runs later from applicationDidFinishLaunching
@@ -47,6 +48,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !Self.isRunningForPreviews else { return }
+
+        appearancePreferences.onChange = { [weak self] in
+            self?.applyAppearance()
+        }
+        applyAppearance()
 
         // Install crash reporter as early as possible so NSException handlers
         // catch failures during the rest of launch. No-op if not configured.
@@ -342,6 +348,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         alert.runModal()
     }
 
+    private func applyAppearance() {
+        let appearance = appearancePreferences.mode.appearance
+        NSApp.appearance = appearance
+        // NSPopover has its own appearance rather than inheriting NSApp's.
+        // Nil restores live system appearance changes on every surface.
+        popover?.appearance = appearance
+        hostingController?.view.appearance = appearance
+        for window in [popover?.contentViewController?.view.window, packageDetailWindow, managerWindow].compactMap({ $0 }) {
+            window.appearance = appearance
+            window.attachedSheet?.appearance = appearance
+        }
+    }
+
     // MARK: - Status item
 
     private func setupStatusItem() {
@@ -364,6 +383,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
 
     private func setupPopover() {
         popover = NSPopover()
+        popover.appearance = appearancePreferences.mode.appearance
         popover.contentSize = NSSize(width: 340, height: 420)
         popover.behavior = .transient
         // Delegate is required to learn about `.transient` auto-closes
@@ -519,6 +539,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
                 badgePreferences: badgePreferences
             )
         )
+        controller.view.appearance = appearancePreferences.mode.appearance
         hostingController = controller
         popover.contentViewController = controller
 
@@ -642,6 +663,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             )
         )
         let window = NSWindow(contentViewController: controller)
+        window.appearance = appearancePreferences.mode.appearance
         window.styleMask = [.titled, .closable, .fullSizeContentView]
         window.title = package.name
         window.titlebarAppearsTransparent = true
@@ -799,6 +821,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
             )
         )
         let window = NSWindow(contentViewController: controller)
+        window.appearance = appearancePreferences.mode.appearance
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window.title = String(localized: "BrewTUI-Bar")
         window.titlebarAppearsTransparent = true

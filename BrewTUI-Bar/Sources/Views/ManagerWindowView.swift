@@ -11,6 +11,7 @@ struct ManagerWindowView: View {
     let appState: AppState
     @Bindable var manager: ManagerState
     let onClose: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
 
     static let windowSize = CGSize(width: 860, height: 600)
     static let minimumSize = CGSize(width: 720, height: 460)
@@ -60,7 +61,7 @@ struct ManagerWindowView: View {
         }
         .frame(width: 190, alignment: .leading)
         .frame(maxHeight: .infinity)
-        .background(.black.opacity(0.18))
+        .background(.black.opacity(colorScheme == .dark ? 0.18 : 0.04))
     }
 
     private func sidebarRow(_ section: ManagerState.Section) -> some View {

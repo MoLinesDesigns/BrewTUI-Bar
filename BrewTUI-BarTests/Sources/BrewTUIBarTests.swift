@@ -415,3 +415,47 @@ struct AppStateTests {
     }
 }
 
+
+@MainActor
+struct AppearancePreferencesTests {
+    private let suiteName = "BrewTUIBar.AppearanceTests.\(UUID().uuidString)"
+    private let defaults: UserDefaults
+
+    init() {
+        defaults = UserDefaults(suiteName: suiteName)!
+    }
+
+    @Test(arguments: AppAppearance.allCases)
+    func selectionSurvivesRelaunch(mode: AppAppearance) {
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(mode == .dark ? "light" : "dark", forKey: AppearancePreferences.modeKey)
+        let preferences = AppearancePreferences(defaults: defaults)
+        preferences.mode = mode
+        #expect(AppearancePreferences(defaults: defaults).mode == mode)
+    }
+
+    @Test(arguments: ["", "unknown"])
+    func missingOrInvalidSelectionFollowsSystem(savedValue: String) {
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        if !savedValue.isEmpty {
+            defaults.set(savedValue, forKey: AppearancePreferences.modeKey)
+        }
+        let preferences = AppearancePreferences(defaults: defaults)
+        #expect(preferences.mode == .system)
+        #expect(preferences.mode.appearance == nil)
+    }
+
+    @Test func changesNotifyOnceAndSystemClearsOverride() {
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let preferences = AppearancePreferences(defaults: defaults)
+        var changes = 0
+        preferences.onChange = { changes += 1 }
+        preferences.mode = .light
+        preferences.mode = .light
+        #expect(changes == 1)
+        preferences.mode = .system
+        #expect(changes == 2)
+        #expect(preferences.mode.appearance == nil)
+        #expect(AppearancePreferences(defaults: defaults).mode == .system)
+    }
+}
