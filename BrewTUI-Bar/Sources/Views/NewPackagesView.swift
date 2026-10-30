@@ -275,7 +275,7 @@ struct NewPackagesView: View {
         }
         if let fetchedAt {
             let template = String(localized: "Updated %@")
-            return String(format: template, fetchedAt.formatted(.relative(presentation: .named)))
+            return String(format: template, fetchedAt.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale)))
         }
         return String(localized: "Recently added to homebrew-core and homebrew-cask")
     }
@@ -548,7 +548,7 @@ struct NewPackagesView: View {
                     }
 
                     if let addedAt = pkg.addedAt {
-                        Text(addedAt.formatted(.relative(presentation: .named)))
+                        Text(addedAt.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale)))
                             .font(.caption.weight(.medium))
                             .foregroundStyle(kindAccent(pkg.kind).opacity(highContrast ? 0.95 : 0.82))
                             .padding(.horizontal, 8)

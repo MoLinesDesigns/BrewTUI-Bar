@@ -28,7 +28,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private var blinkTimer: Timer?
     private var tLayerVisible = true
     private var launchTask: Task<Void, Never>?
-    private var hostingController: NSHostingController<PopoverView>?
+    private var hostingController: NSHostingController<LocalizedContent<PopoverView>>?
     // Red de seguridad sobre `.transient`: en algunos escenarios (popover con
     // foco forzado vía `makeKey()`, tasks largos corriendo, sheet de Settings
     // dejando foco residual) el cierre automático en click fuera no dispara.
@@ -47,13 +47,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     private var reduceMotionObserver: (any NSObjectProtocol)?
 
     var settingsView: some View {
-        SettingsView(
-            scheduler: scheduler,
-            appState: appState,
-            badgePreferences: badgePreferences,
-            appearancePreferences: appearancePreferences,
-            onClose: { NSApp.keyWindow?.performClose(nil) }
-        )
+        LocalizedContent { [scheduler, appState, badgePreferences, appearancePreferences] in
+            SettingsView(
+                scheduler: scheduler,
+                appState: appState,
+                badgePreferences: badgePreferences,
+                appearancePreferences: appearancePreferences,
+                onClose: { NSApp.keyWindow?.performClose(nil) }
+            )
+        }
         .preferredColorScheme(appearancePreferences.mode == .system ? nil : (appearancePreferences.mode == .dark ? .dark : .light))
     }
 
@@ -450,7 +452,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         guard let button = statusItem.button else { return }
 
         let icon = shouldAnimateOutdatedIndicator()
-            ? MenuBarIconComposer.layeredIcon(showT: tLayerVisible)
+            ? MenuBarIconComposer.layeredIcon(showT: tLayerVisible, appearance: button.effectiveAppearance)
             : MenuBarIconComposer.fullIcon()
         icon?.accessibilityDescription = statusItemAccessibilityDescription()
         button.image = icon
@@ -544,11 +546,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
     /// it without going through a click.
     private func presentPopover(from button: NSStatusBarButton) {
         let controller = NSHostingController(
-            rootView: PopoverView(
-                appState: appState,
-                scheduler: scheduler,
-                badgePreferences: badgePreferences
-            )
+            rootView: LocalizedContent { [appState, scheduler, badgePreferences] in
+                PopoverView(
+                    appState: appState,
+                    scheduler: scheduler,
+                    badgePreferences: badgePreferences
+                )
+            }
         )
         controller.view.appearance = appearancePreferences.mode.appearance
         hostingController = controller
@@ -667,11 +671,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         closePackageDetailWindow()
 
         let controller = NSHostingController(
-            rootView: PackageDetailView(
-                package: package,
-                appState: appState,
-                onClose: { [weak self] in self?.closePackageDetailWindow() }
-            )
+            rootView: LocalizedContent { [appState, weak self] in
+                PackageDetailView(
+                    package: package,
+                    appState: appState,
+                    onClose: { [weak self] in self?.closePackageDetailWindow() }
+                )
+            }
         )
         let window = NSWindow(contentViewController: controller)
         window.appearance = appearancePreferences.mode.appearance
@@ -825,11 +831,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, NSW
         }
 
         let controller = NSHostingController(
-            rootView: ManagerWindowView(
-                appState: appState,
-                manager: state,
-                onClose: { [weak self] in self?.closeManagerWindow() }
-            )
+            rootView: LocalizedContent { [appState, weak self] in
+                ManagerWindowView(
+                    appState: appState,
+                    manager: state,
+                    onClose: { [weak self] in self?.closeManagerWindow() }
+                )
+            }
         )
         let window = NSWindow(contentViewController: controller)
         window.appearance = appearancePreferences.mode.appearance

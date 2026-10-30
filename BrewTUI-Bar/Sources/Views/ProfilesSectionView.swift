@@ -137,7 +137,7 @@ struct ProfilesSectionView: View {
             if let modified = brewfile.modifiedAt {
                 Text(String(
                     format: String(localized: "Exported %@"),
-                    modified.formatted(.relative(presentation: .named))
+                    modified.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale))
                 ))
                 .font(.caption)
                 .foregroundStyle(CrystalGlass.secondaryText)

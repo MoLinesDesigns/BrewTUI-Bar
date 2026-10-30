@@ -1,6 +1,431 @@
 {
   "sourceLanguage" : "es",
   "strings" : {
+    "%@. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@. %@"
+          }
+        }
+      }
+    },
+    "%@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %@"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@"
+          }
+        }
+      }
+    },
+    "%@, %@ → %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ → %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@, %@ → %@"
+          }
+        }
+      }
+    },
+    "%lld %%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld %%"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld%%": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%%"
+          }
+        }
+      }
+    },
+    "${action} the service ${service}": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${action} the service ${service}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${action} el servicio ${service}"
+          }
+        }
+      }
+    },
+    "Upgrade ${package}": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrade ${package}"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar ${package}"
+          }
+        }
+      }
+    },
+    "Everything is up to date.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Everything is up to date."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo está actualizado."
+          }
+        }
+      }
+    },
+    "%lld updates available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld updates available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld actualizaciones disponibles."
+          }
+        }
+      }
+    },
+    "%lld packages still pending.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld packages still pending."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan %lld paquetes pendientes."
+          }
+        }
+      }
+    },
+    "Package": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Package"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paquete"
+          }
+        }
+      }
+    },
+    "Finished upgrading %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finished upgrading %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se ha actualizado %@."
+          }
+        }
+      }
+    },
+    "Action": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Action"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acción"
+          }
+        }
+      }
+    },
+    "Service": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servicio"
+          }
+        }
+      }
+    },
+    "No Homebrew service named %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Homebrew service named %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ningún servicio de Homebrew llamado %@."
+          }
+        }
+      }
+    },
+    "%lld upgrades queued": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld upgrades queued"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld actualizaciones en cola"
+          }
+        }
+      }
+    },
+    "+%lld queued": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld queued"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld en cola"
+          }
+        }
+      }
+    },
+    "Copied!": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied!"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¡Copiado!"
+          }
+        }
+      }
+    },
+    "Renew Pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renew Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovar Pro"
+          }
+        }
+      }
+    },
+    "Renew Pro license": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renew Pro license"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovar licencia Pro"
+          }
+        }
+      }
+    },
+    "Language": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idioma"
+          }
+        }
+      }
+    },
+    "Confirm before upgrading all packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirm before upgrading all packages"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confirmar antes de actualizar todo"
+          }
+        }
+      }
+    },
+    "Ask for confirmation before Upgrade All. Off by default.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask for confirmation before Upgrade All. Off by default."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pide confirmación antes de actualizar todos los paquetes. Desactivado por defecto."
+          }
+        }
+      }
+    },
     "Copy all (%lld)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1690,7 +2115,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Obteniendo últimos formulae y casks…"
+            "value" : "Obteniendo las últimas fórmulas y casks…"
           }
         }
       }
@@ -1718,7 +2143,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formula"
+            "value" : "Fórmula"
           }
         }
       }
@@ -1735,7 +2160,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formulae"
+            "value" : "Fórmulas"
           }
         }
       }
@@ -2089,7 +2514,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay formulae recientes en homebrew-core. Prueba a actualizar o vuelve más tarde."
+            "value" : "No hay fórmulas recientes en homebrew-core. Prueba a actualizar o vuelve más tarde."
           }
         }
       }
@@ -2350,7 +2775,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formulae y casks añadidos recientemente"
+            "value" : "Fórmulas y casks añadidos recientemente"
           }
         }
       }
@@ -2694,7 +3119,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Muestra formulae y casks añadidos recientemente"
+            "value" : "Muestra fórmulas y casks añadidos recientemente"
           }
         }
       }
@@ -2987,7 +3412,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Actualizar Todo"
+            "value" : "Actualizar todo"
           }
         }
       }
@@ -4536,7 +4961,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudieron leer los snapshots"
+            "value" : "No se pudieron leer las instantáneas"
           }
         }
       }
@@ -5165,7 +5590,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay snapshots"
+            "value" : "Aún no hay instantáneas"
           }
         }
       }
@@ -5420,7 +5845,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Snapshot anterior"
+            "value" : "Instantánea anterior"
           }
         }
       }
@@ -5505,7 +5930,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Leyendo los snapshots…"
+            "value" : "Leyendo las instantáneas…"
           }
         }
       }
@@ -6168,7 +6593,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Snapshots"
+            "value" : "Instantáneas"
           }
         }
       }
@@ -6423,7 +6848,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta máquina coincide con el snapshot."
+            "value" : "Este Mac coincide con la instantánea."
           }
         }
       }
@@ -6678,7 +7103,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu historial de Homebrew, los snapshots y los perfiles ya están en este Mac: activa Pro para consultarlos aquí."
+            "value" : "Tu historial de Homebrew, las instantáneas y los perfiles ya están en este Mac: activa Pro para consultarlos aquí."
           }
         }
       }

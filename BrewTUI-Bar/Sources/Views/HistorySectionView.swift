@@ -67,7 +67,7 @@ struct HistorySectionView: View {
             buckets[day]?.append(entry)
         }
         return order.map { day in
-            (day: day.formatted(date: .abbreviated, time: .omitted), entries: buckets[day] ?? [])
+            (day: day.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLocalization.shared.language.locale)), entries: buckets[day] ?? [])
         }
     }
 
@@ -97,7 +97,7 @@ struct HistorySectionView: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(BrewTUIBarTheme.critical(highContrast: false))
             }
-            Text(entry.timestamp.formatted(date: .omitted, time: .shortened))
+            Text(entry.timestamp.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: AppLocalization.shared.language.locale)))
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(CrystalGlass.tertiaryText)
         }

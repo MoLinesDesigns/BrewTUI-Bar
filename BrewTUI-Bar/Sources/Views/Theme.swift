@@ -77,3 +77,69 @@ final class AppearancePreferences {
         mode = defaults.string(forKey: Self.modeKey).flatMap(AppAppearance.init(rawValue:)) ?? .system
     }
 }
+
+enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
+    case spanish = "es"
+    case english = "en"
+
+    var id: String { rawValue }
+    var label: String { self == .spanish ? "Español" : "English" }
+    var locale: Locale { Locale(identifier: rawValue) }
+
+    var bundle: Bundle {
+        Bundle.main.path(forResource: rawValue, ofType: "lproj")
+            .flatMap(Bundle.init(path:)) ?? .main
+    }
+}
+
+/// Localization is also read by background services; the lock protects the
+/// selection while Observation refreshes strings already visible in SwiftUI.
+@Observable
+final class AppLocalization: @unchecked Sendable {
+    static let shared = AppLocalization()
+    static let languageKey = "appLanguage"
+
+    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let lock = NSLock()
+    @ObservationIgnored private var storedLanguage: AppLanguage
+
+    var language: AppLanguage {
+        get {
+            access(keyPath: \.language)
+            return lock.withLock { storedLanguage }
+        }
+        set {
+            withMutation(keyPath: \.language) {
+                lock.withLock {
+                    storedLanguage = newValue
+                    defaults.set(newValue.rawValue, forKey: Self.languageKey)
+                    defaults.set([newValue.rawValue], forKey: "AppleLanguages")
+                }
+            }
+        }
+    }
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        storedLanguage = defaults.string(forKey: Self.languageKey).flatMap(AppLanguage.init(rawValue:)) ?? .spanish
+        defaults.set([storedLanguage.rawValue], forKey: "AppleLanguages")
+    }
+}
+
+extension String {
+    // The shorter overload keeps existing call sites localized while using
+    // the app's selection instead of Foundation's process-wide system locale.
+    init(localized key: String.LocalizationValue, comment: StaticString? = nil) {
+        let language = AppLocalization.shared.language
+        self.init(localized: key, bundle: language.bundle, locale: language.locale, comment: comment)
+    }
+}
+
+struct LocalizedContent<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        content()
+            .environment(\.locale, AppLocalization.shared.language.locale)
+    }
+}

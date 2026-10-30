@@ -589,7 +589,7 @@ struct PopoverView: View {
                 .foregroundStyle(CrystalGlass.secondaryText)
                 .opacity(upToDateAppeared || reduceMotion ? 1 : 0)
             if let last = appState.lastChecked {
-                Text(String(format: String(localized: "Last checked %@"), last.formatted(.relative(presentation: .named))))
+                Text(String(format: String(localized: "Last checked %@"), last.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale))))
                     .font(.caption2)
                     .foregroundStyle(CrystalGlass.tertiaryText)
                     .opacity(upToDateAppeared || reduceMotion ? 1 : 0)
@@ -685,7 +685,7 @@ struct PopoverView: View {
                 .accessibilityLabel(String(localized: "Quit"))
             }
             if let last = appState.lastChecked, !appState.visibleOutdatedPackages.isEmpty {
-                Text(last.formatted(.relative(presentation: .named)))
+                Text(last.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale)))
                     .font(.caption2)
                     .foregroundStyle(CrystalGlass.tertiaryText)
             }

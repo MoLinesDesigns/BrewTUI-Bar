@@ -9,26 +9,37 @@ enum MenuBarIconComposer {
         templateImage(named: "MenuBarIcon")
     }
 
-    /// Draws the static B layer plus an optional T layer. Both assets carry
-    /// template intent so AppKit tints them for light/dark menu bars.
-    static func layeredIcon(showT: Bool) -> NSImage? {
+    /// Keep B legible on the menu bar while the optional T blinks in orange.
+    static func layeredIcon(showT: Bool, appearance: NSAppearance) -> NSImage? {
         guard let b = templateImage(named: "MenuBarIconB"),
               let t = templateImage(named: "MenuBarIconT")
         else {
             return fullIcon()
         }
 
+        let foreground: NSColor = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? .white : .black
+        let bLayer = tintedImage(b, color: foreground)
+        let tLayer = tintedImage(t, color: .systemOrange)
         let size = iconSize
         let composed = NSImage(size: size, flipped: false) { rect in
-            b.draw(in: rect)
+            bLayer.draw(in: rect)
             if showT {
-                t.draw(in: rect)
+                tLayer.draw(in: rect)
             }
             return true
         }
-        composed.isTemplate = true
+        composed.isTemplate = false
         composed.size = size
         return composed
+    }
+
+    private static func tintedImage(_ image: NSImage, color: NSColor) -> NSImage {
+        NSImage(size: iconSize, flipped: false) { rect in
+            image.draw(in: rect)
+            color.setFill()
+            rect.fill(using: .sourceAtop)
+            return true
+        }
     }
 
     private static func templateImage(named: String) -> NSImage? {

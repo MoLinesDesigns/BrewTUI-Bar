@@ -3,6 +3,7 @@ import AppKit
 
 struct OutdatedListView: View {
     let appState: AppState
+    @AppStorage("confirmUpgradeAll") private var confirmUpgradeAll = false
     @State private var showUpgradeAllConfirm = false
     @State private var pendingUninstall: OutdatedPackage?
     @Environment(\.legibilityWeight) private var legibilityWeight
@@ -19,7 +20,11 @@ struct OutdatedListView: View {
                 Spacer()
                 if appState.canUpgrade {
                     Button {
-                        showUpgradeAllConfirm = true
+                        if confirmUpgradeAll {
+                            showUpgradeAllConfirm = true
+                        } else {
+                            Task { await appState.upgradeAll() }
+                        }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.up.circle.fill")
@@ -32,17 +37,15 @@ struct OutdatedListView: View {
                     .buttonStyle(.glassPillProminent)
                     .disabled(appState.isLoading)
                     .accessibilityLabel(String(localized: "Upgrade All"))
-                    .confirmationDialog(
-                        String(localized: "Upgrade all packages?"),
-                        isPresented: $showUpgradeAllConfirm,
-                        titleVisibility: .visible
-                    ) {
-                        Button(String(localized: "Upgrade All")) {
+                    .popover(isPresented: $showUpgradeAllConfirm) {
+                        UpgradeAllConfirmationView {
+                            showUpgradeAllConfirm = false
                             // Sin handle retenido: el popover puede ocultarse
                             // (click fuera) y el upgrade debe completar igual.
                             Task { await appState.upgradeAll() }
+                        } onCancel: {
+                            showUpgradeAllConfirm = false
                         }
-                        Button(String(localized: "Cancel"), role: .cancel) {}
                     }
                 }
             }
@@ -147,9 +150,11 @@ struct OutdatedListView: View {
                     }
                     Spacer(minLength: 0)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
                 .contentShape(Rectangle())
             }
-            .buttonStyle(GlassPillButtonStyle(horizontalPadding: 10, verticalPadding: 4))
+            .buttonStyle(.plain)
             // ACC-002: read each row as a single VoiceOver element so the
             // package, both versions and the pin badge come through together.
             .accessibilityElement(children: .combine)
@@ -260,11 +265,48 @@ struct OutdatedListView: View {
     }
 }
 
+struct UpgradeAllConfirmationView: View {
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text(String(localized: "Upgrade all packages?"))
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            HStack(spacing: 10) {
+                Button(String(localized: "Cancel"), role: .cancel, action: onCancel)
+                    .buttonStyle(.glassPill)
+                    .keyboardShortcut(.cancelAction)
+                Button(action: onConfirm) {
+                    Text(String(localized: "Upgrade All"))
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .foregroundStyle(colorScheme == .dark ? Color.black : Color.white)
+                        .background(CrystalGlass.warmAccent, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
+            }
+        }
+        .frame(width: 300)
+        .padding(20)
+        .background(CrystalAmbientBackground())
+    }
+}
+
 // MARK: - Previews
 
-#Preview("5 Packages") {
-    OutdatedListView(appState: PreviewData.makeAppState())
-        .frame(width: 340, height: 300)
+#Preview("Packages / Light and Dark") {
+    HStack {
+        ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+            OutdatedListView(appState: PreviewData.makeAppState())
+                .frame(width: 340, height: 300)
+                .preferredColorScheme(scheme)
+        }
+    }
 }
 
 #Preview("1 Package") {

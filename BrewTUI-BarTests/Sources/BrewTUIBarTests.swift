@@ -1,6 +1,67 @@
 import Testing
 import Foundation
+import AppKit
 @testable import BrewTUI_Bar
+
+@MainActor
+struct MenuBarIconComposerTests {
+    @Test(arguments: [NSAppearance.Name.aqua, .darkAqua])
+    func blinkingTIsOrangeAndBStaysNeutral(appearanceName: NSAppearance.Name) throws {
+        let appearance = try #require(NSAppearance(named: appearanceName))
+        for showT in [true, false] {
+            let image = try #require(MenuBarIconComposer.layeredIcon(showT: showT, appearance: appearance))
+            let data = try #require(image.tiffRepresentation)
+            let bitmap = try #require(NSBitmapImageRep(data: data))
+            var orangePixels = 0
+            var neutralPixels = 0
+            for y in 0..<bitmap.pixelsHigh {
+                for x in 0..<bitmap.pixelsWide {
+                    guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                          color.alphaComponent > 0.5 else { continue }
+                    if color.redComponent > 0.7, color.greenComponent > 0.2,
+                       color.greenComponent < 0.8, color.blueComponent < 0.4 {
+                        orangePixels += 1
+                    }
+                    if abs(color.redComponent - color.greenComponent) < 0.05,
+                       abs(color.greenComponent - color.blueComponent) < 0.05 {
+                        neutralPixels += 1
+                    }
+                }
+            }
+            #expect((orangePixels > 0) == showT)
+            #expect(neutralPixels > 0, "B remains visible in both blink phases")
+        }
+        #expect(MenuBarIconComposer.fullIcon()?.isTemplate == true)
+    }
+}
+
+struct AppLocalizationTests {
+    @Test(arguments: [AppLanguage.spanish, .english])
+    func selectedLanguageSurvivesRelaunch(language: AppLanguage) throws {
+        let suite = "BrewTUIBar.LanguageTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let localization = AppLocalization(defaults: defaults)
+        #expect(localization.language == .spanish)
+        localization.language = language
+        #expect(AppLocalization(defaults: defaults).language == language)
+        #expect(defaults.stringArray(forKey: "AppleLanguages") == [language.rawValue])
+    }
+
+    @Test func unknownLanguageFallsBackToSpanish() throws {
+        let suite = "BrewTUIBar.LanguageTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set("unknown", forKey: AppLocalization.languageKey)
+        #expect(AppLocalization(defaults: defaults).language == .spanish)
+    }
+
+    @Test(arguments: [(AppLanguage.spanish, "Cancelar"), (.english, "Cancel")])
+    func languageUsesItsOwnCatalog(selection: (AppLanguage, String)) {
+        let (language, expected) = selection
+        #expect(String(localized: "Cancel", bundle: language.bundle, locale: language.locale) == expected)
+    }
+}
 
 // MARK: - OutdatedPackage Tests
 

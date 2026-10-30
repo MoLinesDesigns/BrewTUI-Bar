@@ -44,7 +44,7 @@ struct SnapshotsSectionView: View {
             }
         )) { snapshot in
             VStack(alignment: .leading, spacing: 2) {
-                Text(snapshot.capturedAt.formatted(date: .abbreviated, time: .shortened))
+                Text(snapshot.capturedAt.formatted(Date.FormatStyle(date: .abbreviated, time: .shortened, locale: AppLocalization.shared.language.locale)))
                     .font(.callout)
                 Text(String(format: String(localized: "%lld packages"), Int64(snapshot.packageCount)))
                     .font(.caption)

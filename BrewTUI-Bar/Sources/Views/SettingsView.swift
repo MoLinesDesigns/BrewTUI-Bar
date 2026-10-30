@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var launchAtLogin: Bool
     @State private var loginError: String?
     @State private var revalidationError: String?
+    @AppStorage("confirmUpgradeAll") private var confirmUpgradeAll = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.legibilityWeight) private var legibilityWeight
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
@@ -57,7 +58,8 @@ struct SettingsView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .buttonStyle(.glassPill)
-                .toggleStyle(.switch)
+                .toggleStyle(TrailingSettingsToggleStyle())
+                .labeledContentStyle(TrailingSettingsLabeledContentStyle())
                 .liquidGlassContainer()
             }
             .clipped()
@@ -142,6 +144,21 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         settingsSection(String(localized: "General")) {
+            LabeledContent(String(localized: "Language")) {
+                Picker(String(localized: "Language"), selection: Binding(
+                    get: { AppLocalization.shared.language },
+                    set: { AppLocalization.shared.language = $0 }
+                )) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(verbatim: language.label).tag(language)
+                    }
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .accessibilityLabel(String(localized: "Language"))
+                .accessibilityValue(AppLocalization.shared.language.label)
+            }
+
             LabeledContent(String(localized: "Appearance")) {
                 Menu {
                     ForEach(AppAppearance.allCases) { mode in
@@ -186,6 +203,9 @@ struct SettingsView: View {
                     guard !Self.isRunningForPreviews else { return }
                     setLaunchAtLogin(newValue)
                 }
+
+            Toggle("Confirm before upgrading all packages", isOn: $confirmUpgradeAll)
+                .help(String(localized: "Ask for confirmation before Upgrade All. Off by default."))
         }
     }
 
@@ -295,13 +315,13 @@ struct SettingsView: View {
                 if let validated = summary.lastValidatedAt {
                     LabeledContent(
                         String(localized: "Last validated"),
-                        value: validated.formatted(.relative(presentation: .named))
+                        value: validated.formatted(.relative(presentation: .named).locale(AppLocalization.shared.language.locale))
                     )
                 }
                 if let expires = summary.expiresAt {
                     LabeledContent(
                         String(localized: "Expires"),
-                        value: expires.formatted(date: .abbreviated, time: .omitted)
+                        value: expires.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: AppLocalization.shared.language.locale))
                     )
                 }
             } else {
@@ -415,6 +435,30 @@ struct SettingsView: View {
         // search for "BrewTUI-Bar". The bundle id is stable.
         let consoleURL = URL(fileURLWithPath: "/System/Applications/Utilities/Console.app")
         NSWorkspace.shared.open(consoleURL)
+    }
+}
+
+private struct TrailingSettingsToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 12) {
+            configuration.label
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Toggle(configuration)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .fixedSize()
+        }
+    }
+}
+
+private struct TrailingSettingsLabeledContentStyle: LabeledContentStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 12) {
+            configuration.label
+                .frame(maxWidth: .infinity, alignment: .leading)
+            configuration.content
+                .multilineTextAlignment(.trailing)
+        }
     }
 }
 
